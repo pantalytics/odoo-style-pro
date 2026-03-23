@@ -20,8 +20,11 @@ No third-party CSS framework. No overrides that break on update. Just tokens and
 |---|---|
 | **Typography** | Lexend (headings) + Instrument Sans (body), self-hosted |
 | **Colors** | Full `--pan-*` token system for light and dark mode |
-| **Dark mode** | Proper dark tokens via `web.assets_web_dark` — uses Odoo's built-in toggle |
-| **Navbar** | Tighter, cleaner top bar with accent highlight on active item |
+| **Dark mode** | Proper dark tokens via `web.assets_web_dark` — uses Odoo's built-in toggle (Enterprise) |
+| **Navbar** | Clean white navbar with accent highlights, command palette search bar |
+| **Search bar** | Navbar search opens Odoo's command palette (⌘K) — works on both editions |
+| **Apps dropdown** | App icons visible in the dropdown menu |
+| **Home menu** | Styled app launcher with search bar (Enterprise only) |
 | **Kanban** | Styled columns, hover lift on cards, full-height drop zones |
 | **List view** | Uppercase column headers, subtle row hover, cleaner borders |
 | **Form view** | Card layout with shadow, clean section separators |
@@ -30,7 +33,6 @@ No third-party CSS framework. No overrides that break on update. Just tokens and
 | **Modals** | Rounded corners, consistent shadow |
 | **Notifications** | Left-border style (no heavy colored backgrounds) |
 | **Status bar** | Pill-shaped stage buttons |
-| **Notebook tabs** | Vercel-style underline, no legacy border artifacts |
 | **Tags** | Full pill border-radius, semi-transparent overlays |
 | **Login page** | Branded login screen |
 
@@ -80,6 +82,17 @@ odoo -c odoo.conf -i pan_style_pro
 
 Or via **Apps** in the Odoo backend — search for `Pantalytics Style Pro`.
 
+On Enterprise, `pan_style_pro_enterprise` auto-installs for home menu and dark mode support.
+
+---
+
+## Module structure
+
+| Module | Depends | auto_install | Purpose |
+|---|---|---|---|
+| `pan_style_pro` | `web` | No | All base styling, navbar search, app icons |
+| `pan_style_pro_enterprise` | `pan_style_pro`, `web_enterprise` | Yes | Home menu, dark mode tokens |
+
 ---
 
 ## Design tokens
@@ -92,7 +105,7 @@ All values are CSS custom properties on `:root`. Override them in your own parti
 | `--pan-accent-hover` | `#7370ff` | `#b3b1ff` |
 | `--pan-bg` | `#ffffff` | _(Odoo-controlled)_ |
 | `--pan-text` | `#001d21` | `rgba(255,255,255,0.9)` |
-| `--pan-text-secondary` | `#6b7280` | `rgba(255,255,255,0.42)` |
+| `--pan-text-secondary` | `rgba(0,29,33,0.55)` | `rgba(255,255,255,0.42)` |
 | `--pan-border` | `rgba(0,0,0,0.08)` | `rgba(255,255,255,0.09)` |
 | Heading font | Lexend 500 | Lexend 500 |
 | Body font | Instrument Sans 400–700 | Instrument Sans 400–700 |
@@ -125,18 +138,13 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full architecture, toke
 | Odoo 19 Enterprise | Tested |
 | Odoo 17/18 | Not supported |
 | Light mode | Tested |
-| Dark mode | Tested |
+| Dark mode | Tested (Enterprise) |
 
 ---
 
 ## About Pantalytics
 
-[Pantalytics](https://pantalytics.com) builds Odoo modules and integrations for companies that want more from their ERP. Other open-source modules:
-
-- [pan_outlook_pro](https://github.com/pantalytics/pan_outlook_pro) — Microsoft 365 email integration with 2-way sync
-- [pan_crm_pro](https://github.com/pantalytics/pan_crm_pro) — CRM productivity enhancements
-- [pan_ai_pro](https://github.com/pantalytics/pan_ai_pro) — Claude AI integration for Odoo
-- [odoo-mcp-pro](https://github.com/pantalytics/odoo-mcp-pro) — MCP server for Odoo
+[Pantalytics](https://pantalytics.com) builds Odoo modules and integrations for companies that want more from their ERP.
 
 ---
 

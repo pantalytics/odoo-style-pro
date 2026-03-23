@@ -10,13 +10,14 @@ build/
 
 # Odoo compiled assets (generated at runtime)
 pan_style_pro/static/src/css/
+pan_style_pro_enterprise/static/src/css/
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-*.DS_Store
+.DS_Store
 
 # Claude Code internals
 .claude/
