@@ -1,81 +1,145 @@
-# odoo-style
+# Pantalytics Theme for Odoo 19
 
-A modern theme for Odoo 19 (Community & Enterprise) built on the Pantalytics brand. Replaces Odoo's default UI with a clean, consumer-grade look and feel using OWL (Odoo Web Language) component overrides and a CSS design token system.
+A modern, consumer-grade UI theme for Odoo 19 — inspired by the design language of Linear and Vercel. Built and maintained by [Pantalytics](https://pantalytics.com).
 
-## Goals
+![Pantalytics Theme — Light Mode](docs/screenshots/kanban-light.png)
 
-- Modern, minimal UI inspired by tools like Linear and Vercel
-- Full Pantalytics brand integration (colors, typography, spacing)
-- Light and dark theme with toggle support
-- Compatible with Odoo 19 Community and Enterprise
-- No external CSS framework dependency — pure design tokens + SCSS
+---
 
-## Brand
+## Why
+
+Odoo's default UI is functional but dated. This theme replaces it with a clean, minimal interface that feels at home in 2025 — sharp typography, consistent spacing, proper dark mode, and a design token system that makes customisation straightforward.
+
+No third-party CSS framework. No overrides that break on update. Just tokens and targeted SCSS partials injected through Odoo's own asset pipeline.
+
+---
+
+## What's included
+
+| Area | What changed |
+|---|---|
+| **Typography** | Lexend (headings) + Instrument Sans (body), self-hosted |
+| **Colors** | Full `--pan-*` token system for light and dark mode |
+| **Dark mode** | Proper dark tokens via `web.assets_web_dark` — uses Odoo's built-in toggle |
+| **Navbar** | Tighter, cleaner top bar with accent highlight on active item |
+| **Kanban** | Styled columns, hover lift on cards, full-height drop zones |
+| **List view** | Uppercase column headers, subtle row hover, cleaner borders |
+| **Form view** | Card layout with shadow, clean section separators |
+| **Control panel** | Aligned search bar, styled filter pills, view switcher |
+| **Dropdowns** | Rounded, shadowed panels with proper dark mode support |
+| **Modals** | Rounded corners, consistent shadow |
+| **Notifications** | Left-border style (no heavy colored backgrounds) |
+| **Status bar** | Pill-shaped stage buttons |
+| **Notebook tabs** | Vercel-style underline, no legacy border artifacts |
+| **Tags** | Full pill border-radius, semi-transparent overlays |
+| **Login page** | Branded login screen |
+
+---
+
+## Screenshots
+
+### Light mode — CRM Kanban
+
+![CRM Kanban light](docs/screenshots/kanban-light.png)
+
+### Dark mode
+
+![Dark mode](docs/screenshots/dark-mode.png)
+
+---
+
+## Installation
+
+### As Git Submodule (Odoo.sh / self-hosted)
+
+```bash
+git submodule add git@github.com:pantalytics/odoo-style.git addons/odoo-style
+git commit -m "Add pantalytics theme"
+git push
+```
+
+In Odoo.sh: **Settings → Submodules → Add submodule**, then add the deploy key from your GitHub repo.
+
+### Manual
+
+```bash
+git clone https://github.com/pantalytics/odoo-style /path/to/addons/odoo-style
+```
+
+Add to `odoo.conf`:
+
+```ini
+addons_path = /path/to/addons/odoo-style,...
+```
+
+Install the module:
+
+```bash
+odoo -c odoo.conf -i pan_theme
+```
+
+Or via **Apps** in the Odoo backend — search for `Pantalytics Theme`.
+
+---
+
+## Design tokens
+
+All values are CSS custom properties on `:root`. Override them in your own partial to adapt the theme to any brand.
 
 | Token | Light | Dark |
 |---|---|---|
-| Accent | `#9b99ff` | `#9b99ff` |
-| Background | `#ffffff` | `#001d21` |
-| Background secondary | `#f5f5f5` | `#002328` |
-| Text primary | `#001d21` | `#ffffff` |
+| `--pan-accent` | `#9b99ff` | `#9b99ff` |
+| `--pan-accent-hover` | `#7370ff` | `#b3b1ff` |
+| `--pan-bg` | `#ffffff` | _(Odoo-controlled)_ |
+| `--pan-text` | `#001d21` | `rgba(255,255,255,0.9)` |
+| `--pan-text-secondary` | `#6b7280` | `rgba(255,255,255,0.42)` |
+| `--pan-border` | `rgba(0,0,0,0.08)` | `rgba(255,255,255,0.09)` |
 | Heading font | Lexend 500 | Lexend 500 |
 | Body font | Instrument Sans 400–700 | Instrument Sans 400–700 |
 
-## Structure
-
-```
-odoo-style/
-├── pan_theme/               # Main Odoo module
-│   ├── __manifest__.py
-│   ├── static/
-│   │   ├── src/
-│   │   │   ├── scss/        # Design tokens + overrides
-│   │   │   ├── js/          # OWL component patches
-│   │   │   └── fonts/       # Self-hosted Lexend + Instrument Sans
-│   │   └── tests/
-│   └── views/
-│       └── assets.xml       # Asset bundle declarations
-└── docs/
-    └── ARCHITECTURE.md
-```
-
-## Getting Started
-
-### Prerequisites
-
-- Odoo 19 (Community or Enterprise)
-- Python 3.11+
-- Node.js (for SCSS compilation during development)
-
-### Installation
-
-1. Clone this repo into your Odoo addons path:
-   ```bash
-   git clone https://github.com/pantalytics/odoo-style /path/to/addons/odoo-style
-   ```
-
-2. Add the path to `odoo.conf`:
-   ```ini
-   addons_path = /path/to/addons/odoo-style,...
-   ```
-
-3. Install the `pan_theme` module via Odoo Apps or:
-   ```bash
-   odoo -c odoo.conf -i pan_theme
-   ```
+---
 
 ## Development
 
-SCSS source files are compiled by Odoo's built-in asset pipeline. Run Odoo in dev mode for automatic recompilation:
+SCSS is compiled by Odoo's built-in asset pipeline — no separate build step needed. Run in dev mode for live recompilation:
 
 ```bash
 odoo -c odoo.conf --dev=assets
 ```
 
-## Related Repos
+After changing SCSS, update the module:
 
-| Repo | Purpose |
+```bash
+python -m odoo -c odoo.conf --update=pan_theme --stop-after-init -d <your_db>
+```
+
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full architecture, token system, and conventions.
+
+---
+
+## Compatibility
+
+| | Status |
 |---|---|
-| `odoo-pantalytics` | Main Pantalytics Odoo configuration |
-| `pantalytics-website` | Marketing website (Astro) — source of truth for brand tokens |
-| `pantalytics-brand` | Brand assets |
+| Odoo 19 Community | Tested |
+| Odoo 19 Enterprise | Tested |
+| Odoo 17/18 | Not supported |
+| Light mode | Tested |
+| Dark mode | Tested |
+
+---
+
+## About Pantalytics
+
+[Pantalytics](https://pantalytics.com) builds Odoo modules and integrations for companies that want more from their ERP. Other open-source modules:
+
+- [pan_outlook_pro](https://github.com/pantalytics/pan_outlook_pro) — Microsoft 365 email integration with 2-way sync
+- [pan_crm_pro](https://github.com/pantalytics/pan_crm_pro) — CRM productivity enhancements
+- [pan_ai_pro](https://github.com/pantalytics/pan_ai_pro) — Claude AI integration for Odoo
+- [odoo-mcp-pro](https://github.com/pantalytics/odoo-mcp-pro) — MCP server for Odoo
+
+---
+
+## License
+
+LGPL-3.0 — see [LICENSE](LICENSE).
