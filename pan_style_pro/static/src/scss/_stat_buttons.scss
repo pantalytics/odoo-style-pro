@@ -1,0 +1,59 @@
+// Pantalytics stat button / KPI tile overrides
+// The row of tiles at the top of form views (Opportunities, Sales, Invoiced, etc.)
+
+.o-form-buttonbox {
+
+  // Individual stat button tiles
+  .oe_stat_button {
+    border-color: var(--pan-border) !important;
+    border-radius: var(--pan-radius-md) !important;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease !important;
+    margin-left: 0 !important;
+    gap: var(--pan-space-2);
+
+    &:hover {
+      background-color: rgba(155, 153, 255, 0.05) !important;
+      border-color: var(--pan-accent) !important;
+      box-shadow: var(--pan-shadow-sm) !important;
+    }
+
+    // Icon — accent color
+    .o_button_icon {
+      color: var(--pan-accent) !important;
+      opacity: 0.7;
+      transition: opacity 0.15s ease;
+    }
+
+    &:hover .o_button_icon {
+      opacity: 1;
+    }
+  }
+
+  // Stat value — accent, slightly larger
+  .o_stat_value {
+    color: var(--pan-text) !important;
+    font-weight: 600 !important;
+    font-size: 0.9375rem !important;
+    font-family: var(--pan-font-heading) !important;
+  }
+
+  // Stat label
+  .o_stat_text {
+    color: var(--pan-text-secondary) !important;
+    font-size: 0.75rem !important;
+    letter-spacing: 0.01em !important;
+  }
+
+  // Spacing between buttons
+  &:not(.o-form-buttonbox-small) > * + * {
+    margin-left: var(--pan-space-1) !important;
+  }
+
+  // First and last rounding (override Odoo's flat edges)
+  @media (min-width: 768px) {
+    .oe_stat_button,
+    .oe_stat_button > button {
+      border-radius: var(--pan-radius-md) !important;
+    }
+  }
+}

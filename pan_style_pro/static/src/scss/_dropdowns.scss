@@ -52,6 +52,15 @@
   opacity: 1 !important;
 }
 
+// ─── App icons in apps dropdown ──────────────────────────────────────────────
+
+.pan-app-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: var(--pan-radius-sm);
+  flex-shrink: 0;
+}
+
 // ─── Section header ───────────────────────────────────────────────────────────
 
 .dropdown-header,

@@ -1,0 +1,109 @@
+// Pantalytics chatter overrides
+// Styles the mail chatter: topbar, messages, composer, followers
+
+// ─── Chatter topbar ─────────────────────────────────────────────────────────
+
+.o-mail-Chatter-topbar {
+  gap: var(--pan-space-1);
+}
+
+// Active composer button — accent highlight
+.o-mail-Chatter-sendMessage.btn-primary,
+.o-mail-Chatter-logNote.btn-primary {
+  background-color: var(--pan-accent) !important;
+  border-color: var(--pan-accent) !important;
+
+  &:hover,
+  &:focus {
+    background-color: var(--pan-accent-hover) !important;
+    border-color: var(--pan-accent-hover) !important;
+  }
+}
+
+// Action link buttons — accent color on hover
+.o-mail-Chatter-topbar .btn-link.text-action {
+  color: var(--pan-text-secondary) !important;
+  transition: color 0.15s ease !important;
+
+  &:hover {
+    color: var(--pan-accent) !important;
+  }
+}
+
+// ─── Messages ───────────────────────────────────────────────────────────────
+
+.o-mail-Message {
+  border-radius: var(--pan-radius-lg) !important;
+  transition: background-color 0.15s ease !important;
+}
+
+// Message action buttons (reply, mark as todo, etc.)
+.o-mail-Message-actions {
+  border-radius: var(--pan-radius-md) !important;
+  box-shadow: var(--pan-shadow-xs) !important;
+  border-color: var(--pan-border) !important;
+}
+
+// Starred message accent
+.o-mail-Message-moreMenu .fa-star {
+  color: var(--pan-accent) !important;
+}
+
+// ─── Composer ───────────────────────────────────────────────────────────────
+
+.o-mail-Composer {
+  border-radius: var(--pan-radius-lg) !important;
+}
+
+.o-mail-Composer-input .o-mail-Composer-textarea {
+  border-radius: var(--pan-radius-md) !important;
+
+  &:focus {
+    border-color: var(--pan-accent) !important;
+    box-shadow: 0 0 0 3px rgba(155, 153, 255, 0.2) !important;
+  }
+}
+
+// Send button in composer — accent
+.o-mail-Composer-actions .o-mail-Composer-send {
+  background-color: var(--pan-accent) !important;
+
+  &:hover {
+    background-color: var(--pan-accent-hover) !important;
+  }
+}
+
+// ─── Followers ──────────────────────────────────────────────────────────────
+
+.o-mail-Followers-button {
+  transition: color 0.15s ease !important;
+
+  &:hover {
+    color: var(--pan-accent) !important;
+  }
+}
+
+.o-mail-Followers-dropdown {
+  border-radius: var(--pan-radius-lg) !important;
+  box-shadow: var(--pan-shadow-lg) !important;
+  border-color: var(--pan-border) !important;
+}
+
+// ─── Attachment box ─────────────────────────────────────────────────────────
+
+.o-mail-AttachmentCard {
+  border-radius: var(--pan-radius-md) !important;
+  border-color: var(--pan-border) !important;
+  transition: box-shadow 0.15s ease !important;
+
+  &:hover {
+    box-shadow: var(--pan-shadow-sm) !important;
+  }
+}
+
+// ─── Activity ───────────────────────────────────────────────────────────────
+
+.o-mail-Activity {
+  border-radius: var(--pan-radius-md) !important;
+  border-color: var(--pan-border) !important;
+}

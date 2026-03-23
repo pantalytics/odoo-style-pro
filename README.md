@@ -1,8 +1,8 @@
-# Pantalytics Theme for Odoo 19
+# Pantalytics Style Pro for Odoo 19
 
 A modern, consumer-grade UI theme for Odoo 19 — inspired by the design language of Linear and Vercel. Built and maintained by [Pantalytics](https://pantalytics.com).
 
-![Pantalytics Theme — Light Mode](docs/screenshots/kanban-light.png)
+![Pantalytics Style Pro — Light Mode](docs/screenshots/kanban-light.png)
 
 ---
 
@@ -53,7 +53,7 @@ No third-party CSS framework. No overrides that break on update. Just tokens and
 ### As Git Submodule (Odoo.sh / self-hosted)
 
 ```bash
-git submodule add git@github.com:pantalytics/odoo-style.git addons/odoo-style
+git submodule add git@github.com:pantalytics/odoo-style-pro.git addons/odoo-style-pro
 git commit -m "Add pantalytics theme"
 git push
 ```
@@ -63,22 +63,22 @@ In Odoo.sh: **Settings → Submodules → Add submodule**, then add the deploy k
 ### Manual
 
 ```bash
-git clone https://github.com/pantalytics/odoo-style /path/to/addons/odoo-style
+git clone https://github.com/pantalytics/odoo-style-pro /path/to/addons/odoo-style-pro
 ```
 
 Add to `odoo.conf`:
 
 ```ini
-addons_path = /path/to/addons/odoo-style,...
+addons_path = /path/to/addons/odoo-style-pro,...
 ```
 
 Install the module:
 
 ```bash
-odoo -c odoo.conf -i pan_theme
+odoo -c odoo.conf -i pan_style_pro
 ```
 
-Or via **Apps** in the Odoo backend — search for `Pantalytics Theme`.
+Or via **Apps** in the Odoo backend — search for `Pantalytics Style Pro`.
 
 ---
 
@@ -110,7 +110,7 @@ odoo -c odoo.conf --dev=assets
 After changing SCSS, update the module:
 
 ```bash
-python -m odoo -c odoo.conf --update=pan_theme --stop-after-init -d <your_db>
+python -m odoo -c odoo.conf --update=pan_style_pro --stop-after-init -d <your_db>
 ```
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full architecture, token system, and conventions.

@@ -1,0 +1,39 @@
+// Pantalytics navbar search bar — opens command palette
+
+.pan-navbar-search {
+  max-width: 240px;
+  width: 100%;
+  cursor: pointer;
+}
+
+.pan-navbar-search-box {
+  background: var(--pan-bg-secondary);
+  border: 1px solid var(--pan-border);
+  border-radius: var(--pan-radius-md);
+  padding: 5px var(--pan-space-3);
+  font-size: 0.8125rem;
+  color: var(--pan-text-secondary);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    border-color: var(--pan-accent);
+    box-shadow: var(--pan-shadow-sm);
+  }
+}
+
+.pan-navbar-search-shortcut {
+  display: flex;
+  gap: 2px;
+
+  kbd {
+    background: var(--pan-bg);
+    border: 1px solid var(--pan-border);
+    border-radius: var(--pan-radius-sm);
+    padding: 0px 5px;
+    font-size: 0.6875rem;
+    font-family: inherit;
+    color: var(--pan-text-secondary);
+    box-shadow: var(--pan-shadow-xs);
+    line-height: 1.6;
+  }
+}

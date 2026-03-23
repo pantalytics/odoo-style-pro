@@ -2,7 +2,7 @@
 
 ## Overview
 
-`odoo-style` is a single Odoo module (`pan_theme`) that overrides Odoo's default UI without modifying core files. It uses three mechanisms:
+`odoo-style-pro` is a single Odoo module (`pan_style_pro`) that overrides Odoo's default UI without modifying core files. It uses three mechanisms:
 
 1. **CSS design tokens** — CSS custom properties that replace Odoo's hardcoded colors, fonts, and spacing
 2. **SCSS overrides** — targeted overrides of Odoo's SCSS variables and component styles
@@ -51,7 +51,7 @@ The `data-theme` attribute is toggled on `<html>` by an OWL service that respect
 ## Module Structure
 
 ```
-pan_theme/
+pan_style_pro/
 ├── __init__.py
 ├── __manifest__.py
 ├── static/
@@ -85,12 +85,12 @@ Odoo 19 uses a bundle-based asset system. Assets are declared in `assets.xml`:
 
 ```xml
 <odoo>
-  <template id="pan_theme_assets" inherit_id="web.assets_backend">
+  <template id="pan_style_pro_assets" inherit_id="web.assets_backend">
     <xpath expr="." position="inside">
       <!-- Fonts -->
-      <link rel="stylesheet" href="/pan_theme/static/src/scss/main.scss"/>
-      <script type="text/javascript" src="/pan_theme/static/src/js/theme_service.js"/>
-      <script type="text/javascript" src="/pan_theme/static/src/js/theme_toggle.js"/>
+      <link rel="stylesheet" href="/pan_style_pro/static/src/scss/main.scss"/>
+      <script type="text/javascript" src="/pan_style_pro/static/src/js/theme_service.js"/>
+      <script type="text/javascript" src="/pan_style_pro/static/src/js/theme_toggle.js"/>
     </xpath>
   </template>
 </odoo>
@@ -138,7 +138,7 @@ The module targets both editions:
 Enterprise-only patches are guarded so they load only when the relevant module is installed:
 
 ```xml
-<template id="pan_theme_enterprise" inherit_id="web_enterprise.assets_backend"
+<template id="pan_style_pro_enterprise" inherit_id="web_enterprise.assets_backend"
           active="False">
   ...
 </template>

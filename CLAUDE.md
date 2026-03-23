@@ -2,9 +2,9 @@
 
 ## Project
 
-`odoo-style` — Pantalytics theme for Odoo 19 (Community + Enterprise).
+`odoo-style-pro` — Pantalytics Style Pro for Odoo 19 (Community + Enterprise).
 
-Gives Odoo a modern, consumer-grade look and feel (think Linear/Vercel) using the Pantalytics brand. Implemented as a single Odoo module (`pan_theme`) with CSS design tokens and OWL component patches.
+Gives Odoo a modern, consumer-grade look and feel (think Linear/Vercel) using the Pantalytics brand. Implemented as a single Odoo module (`pan_style_pro`) with CSS design tokens and OWL component patches.
 
 ## Brand tokens (source of truth: `pantalytics-website/src/styles/global.css`)
 
@@ -21,14 +21,15 @@ Gives Odoo a modern, consumer-grade look and feel (think Linear/Vercel) using th
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for full details.
 
 - Design tokens via CSS custom properties (`--pan-*`) on `:root` (light) and `[data-theme="dark"]`
-- SCSS overrides in `pan_theme/static/src/scss/`
-- OWL patches in `pan_theme/static/src/js/patches/`
-- Asset injection via `pan_theme/views/assets.xml` into `web.assets_backend`
+- SCSS overrides in `pan_style_pro/static/src/scss/`
+- OWL patches in `pan_style_pro/static/src/js/patches/`
+- Asset injection via `pan_style_pro/views/assets.xml` into `web.assets_backend`
 
 ## Conventions
 
 ### Odoo module
-- Module name: `pan_theme`
+- Module technical name: `pan_style_pro`
+- Module display name: "Pantalytics Style Pro"
 - All custom CSS/SCSS must use `--pan-` prefixed tokens — never hardcode colors or fonts
 - OWL patches use `patch()` from `@web/core/utils/patch` — never replace components wholesale
 - Enterprise-only patches go in `patches/enterprise/` and are guarded in `assets.xml`

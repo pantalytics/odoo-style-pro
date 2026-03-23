@@ -2,18 +2,42 @@
 
 // ─── Navbar ───────────────────────────────────────────────────────────────────
 
+// Override Odoo's navbar CSS custom properties
 .o_main_navbar {
+  --NavBar-entry-color: var(--pan-text);
+  --NavBar-entry-color--hover: var(--pan-text);
+  --NavBar-entry-backgroundColor: transparent;
+  --NavBar-entry-backgroundColor--hover: rgba(0, 0, 0, 0.04);
+  --NavBar-entry-backgroundColor--focus: rgba(0, 0, 0, 0.04);
+  --NavBar-entry-backgroundColor--active: rgba(155, 153, 255, 0.12);
+  --NavBar-entry-borderColor-active: var(--pan-accent);
+  --NavBar-brand-color: var(--pan-text);
+
   height: var(--pan-navbar-height) !important;
   min-height: var(--pan-navbar-height) !important;
+  background-color: var(--pan-navbar-bg) !important;
+  color: var(--pan-text) !important;
   border-bottom: 1px solid var(--pan-navbar-border) !important;
   box-shadow: var(--pan-shadow-xs) !important;
   padding: 0 var(--pan-space-3) !important;
+  display: flex !important;
+  align-items: center !important;
+
+  // Override all text/link colors — needed for Community's white-on-purple defaults
+  a, button, .o_nav_entry, .o_menu_brand, .dropdown-toggle, .o_menu_toggle {
+    color: var(--pan-text) !important;
+  }
 
   // Menu entries
   .o_nav_entry,
   .o_menu_brand,
   .dropdown-toggle {
     border-radius: var(--pan-radius-md) !important;
+    transition: background-color 0.15s ease, color 0.15s ease !important;
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.04) !important;
+    }
   }
 
   // Active entry accent
@@ -22,17 +46,17 @@
     background-color: rgba(155, 153, 255, 0.12) !important;
     color: var(--pan-accent) !important;
   }
-}
 
-// Override Odoo's own navbar height variable at root level
-:root {
-  --o-navbar-height: var(--pan-navbar-height);
-}
+  // Systray icons
+  .o_menu_systray {
+    .dropdown-toggle, a, button {
+      color: var(--pan-text-secondary) !important;
 
-// Vertically center all navbar children
-.o_main_navbar {
-  display: flex !important;
-  align-items: center !important;
+      &:hover {
+        color: var(--pan-text) !important;
+      }
+    }
+  }
 
   .o_menu_toggle,
   .o_nav_entry,
@@ -40,6 +64,11 @@
   .o_menu_brand {
     align-self: center !important;
   }
+}
+
+// Override Odoo's own navbar height variable at root level
+:root {
+  --o-navbar-height: var(--pan-navbar-height);
 }
 
 // ─── Home menu background ─────────────────────────────────────────────────────

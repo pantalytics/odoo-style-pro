@@ -1,0 +1,153 @@
+// Pantalytics settings page overrides — modern/minimal design
+
+// ─── CSS custom properties ──────────────────────────────────────────────────
+
+.o_base_settings_view .o_form_renderer {
+  --settings__tab-bg: transparent;
+  --settings__tab-bg--active: rgba(155, 153, 255, 0.08);
+  --settings__tab-color: var(--pan-text-secondary);
+  --settings__title-bg: transparent;
+}
+
+// ─── Sidebar tabs ───────────────────────────────────────────────────────────
+
+.o_setting_container .settings_tab {
+  background: transparent !important;
+  border-right: 1px solid var(--pan-border) !important;
+  padding: var(--pan-space-3) var(--pan-space-2) !important;
+  gap: 2px !important;
+
+  .tab {
+    border-radius: var(--pan-radius-md) !important;
+    margin: 0 !important;
+    padding: 0 var(--pan-space-3) !important;
+    height: 36px !important;
+    line-height: 36px !important;
+    font-size: 0.8125rem !important;
+    font-weight: 400 !important;
+    color: var(--pan-text-secondary) !important;
+    transition: all 0.15s ease !important;
+
+    .icon {
+      opacity: 0.5;
+      transition: opacity 0.15s ease;
+    }
+
+    &:hover {
+      background-color: rgba(155, 153, 255, 0.06) !important;
+      color: var(--pan-text) !important;
+
+      .icon {
+        opacity: 0.8;
+      }
+    }
+
+    &.selected {
+      background-color: rgba(155, 153, 255, 0.08) !important;
+      box-shadow: none !important;
+      color: var(--pan-accent) !important;
+      font-weight: 500 !important;
+
+      .icon {
+        opacity: 1;
+      }
+    }
+  }
+}
+
+// ─── Section headers ────────────────────────────────────────────────────────
+
+// h2 — section titles: clean, no background band
+.settings > .app_settings_block h2 {
+  background-color: transparent !important;
+  font-family: var(--pan-font-heading) !important;
+  font-weight: 500 !important;
+  font-size: 0.75rem !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  color: var(--pan-text-secondary) !important;
+  border-bottom: none !important;
+  padding-top: var(--pan-space-5) !important;
+  padding-bottom: var(--pan-space-2) !important;
+}
+
+// h3 — sub-section tips
+.settings > .app_settings_block h3 {
+  color: var(--pan-text-secondary) !important;
+  font-size: 0.75rem !important;
+  opacity: 0.7 !important;
+}
+
+// ─── Settings content area ──────────────────────────────────────────────────
+
+.settings > .app_settings_block .o_settings_container {
+  margin-bottom: var(--pan-space-4) !important;
+}
+
+// ─── Setting boxes ──────────────────────────────────────────────────────────
+
+.o_setting_box {
+  border-radius: var(--pan-radius-lg) !important;
+  padding: var(--pan-space-3) !important;
+  margin: var(--pan-space-1) 0 !important;
+  transition: background-color 0.15s ease !important;
+
+  &:hover {
+    background-color: var(--pan-bg-secondary, rgba(0, 0, 0, 0.02)) !important;
+  }
+}
+
+// Remove the left border divider — use spacing instead
+.o_setting_right_pane {
+  border-left: none !important;
+  padding-left: var(--pan-space-3) !important;
+}
+
+// Setting labels — slightly bolder
+.o_setting_right_pane .o_form_label {
+  font-weight: 500 !important;
+  font-size: 0.875rem !important;
+  color: var(--pan-text) !important;
+}
+
+// Setting descriptions
+.o_setting_right_pane .text-muted {
+  font-size: 0.8125rem !important;
+  line-height: 1.5 !important;
+}
+
+// ─── Toggles / checkboxes in settings ───────────────────────────────────────
+
+.o_setting_left_pane .o_field_boolean .form-check-input:checked {
+  background-color: var(--pan-accent) !important;
+  border-color: var(--pan-accent) !important;
+}
+
+// ─── Search highlight ───────────────────────────────────────────────────────
+
+.o_searchable_setting {
+  --SearchableSetting__highlight-background: rgba(155, 153, 255, 0.08);
+  --SearchableSetting__highlight-border: var(--pan-accent);
+  border-radius: var(--pan-radius-lg) !important;
+}
+
+// Search header bar
+.settings .settingSearchHeader {
+  background-color: transparent !important;
+  border-bottom: 1px solid var(--pan-border) !important;
+  font-family: var(--pan-font-heading) !important;
+  font-weight: 500 !important;
+  font-size: 0.75rem !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  color: var(--pan-text-secondary) !important;
+}
+
+// ─── App settings header (icon + name at top) ───────────────────────────────
+
+.settings .app_settings_header {
+  padding-top: var(--pan-space-4) !important;
+  padding-bottom: var(--pan-space-3) !important;
+  border-bottom: 1px solid var(--pan-border) !important;
+  margin-bottom: 0 !important;
+}

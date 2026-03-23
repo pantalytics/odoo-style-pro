@@ -9,7 +9,7 @@ dist/
 build/
 
 # Odoo compiled assets (generated at runtime)
-pan_theme/static/src/css/
+pan_style_pro/static/src/css/
 
 # IDE
 .vscode/

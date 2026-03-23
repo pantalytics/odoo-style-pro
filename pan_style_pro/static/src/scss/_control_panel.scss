@@ -128,9 +128,7 @@
 // ─── Search facets (active filter pills) ─────────────────────────────────────
 
 .o_searchview_facet {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: var(--pan-space-1) !important;
+  // Keep original align-items: stretch for proper overlay positioning
   background-color: rgba(155, 153, 255, 0.1) !important;
   border: 1px solid rgba(155, 153, 255, 0.3) !important;
   color: var(--pan-accent) !important;
@@ -138,16 +136,34 @@
   font-family: var(--pan-font-body) !important;
   font-size: 0.75rem !important;
   font-weight: 500 !important;
-  padding: 0.125rem var(--pan-space-2) !important;
   line-height: 1.5 !important;
+
+  // Label section (icon + edit overlay)
+  .o_searchview_facet_label {
+    display: flex !important;
+    align-items: center !important;
+
+    .btn-primary {
+      background-color: var(--pan-accent) !important;
+      border-color: var(--pan-accent) !important;
+    }
+  }
+
+  // Values + remove button
+  .o_facet_values {
+    align-items: center !important;
+  }
 
   .o_facet_remove {
     color: var(--pan-accent) !important;
     opacity: 0.7 !important;
     cursor: pointer !important;
-
+    position: relative !important;
+    z-index: 1 !important;
+    font-family: 'odoo_ui_icons' !important;
     &:hover {
       opacity: 1 !important;
+      color: var(--pan-accent-hover) !important;
     }
   }
 }

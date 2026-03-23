@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+    <!-- Add search bar to navbar, just before systray -->
+    <t t-name="pan_style_pro.NavBar" t-inherit="web.NavBar" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('o_menu_systray')]" position="before">
+            <div t-if="!env.isSmall" class="pan-navbar-search ms-auto me-2" t-on-click="onSearchBarClick">
+                <div class="pan-navbar-search-box d-flex align-items-center">
+                    <i class="fa fa-search me-2 opacity-50"/>
+                    <span class="opacity-50">Search…</span>
+                    <span class="pan-navbar-search-shortcut ms-auto">
+                        <kbd>⌘</kbd><kbd>K</kbd>
+                    </span>
+                </div>
+            </div>
+        </xpath>
+    </t>
+
+</templates>

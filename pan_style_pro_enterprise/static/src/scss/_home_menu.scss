@@ -1,0 +1,117 @@
+// Pantalytics home menu overrides — modern app launcher
+
+// ─── Background ─────────────────────────────────────────────────────────────
+
+// Subtle tinted background — gives white icons contrast
+.o_home_menu_background,
+.o_web_client.o_home_menu_background {
+  background-image: none !important;
+  background-color: var(--pan-bg-secondary, #f5f5f5) !important;
+}
+
+// ─── Search bar ─────────────────────────────────────────────────────────────
+
+.pan-home-search {
+  max-width: 480px;
+  width: 100%;
+}
+
+.pan-home-search-box {
+  background: var(--pan-bg, #ffffff);
+  border: 1px solid var(--pan-border-strong);
+  border-radius: var(--pan-radius-lg);
+  padding: var(--pan-space-3) var(--pan-space-4);
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  font-size: 0.875rem;
+  color: var(--pan-text-secondary);
+  box-shadow: var(--pan-shadow-sm);
+
+  &:hover {
+    border-color: var(--pan-accent);
+    box-shadow: var(--pan-shadow-md);
+  }
+}
+
+.pan-home-search-shortcut {
+  display: flex;
+  gap: 3px;
+
+  kbd {
+    background: var(--pan-bg, #ffffff);
+    border: 1px solid var(--pan-border);
+    border-radius: var(--pan-radius-sm);
+    padding: 1px 6px;
+    font-size: 0.75rem;
+    font-family: inherit;
+    color: var(--pan-text-secondary);
+    box-shadow: var(--pan-shadow-xs);
+    line-height: 1.5;
+  }
+}
+
+// ─── App grid ───────────────────────────────────────────────────────────────
+
+.o_home_menu {
+  // Ensure scrollbar matches theme
+  scrollbar-color: rgba(155, 153, 255, 0.3) transparent !important;
+
+  .container {
+    padding-top: var(--pan-space-5) !important;
+  }
+
+  // App items
+  .o_app {
+    transition: transform 0.15s ease !important;
+    border-radius: var(--pan-radius-lg) !important;
+    padding: var(--pan-space-3) !important;
+
+    &:hover {
+      background-color: var(--pan-bg-secondary, rgba(0, 0, 0, 0.02)) !important;
+    }
+
+    // App icons — elevated on tinted bg
+    .o_app_icon {
+      border-radius: var(--pan-radius-lg) !important;
+      box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.1),
+        0 4px 8px rgba(0, 0, 0, 0.06) !important;
+      transition: box-shadow 0.2s ease, transform 0.2s ease !important;
+    }
+
+    &:hover .o_app_icon {
+      box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.12),
+        0 8px 24px rgba(0, 0, 0, 0.08) !important;
+      transform: translateY(-3px) !important;
+    }
+
+    &:active .o_app_icon {
+      transform: translateY(-1px) scale(0.97) !important;
+    }
+
+    // Caption
+    .o_caption {
+      font-family: var(--pan-font-body) !important;
+      font-size: 0.8125rem !important;
+      font-weight: 500 !important;
+      color: var(--pan-text) !important;
+      text-shadow: none !important;
+      margin-top: var(--pan-space-2) !important;
+    }
+
+    // Keyboard focus
+    &.o_focused {
+      background: rgba(155, 153, 255, 0.08) !important;
+      outline: 2px solid var(--pan-accent) !important;
+      outline-offset: -2px;
+      border-radius: var(--pan-radius-lg) !important;
+    }
+  }
+}
+
+// ─── Navbar transparent on home ─────────────────────────────────────────────
+
+.o_home_menu_background:not(.o_home_menu_background_custom):not(.o_in_studio) .o_main_navbar {
+  border-bottom: 1px solid var(--pan-border) !important;
+}
