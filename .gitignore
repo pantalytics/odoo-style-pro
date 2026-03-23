@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+
+# Odoo compiled assets (generated at runtime)
+pan_theme/static/src/css/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.DS_Store
+
+# Claude Code internals
+.claude/
+.local/
+
+# Environment
+.env
+*.env.local

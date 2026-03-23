@@ -1,0 +1,80 @@
+// Pantalytics pager overrides
+
+// ─── Pager container ──────────────────────────────────────────────────────────
+
+.o_pager {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: var(--pan-space-1) !important;
+  font-size: 0.75rem !important;
+  line-height: 1 !important;
+}
+
+// ─── Counter ("1-10 / 42") ────────────────────────────────────────────────────
+
+.o_pager .o_pager_counter {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: var(--pan-space-1) !important;
+  color: var(--pan-text-secondary) !important;
+  font-variant-numeric: tabular-nums !important;
+  letter-spacing: 0.01em !important;
+  white-space: nowrap !important;
+}
+
+// ─── Clickable value (editable range) ─────────────────────────────────────────
+
+.o_pager .o_pager_value {
+  color: var(--pan-text-secondary) !important;
+  font-variant-numeric: tabular-nums !important;
+  border-radius: var(--pan-radius-sm) !important;
+  padding: 0 var(--pan-space-1) !important;
+  transition: background-color 0.15s ease, color 0.15s ease !important;
+  cursor: pointer !important;
+
+  &:hover,
+  &:focus {
+    background-color: rgba(155, 153, 255, 0.1) !important;
+    color: var(--pan-accent) !important;
+    outline: none !important;
+  }
+}
+
+// ─── Prev / next buttons ──────────────────────────────────────────────────────
+
+.o_pager button.o_pager_previous,
+.o_pager button.o_pager_next {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 1.75rem !important;
+  height: 1.75rem !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  border-radius: var(--pan-radius-sm) !important;
+  color: var(--pan-text-secondary) !important;
+  font-size: 0.875rem !important;
+  line-height: 1 !important;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
+  cursor: pointer !important;
+
+  &:hover,
+  &:focus-visible {
+    background-color: rgba(155, 153, 255, 0.1) !important;
+    border-color: var(--pan-border) !important;
+    color: var(--pan-accent) !important;
+    outline: none !important;
+  }
+
+  &:active {
+    background-color: rgba(155, 153, 255, 0.18) !important;
+    color: var(--pan-accent-hover) !important;
+  }
+
+  &:disabled {
+    opacity: 0.35 !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+  }
+}

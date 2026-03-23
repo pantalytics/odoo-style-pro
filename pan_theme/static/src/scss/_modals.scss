@@ -1,0 +1,89 @@
+// Pantalytics modal & dialog overrides
+
+// ─── Backdrop ─────────────────────────────────────────────────────────────────
+
+.modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+
+  &.show {
+    opacity: 1 !important;
+  }
+}
+
+// ─── Modal card ───────────────────────────────────────────────────────────────
+
+.modal-content {
+  border-radius: var(--pan-radius-lg) !important;
+  border: 1px solid var(--pan-border) !important;
+  box-shadow: var(--pan-shadow-lg) !important;
+  overflow: hidden !important;
+}
+
+.o_dialog .modal-content {
+  border-radius: var(--pan-radius-lg) !important;
+  border: 1px solid var(--pan-border) !important;
+  box-shadow: var(--pan-shadow-lg) !important;
+}
+
+// ─── Header ───────────────────────────────────────────────────────────────────
+
+.modal-header {
+  padding: var(--pan-space-4) var(--pan-space-5) !important;
+  border-bottom: 1px solid var(--pan-border) !important;
+  align-items: center !important;
+}
+
+.modal-title {
+  font-family: var(--pan-font-heading) !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+  color: var(--pan-text) !important;
+  line-height: 1.4 !important;
+}
+
+// ─── Close button ─────────────────────────────────────────────────────────────
+
+.modal-header .btn-close {
+  border-radius: var(--pan-radius-md) !important;
+  opacity: 0.45 !important;
+  transition: opacity 0.15s ease, background-color 0.15s ease !important;
+  padding: var(--pan-space-1) !important;
+
+  &:hover {
+    opacity: 0.85 !important;
+    background-color: rgba(0, 0, 0, 0.06) !important;
+  }
+
+  &:focus-visible {
+    outline-color: var(--pan-accent) !important;
+    opacity: 0.85 !important;
+  }
+}
+
+// ─── Body ─────────────────────────────────────────────────────────────────────
+
+.modal-body {
+  padding: var(--pan-space-5) !important;
+  font-family: var(--pan-font-body) !important;
+  color: var(--pan-text) !important;
+}
+
+// ─── Footer ───────────────────────────────────────────────────────────────────
+
+.modal-footer {
+  padding: var(--pan-space-3) var(--pan-space-5) !important;
+  border-top: 1px solid var(--pan-border) !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: var(--pan-space-2) !important;
+}
+
+// ─── Warning dialog variant ───────────────────────────────────────────────────
+
+.o_dialog_warning .modal-content {
+  border-color: rgba(155, 153, 255, 0.3) !important;
+}
+
+.o_dialog_warning .modal-header {
+  border-bottom-color: rgba(155, 153, 255, 0.2) !important;
+}

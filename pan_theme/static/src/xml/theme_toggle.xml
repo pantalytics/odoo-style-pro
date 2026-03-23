@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+    <t t-name="pan_theme.ThemeToggle">
+        <button class="btn btn-sm pan-theme-toggle o_nav_entry"
+                t-on-click="toggle"
+                t-att-title="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+                aria-label="Toggle dark mode">
+            <t t-if="isDark">☀</t>
+            <t t-else="">🌙</t>
+        </button>
+    </t>
+</templates>

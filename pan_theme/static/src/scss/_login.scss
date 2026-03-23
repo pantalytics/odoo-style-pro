@@ -1,0 +1,48 @@
+// Pantalytics login page overrides
+// Injected via web.assets_web (covers /web/login)
+
+:root {
+  --pan-accent:       #9b99ff;
+  --pan-accent-hover: #7370ff;
+  --pan-font-body:    "Instrument Sans", sans-serif;
+  --pan-radius-md:    0.375rem;
+  --pan-shadow-md:    0 4px 6px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+body.o_home_menu_background {
+  font-family: var(--pan-font-body);
+  background: linear-gradient(135deg, #f5f5f5 0%, #ededff 100%) !important;
+}
+
+.oe_login_form,
+.o_database_list {
+  .btn-primary {
+    background-color: var(--pan-accent) !important;
+    border-color: var(--pan-accent) !important;
+    border-radius: var(--pan-radius-md) !important;
+    font-weight: 500 !important;
+
+    &:hover {
+      background-color: var(--pan-accent-hover) !important;
+      border-color: var(--pan-accent-hover) !important;
+    }
+  }
+
+  input.form-control {
+    border-radius: var(--pan-radius-md) !important;
+    border-color: rgba(0, 0, 0, 0.15) !important;
+
+    &:focus {
+      border-color: var(--pan-accent) !important;
+      box-shadow: 0 0 0 3px rgba(155, 153, 255, 0.2) !important;
+      outline: none !important;
+    }
+  }
+}
+
+// Login card
+.container .card {
+  border-radius: 0.75rem !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.04) !important;
+}

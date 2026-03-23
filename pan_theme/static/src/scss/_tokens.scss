@@ -1,0 +1,47 @@
+// Pantalytics design tokens
+// Source of truth: pantalytics-website/src/styles/global.css
+// All tokens prefixed with --pan-
+
+:root {
+  // Colors — accent
+  --pan-accent:           #9b99ff;
+  --pan-accent-hover:     #7370ff;
+
+  // Colors — light theme (default)
+  --pan-bg:               #ffffff;
+  --pan-bg-secondary:     #fafafa;
+  --pan-text:             #001d21;
+  --pan-text-secondary:   rgba(0, 29, 33, 0.55);
+  --pan-border:           rgba(0, 0, 0, 0.08);
+  --pan-border-strong:    rgba(0, 0, 0, 0.15);
+
+  // Typography
+  --pan-font-heading:     "Lexend", sans-serif;
+  --pan-font-body:        "Instrument Sans", sans-serif;
+
+  // Radius
+  --pan-radius-sm:        0.25rem;  // 4px  — inputs, tags
+  --pan-radius-md:        0.375rem; // 6px  — buttons, cards
+  --pan-radius-lg:        0.5rem;   // 8px  — modals, panels
+
+  // Shadows
+  --pan-shadow-xs:  0 1px 2px rgba(0, 0, 0, 0.05);
+  --pan-shadow-sm:  0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --pan-shadow-md:  0 4px 6px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.04);
+  --pan-shadow-lg:  0 10px 24px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0, 0, 0, 0.04);
+
+  // Spacing (4px base scale)
+  --pan-space-1:  0.25rem;  //  4px
+  --pan-space-2:  0.5rem;   //  8px
+  --pan-space-3:  0.75rem;  // 12px
+  --pan-space-4:  1rem;     // 16px
+  --pan-space-5:  1.5rem;   // 24px
+  --pan-space-6:  2rem;     // 32px
+
+  // Navbar
+  --pan-navbar-height:    56px;
+  --pan-navbar-bg:        #ffffff;
+  --pan-navbar-border:    rgba(0, 0, 0, 0.08);
+}
+
+// Dark mode tokens are in _tokens.dark.scss → web.assets_web_dark

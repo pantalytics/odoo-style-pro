@@ -1,0 +1,140 @@
+// Pantalytics notifications & alerts overrides
+
+// ─── Color constants for semantic notification types ──────────────────────────
+// These are intentionally NOT tokenised — they are universal semantic colors
+// that must stay consistent regardless of brand theme.
+$pan-color-success : #22c55e;
+$pan-color-warning : #f59e0b;
+$pan-color-danger  : #ef4444;
+
+// ─── Toast notifications (.o_notification_manager) ────────────────────────────
+
+.o_notification_manager .o_notification {
+  border: 1px solid var(--pan-border) !important;
+  border-left: 4px solid var(--pan-accent) !important; // default / info
+  border-radius: var(--pan-radius-lg) !important;
+  box-shadow: var(--pan-shadow-md) !important;
+  font-family: var(--pan-font-body) !important;
+  padding: var(--pan-space-3) var(--pan-space-4) !important;
+  min-width: 280px !important;
+  max-width: 400px !important;
+  transition: opacity 0.2s ease, transform 0.2s ease !important;
+
+  // ── Type variants ────────────────────────────────────────────────────────
+
+  &.o_notification_info {
+    border-left-color: var(--pan-accent) !important;
+  }
+
+  &.o_notification_success {
+    border-left-color: $pan-color-success !important;
+  }
+
+  &.o_notification_warning {
+    border-left-color: $pan-color-warning !important;
+  }
+
+  &.o_notification_danger {
+    border-left-color: $pan-color-danger !important;
+  }
+
+  // ── Inner elements ───────────────────────────────────────────────────────
+
+  .o_notification_title {
+    font-size: 0.8125rem !important; // 13 px
+    font-weight: 600 !important;
+    color: var(--pan-text) !important;
+    line-height: 1.4 !important;
+    margin-bottom: var(--pan-space-1) !important;
+  }
+
+  .o_notification_content {
+    font-size: 0.8125rem !important;
+    color: var(--pan-text-secondary) !important;
+    line-height: 1.5 !important;
+  }
+
+  .o_notification_close {
+    color: var(--pan-text-secondary) !important;
+    opacity: 0.6 !important;
+    transition: opacity 0.15s ease !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+
+    &:hover {
+      opacity: 1 !important;
+      color: var(--pan-text) !important;
+    }
+  }
+
+  .o_notification_icon {
+    color: var(--pan-text-secondary) !important;
+    font-size: 1rem !important;
+    flex-shrink: 0 !important;
+
+    // Tint icon to match left-border type color using currentColor trick
+    .o_notification_info & {
+      color: var(--pan-accent) !important;
+    }
+
+    .o_notification_success & {
+      color: $pan-color-success !important;
+    }
+
+    .o_notification_warning & {
+      color: $pan-color-warning !important;
+    }
+
+    .o_notification_danger & {
+      color: $pan-color-danger !important;
+    }
+  }
+}
+
+// ─── Bootstrap alerts (used in form views) ────────────────────────────────────
+
+.alert {
+  border-radius: var(--pan-radius-md) !important;
+  border: 1px solid var(--pan-border) !important;
+  border-left: 4px solid var(--pan-border-strong) !important;
+  color: var(--pan-text) !important;
+  font-family: var(--pan-font-body) !important;
+  font-size: 0.8125rem !important;
+  padding: var(--pan-space-3) var(--pan-space-4) !important;
+  box-shadow: none !important;
+
+  // ── Semantic variants ────────────────────────────────────────────────────
+
+  &.alert-info {
+    border-left-color: var(--pan-accent) !important;
+    background-color: rgba(155, 153, 255, 0.06) !important;
+  }
+
+  &.alert-success {
+    border-left-color: $pan-color-success !important;
+    background-color: rgba(34, 197, 94, 0.06) !important;
+  }
+
+  &.alert-warning {
+    border-left-color: $pan-color-warning !important;
+    background-color: rgba(245, 158, 11, 0.06) !important;
+  }
+
+  &.alert-danger {
+    border-left-color: $pan-color-danger !important;
+    background-color: rgba(239, 68, 68, 0.06) !important;
+  }
+
+  // ── Links inside alerts ──────────────────────────────────────────────────
+
+  a,
+  .alert-link {
+    color: var(--pan-accent) !important;
+    font-weight: 600 !important;
+
+    &:hover {
+      color: var(--pan-accent-hover) !important;
+    }
+  }
+}

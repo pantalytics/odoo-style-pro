@@ -1,0 +1,186 @@
+// Pantalytics tags & badges overrides
+
+// ─── Tags (.o_tag) ────────────────────────────────────────────────────────────
+//
+// Odoo generates per-tag background colors dynamically (inline style).
+// We keep that hue but dial the opacity down to ~15 % so it reads as a
+// subtle tinted chip rather than a loud solid block.
+// A matching border at ~30 % opacity gives the chip definition without
+// adding visual weight.
+
+.o_tag {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: var(--pan-space-1) !important;
+
+  // Pill shape
+  border-radius: 9999px !important;
+
+  // Compact, balanced padding
+  padding: 0.125rem var(--pan-space-2) !important;
+
+  // Typography
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  line-height: 1.5 !important;
+
+  // Soften Odoo's solid background — alpha overlay on top of the
+  // dynamically injected background-color.
+  // Because the bg is set inline we can't use a token, so we layer a
+  // semi-transparent white mask via mix-blend-mode or a pseudo-element.
+  // The cleanest cross-browser approach: set background-color to
+  // transparent and emulate the tint with opacity on the element, but
+  // that would fade the text too. Instead we force background-image to a
+  // translucent white gradient that lightens whatever color sits beneath.
+  background-image: linear-gradient(
+    rgba(255, 255, 255, 0.72),
+    rgba(255, 255, 255, 0.72)
+  ) !important;
+
+  // Border derived from the dynamic bg — approximated with a low-opacity
+  // dark stroke so it works across all hues.
+  border: 1px solid var(--pan-border-strong) !important;
+
+  // Smooth interactive states
+  transition: opacity 0.15s ease, border-color 0.15s ease !important;
+
+  &:hover {
+    border-color: var(--pan-border-strong) !important;
+    opacity: 0.88 !important;
+  }
+
+  // ─── Tag text ───────────────────────────────────────────────────────────────
+
+  .o_tag_badge_text {
+    color: var(--pan-text) !important;
+    font-size: 0.75rem !important;
+    font-weight: 500 !important;
+    line-height: 1 !important;
+    letter-spacing: 0.01em !important;
+  }
+
+  // ─── Delete (×) button ──────────────────────────────────────────────────────
+
+  .o_delete {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    // Tighten the hit area without adding bulk
+    padding: 0 !important;
+    margin-left: calc(var(--pan-space-1) * 0.5) !important;
+
+    font-size: 0.65rem !important;
+    line-height: 1 !important;
+
+    // Subtle by default — only becomes prominent on hover
+    opacity: 0.4 !important;
+    color: var(--pan-text) !important;
+    cursor: pointer !important;
+
+    border: none !important;
+    background: transparent !important;
+    border-radius: 9999px !important;
+
+    transition: opacity 0.15s ease, background-color 0.15s ease !important;
+
+    &:hover,
+    &:focus {
+      opacity: 1 !important;
+      background-color: rgba(0, 0, 0, 0.1) !important;
+      outline: none !important;
+    }
+  }
+}
+
+// Dark mode — invert the lightening overlay so the tint stays readable
+// on dark backgrounds.
+[data-theme="dark"] .o_tag {
+  background-image: linear-gradient(
+    rgba(0, 0, 0, 0.55),
+    rgba(0, 0, 0, 0.55)
+  ) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+
+  .o_tag_badge_text {
+    color: var(--pan-text) !important; // resolves to light text in dark mode
+  }
+
+  .o_delete {
+    color: var(--pan-text) !important;
+
+    &:hover,
+    &:focus {
+      background-color: rgba(255, 255, 255, 0.12) !important;
+    }
+  }
+}
+
+// ─── Bootstrap badges (.badge) ────────────────────────────────────────────────
+
+.badge {
+  border-radius: 9999px !important;
+  padding: 0.2em 0.6em !important;
+  font-size: 0.7rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em !important;
+  line-height: 1 !important;
+  transition: opacity 0.15s ease !important;
+}
+
+// ─── Semantic badge variants ──────────────────────────────────────────────────
+
+// Primary — accent color family
+.badge.text-bg-primary {
+  background-color: rgba(155, 153, 255, 0.15) !important;
+  color: var(--pan-accent) !important;
+  border: 1px solid rgba(155, 153, 255, 0.3) !important;
+}
+
+// Success — keep hue, reduce opacity
+.badge.text-bg-success {
+  background-color: rgba(34, 197, 94, 0.12) !important;
+  color: #16a34a !important;
+  border: 1px solid rgba(34, 197, 94, 0.25) !important;
+}
+
+// Warning
+.badge.text-bg-warning {
+  background-color: rgba(234, 179, 8, 0.12) !important;
+  color: #a16207 !important;
+  border: 1px solid rgba(234, 179, 8, 0.25) !important;
+}
+
+// Danger
+.badge.text-bg-danger {
+  background-color: rgba(239, 68, 68, 0.12) !important;
+  color: #dc2626 !important;
+  border: 1px solid rgba(239, 68, 68, 0.25) !important;
+}
+
+// Dark mode — lighten text so tinted chips stay legible on dark bg
+[data-theme="dark"] {
+  .badge.text-bg-primary {
+    background-color: rgba(155, 153, 255, 0.18) !important;
+    color: var(--pan-accent-hover) !important; // #b3b1ff in dark
+    border-color: rgba(155, 153, 255, 0.35) !important;
+  }
+
+  .badge.text-bg-success {
+    background-color: rgba(34, 197, 94, 0.15) !important;
+    color: #4ade80 !important;
+    border-color: rgba(34, 197, 94, 0.3) !important;
+  }
+
+  .badge.text-bg-warning {
+    background-color: rgba(234, 179, 8, 0.15) !important;
+    color: #fde047 !important;
+    border-color: rgba(234, 179, 8, 0.3) !important;
+  }
+
+  .badge.text-bg-danger {
+    background-color: rgba(239, 68, 68, 0.15) !important;
+    color: #f87171 !important;
+    border-color: rgba(239, 68, 68, 0.3) !important;
+  }
+}

@@ -1,0 +1,154 @@
+// Pantalytics component overrides
+
+// ─── Buttons ──────────────────────────────────────────────────────────────────
+
+.btn {
+  border-radius: var(--pan-radius-md) !important;
+  font-weight: 500 !important;
+  transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+.btn-primary {
+  background-color: var(--pan-accent) !important;
+  border-color: var(--pan-accent) !important;
+  color: #ffffff !important;
+
+  &:hover,
+  &:focus,
+  &:active,
+  &.active {
+    background-color: var(--pan-accent-hover) !important;
+    border-color: var(--pan-accent-hover) !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 0 3px rgba(155, 153, 255, 0.25) !important;
+  }
+}
+
+.btn-secondary {
+  border-color: var(--pan-border-strong) !important;
+
+  &:hover,
+  &:focus,
+  &:active {
+    border-color: var(--pan-border-strong) !important;
+  }
+}
+
+// Links
+a,
+.o_form_uri {
+  color: var(--pan-accent);
+
+  &:hover {
+    color: var(--pan-accent-hover);
+  }
+}
+
+// Focus ring — use accent color
+:focus-visible {
+  outline-color: var(--pan-accent) !important;
+}
+
+// ─── Input fields ─────────────────────────────────────────────────────────────
+
+.form-control,
+.o_input,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+textarea,
+select.form-select {
+  border-radius: var(--pan-radius-md) !important;
+  border-color: var(--pan-border-strong) !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+
+  &:focus {
+    border-color: var(--pan-accent) !important;
+    box-shadow: 0 0 0 3px rgba(155, 153, 255, 0.2) !important;
+    outline: none !important;
+  }
+}
+
+// ─── Cards & kanban ───────────────────────────────────────────────────────────
+
+.o_kanban_record {
+  border-radius: var(--pan-radius-lg) !important;
+  border-color: var(--pan-border) !important;
+  box-shadow: var(--pan-shadow-sm) !important;
+  transition: box-shadow 0.15s ease, transform 0.15s ease !important;
+
+  &:hover {
+    box-shadow: var(--pan-shadow-md) !important;
+    transform: translateY(-1px) !important;
+  }
+}
+
+.o_form_sheet,
+.card {
+  border-radius: var(--pan-radius-lg) !important;
+  border-color: var(--pan-border) !important;
+  box-shadow: var(--pan-shadow-sm) !important;
+}
+
+// ─── Sidebar ──────────────────────────────────────────────────────────────────
+
+// Discuss sidebar
+.o_discuss_sidebar .o_active {
+  background-color: rgba(155, 153, 255, 0.1) !important;
+  color: var(--pan-accent) !important;
+  border-radius: var(--pan-radius-md) !important;
+}
+
+// Notebook tabs — Vercel stijl: alleen een clean 2px bottom underline
+.o_notebook .nav-tabs {
+  border-bottom: 1px solid var(--pan-border) !important;
+  gap: 0 !important;
+}
+
+.o_notebook .nav-tabs .nav-link {
+  border-radius: 0 !important;
+  border: none !important;
+  border-bottom: 2px solid transparent !important;
+  margin-bottom: -1px !important;
+  color: var(--pan-text-secondary) !important;
+  font-size: 0.8125rem !important;
+  font-weight: 500 !important;
+  padding: var(--pan-space-2) var(--pan-space-3) !important;
+  transition: color 0.15s ease, border-bottom-color 0.15s ease !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+
+  &:hover {
+    color: var(--pan-text) !important;
+    border-bottom-color: var(--pan-border-strong) !important;
+    background: transparent !important;
+  }
+
+  &.active,
+  &:active {
+    color: var(--pan-accent) !important;
+    border-top: none !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: 2px solid var(--pan-accent) !important;
+    background: transparent !important;
+    font-weight: 600 !important;
+    box-shadow: none !important;
+  }
+
+  // Odoo voegt een ::after toe met eigen kleur — verbergen
+  &.active::after,
+  &::after {
+    display: none !important;
+    content: none !important;
+  }
+}
+
+// Left app sidebar menu items
+.o_menu_sections .o_nav_entry.active,
+.o_menu_sections .o_nav_entry:focus {
+  color: var(--pan-accent) !important;
+  background-color: rgba(155, 153, 255, 0.08) !important;
+}

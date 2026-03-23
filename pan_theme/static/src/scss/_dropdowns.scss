@@ -1,0 +1,66 @@
+// Pantalytics dropdown overrides
+
+// ─── Dropdown panel ───────────────────────────────────────────────────────────
+
+.dropdown-menu,
+.o_dropdown_menu {
+  border: 1px solid var(--pan-border-strong) !important;
+  border-radius: var(--pan-radius-lg) !important;
+  box-shadow: var(--pan-shadow-md) !important;
+  padding: var(--pan-space-1) !important;
+  min-width: 11rem !important;
+}
+
+// ─── Dropdown items ───────────────────────────────────────────────────────────
+
+.dropdown-item,
+.o_dropdown_menu .o_dropdown_item {
+  border-radius: var(--pan-radius-md) !important;
+  padding: var(--pan-space-1) var(--pan-space-2) !important;
+  color: var(--pan-text) !important;
+  font-size: 0.875rem !important;
+  line-height: 1.5 !important;
+  background-color: transparent !important;
+  transition: background-color 0.1s ease, color 0.1s ease !important;
+}
+
+// Hover / focus state
+.dropdown-item:hover,
+.dropdown-item:focus,
+.o_dropdown_menu .o_dropdown_item:hover,
+.o_dropdown_menu .o_dropdown_item:focus {
+  background-color: var(--pan-border) !important;
+  color: var(--pan-text) !important;
+}
+
+// Active / selected state
+.dropdown-item.active,
+.dropdown-item:active,
+.o_dropdown_menu .o_dropdown_item.active,
+.o_dropdown_menu .o_dropdown_item:active {
+  background-color: rgba(155, 153, 255, 0.1) !important;
+  color: var(--pan-accent) !important;
+  font-weight: 500 !important;
+}
+
+// ─── Divider ──────────────────────────────────────────────────────────────────
+
+.dropdown-divider,
+.o_dropdown_menu .dropdown-divider {
+  border-color: var(--pan-border) !important;
+  margin: var(--pan-space-1) 0 !important;
+  opacity: 1 !important;
+}
+
+// ─── Section header ───────────────────────────────────────────────────────────
+
+.dropdown-header,
+.o_dropdown_menu .dropdown-header {
+  padding: var(--pan-space-1) var(--pan-space-2) !important;
+  font-size: 0.6875rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  color: var(--pan-text-secondary) !important;
+  line-height: 1.5 !important;
+}

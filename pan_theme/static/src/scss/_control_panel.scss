@@ -1,0 +1,180 @@
+// Pantalytics control panel overrides
+
+// ─── Control panel container ──────────────────────────────────────────────────
+
+.o_control_panel {
+  border-bottom: 1px solid var(--pan-border) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+
+  // ─── Breadcrumb ─────────────────────────────────────────────────────────────
+
+  .breadcrumb {
+    font-family: var(--pan-font-body) !important;
+    font-size: 0.8125rem !important;
+    font-weight: 500 !important;
+    margin-bottom: 0 !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+  }
+
+  .breadcrumb-item {
+    color: var(--pan-text-secondary) !important;
+    line-height: 1.5 !important;
+
+    a {
+      color: var(--pan-text-secondary) !important;
+      text-decoration: none !important;
+
+      &:hover {
+        color: var(--pan-text) !important;
+      }
+    }
+  }
+
+  .breadcrumb-item.active {
+    color: var(--pan-text) !important;
+    font-weight: 600 !important;
+  }
+
+  // Separator between breadcrumb items
+  .breadcrumb-item + .breadcrumb-item::before {
+    content: "›" !important;
+    color: var(--pan-text-secondary) !important;
+    opacity: 0.5 !important;
+    font-weight: 400 !important;
+    padding: 0 var(--pan-space-1) !important;
+  }
+}
+
+// ─── Action buttons area ──────────────────────────────────────────────────────
+
+.o_control_panel_actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: var(--pan-space-2) !important;
+
+  .btn {
+    font-family: var(--pan-font-body) !important;
+    font-size: 0.8125rem !important;
+    font-weight: 500 !important;
+    border-radius: var(--pan-radius-md) !important;
+    padding: var(--pan-space-1) var(--pan-space-3) !important;
+    line-height: 1.5 !important;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease !important;
+  }
+
+  .btn-primary {
+    background-color: var(--pan-accent) !important;
+    border-color: var(--pan-accent) !important;
+    color: #fff !important;
+
+    &:hover,
+    &:focus {
+      background-color: var(--pan-accent-hover) !important;
+      border-color: var(--pan-accent-hover) !important;
+    }
+  }
+
+  .btn-secondary {
+    background-color: transparent !important;
+    border-color: var(--pan-border-strong) !important;
+    color: var(--pan-text) !important;
+
+    &:hover,
+    &:focus {
+      background-color: var(--pan-border) !important;
+      border-color: var(--pan-border-strong) !important;
+    }
+  }
+}
+
+// ─── Search bar ───────────────────────────────────────────────────────────────
+
+.o_searchview {
+  background-color: transparent !important;
+  border: 1px solid var(--pan-border) !important;
+  border-radius: var(--pan-radius-md) !important;
+  box-shadow: none !important;
+  min-height: 2rem !important;
+  padding: 0 var(--pan-space-2) !important;
+  transition: border-color 0.15s ease !important;
+
+  &:focus-within {
+    border-color: var(--pan-accent) !important;
+    box-shadow: 0 0 0 3px rgba(155, 153, 255, 0.15) !important;
+  }
+
+  .o_searchview_input {
+    font-family: var(--pan-font-body) !important;
+    font-size: 0.8125rem !important;
+    color: var(--pan-text) !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: var(--pan-space-1) 0 !important;
+
+    &::placeholder {
+      color: var(--pan-text-secondary) !important;
+    }
+
+    &:focus {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+  }
+}
+
+// ─── Search facets (active filter pills) ─────────────────────────────────────
+
+.o_searchview_facet {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: var(--pan-space-1) !important;
+  background-color: rgba(155, 153, 255, 0.1) !important;
+  border: 1px solid rgba(155, 153, 255, 0.3) !important;
+  color: var(--pan-accent) !important;
+  border-radius: var(--pan-radius-sm) !important;
+  font-family: var(--pan-font-body) !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  padding: 0.125rem var(--pan-space-2) !important;
+  line-height: 1.5 !important;
+
+  .o_facet_remove {
+    color: var(--pan-accent) !important;
+    opacity: 0.7 !important;
+    cursor: pointer !important;
+
+    &:hover {
+      opacity: 1 !important;
+    }
+  }
+}
+
+// ─── View switcher ────────────────────────────────────────────────────────────
+
+.o_cp_switch_buttons {
+  .o_switch_view {
+    font-size: 0.875rem !important;
+    border: 1px solid var(--pan-border) !important;
+    background: transparent !important;
+    color: var(--pan-text-secondary) !important;
+    padding: var(--pan-space-1) var(--pan-space-2) !important;
+    line-height: 1 !important;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease !important;
+    box-shadow: none !important;
+
+    &:hover {
+      background-color: var(--pan-border) !important;
+      color: var(--pan-text) !important;
+      border-color: var(--pan-border-strong) !important;
+    }
+
+    &.active {
+      background-color: rgba(155, 153, 255, 0.12) !important;
+      color: var(--pan-accent) !important;
+      border-color: rgba(155, 153, 255, 0.3) !important;
+    }
+  }
+}

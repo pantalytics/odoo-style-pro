@@ -1,0 +1,269 @@
+// Pantalytics kanban view overrides
+
+// ─── Board container ──────────────────────────────────────────────────────────
+
+.o_kanban_view {
+  gap: var(--pan-space-3) !important;
+}
+
+
+// ─── Column / group ───────────────────────────────────────────────────────────
+
+.o_kanban_group {
+  background-color: rgba(0, 0, 0, 0.025) !important;
+  border: 1px solid var(--pan-border) !important;
+  border-radius: var(--pan-radius-lg) !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+
+  // Cards inside — geen extra horizontale margin, kolom padding regelt spacing
+  .o_kanban_record {
+    margin: 0 var(--pan-space-2) var(--pan-space-2) !important;
+    width: calc(100% - var(--pan-space-4)) !important;
+
+    &:first-of-type {
+      margin-top: var(--pan-space-2) !important;
+    }
+  }
+}
+
+// ─── Column header ────────────────────────────────────────────────────────────
+
+.o_kanban_header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: var(--pan-space-3) var(--pan-space-3) var(--pan-space-2) !important;
+  border-bottom: 1px solid var(--pan-border) !important;
+  gap: var(--pan-space-2) !important;
+}
+
+.o_kanban_header_title {
+  display: flex !important;
+  align-items: center !important;
+  gap: var(--pan-space-2) !important;
+  font-family: var(--pan-font-body) !important;
+  font-size: 0.8125rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.01em !important;
+  color: var(--pan-text) !important;
+  flex: 1 !important;
+  min-width: 0 !important;
+
+  // Column title text — truncate gracefully
+  .o_column_title {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  // Record count badge
+  .o_kanban_counter,
+  .o_record_selector,
+  span.o_kanban_group_count {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 1.25rem !important;
+    height: 1.25rem !important;
+    padding: 0 0.3rem !important;
+    background-color: var(--pan-border) !important;
+    border-radius: var(--pan-radius-sm) !important;
+    font-size: 0.6875rem !important;
+    font-weight: 600 !important;
+    color: var(--pan-text-secondary) !important;
+    flex-shrink: 0 !important;
+  }
+}
+
+// Header action buttons (quick-add, kebab menu)
+.o_kanban_header .o_kanban_quick_add,
+.o_kanban_header .o_column_unfold,
+.o_kanban_header .o_kanban_header_button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+  border-radius: var(--pan-radius-sm) !important;
+  color: var(--pan-text-secondary) !important;
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: background-color 0.12s ease, color 0.12s ease !important;
+  flex-shrink: 0 !important;
+
+  &:hover {
+    background-color: var(--pan-border) !important;
+    color: var(--pan-text) !important;
+  }
+}
+
+// ─── Progress bar ─────────────────────────────────────────────────────────────
+
+.o_column_progress {
+  padding: 0 var(--pan-space-3) var(--pan-space-2) !important;
+
+  .o_progress {
+    height: 3px !important;
+    border-radius: 99px !important;
+    background-color: var(--pan-border) !important;
+    overflow: hidden !important;
+  }
+
+  .o_progress_bar,
+  .progress-bar {
+    background-color: var(--pan-accent) !important;
+    border-radius: 99px !important;
+    transition: width 0.3s ease !important;
+  }
+}
+
+// ─── Load more ────────────────────────────────────────────────────────────────
+
+.o_kanban_load_more {
+  display: block !important;
+  width: 100% !important;
+  padding: var(--pan-space-2) var(--pan-space-3) !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  color: var(--pan-text-secondary) !important;
+  text-align: center !important;
+  background: transparent !important;
+  border: none !important;
+  border-top: 1px solid var(--pan-border) !important;
+  cursor: pointer !important;
+  transition: color 0.12s ease, background-color 0.12s ease !important;
+
+  &:hover {
+    color: var(--pan-text) !important;
+    background-color: var(--pan-border) !important;
+    text-decoration: none !important;
+  }
+}
+
+// ─── Empty column state ───────────────────────────────────────────────────────
+
+.o_kanban_group_show_empty {
+  .o_kanban_no_results {
+    padding: var(--pan-space-4) var(--pan-space-3) !important;
+    text-align: center !important;
+    color: var(--pan-text-secondary) !important;
+    font-size: 0.8125rem !important;
+  }
+}
+
+// ─── Quick-create form ────────────────────────────────────────────────────────
+
+.o_kanban_quick_create {
+  margin: var(--pan-space-2) var(--pan-space-3) var(--pan-space-3) !important;
+  border: 1px solid var(--pan-border) !important;
+  border-top: 2px solid var(--pan-accent) !important;
+  border-radius: var(--pan-radius-lg) !important;
+  box-shadow: var(--pan-shadow-sm) !important;
+  padding: var(--pan-space-3) !important;
+
+  // Inputs inside quick-create inherit global input styles;
+  // just tighten spacing
+  .o_field_widget,
+  .o_input {
+    margin-bottom: var(--pan-space-2) !important;
+  }
+
+  // Action buttons row
+  .o_kanban_add,
+  .o_kanban_edit,
+  .o_kanban_discard {
+    border-radius: var(--pan-radius-md) !important;
+    font-size: 0.8125rem !important;
+    font-weight: 500 !important;
+    padding: var(--pan-space-1) var(--pan-space-3) !important;
+    transition: background-color 0.12s ease, border-color 0.12s ease !important;
+  }
+
+  .o_kanban_add {
+    background-color: var(--pan-accent) !important;
+    border-color: var(--pan-accent) !important;
+    color: #ffffff !important;
+
+    &:hover {
+      background-color: var(--pan-accent-hover) !important;
+      border-color: var(--pan-accent-hover) !important;
+    }
+  }
+
+  .o_kanban_discard {
+    background: transparent !important;
+    border-color: var(--pan-border-strong) !important;
+    color: var(--pan-text-secondary) !important;
+
+    &:hover {
+      border-color: var(--pan-border-strong) !important;
+      color: var(--pan-text) !important;
+      background-color: var(--pan-border) !important;
+    }
+  }
+}
+
+// ─── "Add a column" panel ─────────────────────────────────────────────────────
+
+.o_kanban_add_column {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 200px !important;
+  max-width: 220px !important;
+  min-height: 80px !important;
+  padding: var(--pan-space-4) var(--pan-space-3) !important;
+  background-color: transparent !important;
+  border: 1.5px dashed var(--pan-border-strong) !important;
+  border-radius: var(--pan-radius-lg) !important;
+  color: var(--pan-text-secondary) !important;
+  font-size: 0.8125rem !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease !important;
+  align-self: flex-start !important;
+
+  // Icon if present
+  i,
+  .fa {
+    margin-bottom: var(--pan-space-1) !important;
+    font-size: 1rem !important;
+    color: var(--pan-text-secondary) !important;
+    transition: color 0.15s ease !important;
+  }
+
+  &:hover {
+    border-color: var(--pan-accent) !important;
+    color: var(--pan-accent) !important;
+    background-color: rgba(155, 153, 255, 0.04) !important;
+
+    i,
+    .fa {
+      color: var(--pan-accent) !important;
+    }
+  }
+
+  // Inline input shown when user clicks "Add a column"
+  .o_kanban_add_column_form {
+    width: 100% !important;
+
+    input {
+      border-radius: var(--pan-radius-md) !important;
+      border: 1px solid var(--pan-border-strong) !important;
+      padding: var(--pan-space-1) var(--pan-space-2) !important;
+      font-size: 0.8125rem !important;
+      width: 100% !important;
+      margin-bottom: var(--pan-space-2) !important;
+
+      &:focus {
+        border-color: var(--pan-accent) !important;
+        box-shadow: 0 0 0 3px rgba(155, 153, 255, 0.2) !important;
+        outline: none !important;
+      }
+    }
+  }
+}
