@@ -9,6 +9,7 @@
   box-shadow: var(--pan-shadow-md) !important;
   padding: var(--pan-space-1) !important;
   min-width: 11rem !important;
+  overflow: visible !important;
 }
 
 // ─── Dropdown items ───────────────────────────────────────────────────────────
@@ -16,7 +17,6 @@
 .dropdown-item,
 .o_dropdown_menu .o_dropdown_item {
   border-radius: var(--pan-radius-md) !important;
-  padding: var(--pan-space-1) var(--pan-space-2) !important;
   color: var(--pan-text) !important;
   font-size: 0.875rem !important;
   line-height: 1.5 !important;

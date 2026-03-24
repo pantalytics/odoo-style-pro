@@ -4,7 +4,7 @@
 
 .o_control_panel {
   border-bottom: 1px solid var(--pan-border) !important;
-  background: transparent !important;
+  background-color: var(--pan-bg, #ffffff) !important;
   box-shadow: none !important;
 
   // ─── Breadcrumb ─────────────────────────────────────────────────────────────
