@@ -9,6 +9,10 @@
   box-shadow: var(--pan-shadow-md) !important;
   padding: var(--pan-space-1) !important;
   min-width: 11rem !important;
+}
+
+// Statusbar dropdown needs overflow visible for checkmarks
+.o_statusbar_status .dropdown-menu {
   overflow: visible !important;
 }
 
