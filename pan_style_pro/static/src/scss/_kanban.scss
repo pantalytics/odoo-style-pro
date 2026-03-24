@@ -28,6 +28,38 @@
   }
 }
 
+// ─── Folded column ───────────────────────────────────────────────────────────
+// Vercel-style: thin vertical strip with rotated title, click to unfold
+
+.o_kanban_group.o_column_folded {
+  background-color: rgba(0, 0, 0, 0.015) !important;
+  border: 1px solid var(--pan-border) !important;
+  border-radius: var(--pan-radius-lg) !important;
+  overflow: visible !important;
+  cursor: col-resize !important;
+  transition: background-color 0.15s ease !important;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04) !important;
+  }
+
+  .o_kanban_header {
+    border-bottom: none !important;
+  }
+
+  .o_column_title {
+    white-space: nowrap !important;
+  }
+
+  .o_column_unfold {
+    color: var(--pan-text-secondary) !important;
+
+    &:hover {
+      color: var(--pan-text) !important;
+    }
+  }
+}
+
 // ─── Column header ────────────────────────────────────────────────────────────
 
 .o_kanban_header {
