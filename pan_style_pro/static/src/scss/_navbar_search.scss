@@ -1,5 +1,10 @@
 // Pantalytics navbar search bar — opens command palette
 
+// Hide on home screen (home screen has its own search bar)
+.o_home_menu_background .pan-navbar-search {
+  display: none !important;
+}
+
 .pan-navbar-search {
   max-width: 240px;
   width: 100%;
