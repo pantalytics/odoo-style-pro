@@ -1,0 +1,208 @@
+// Pantalytics Community home menu — full-screen app launcher
+// Uses Odoo's action system (like Enterprise) — replaces content area, not an overlay
+
+// ─── Background (applied on body when home menu is active) ─────────────────
+
+.o_home_menu_background {
+  background-image: none !important;
+  background-color: var(--pan-bg-secondary, #f5f5f5) !important;
+
+  // Navbar border on home screen
+  &:not(.o_home_menu_background_custom):not(.o_in_studio) .o_main_navbar {
+    border-bottom: 1px solid var(--pan-border) !important;
+  }
+}
+
+// ─── Home menu container ───────────────────────────────────────────────────
+
+.o_home_menu {
+  font-size: 1rem;
+  scrollbar-color: rgba(155, 153, 255, 0.3) transparent;
+  padding-top: 2rem;
+}
+
+.pan-home-menu-container {
+  width: 100%;
+  max-width: 850px; // matches Enterprise $o-home-menu-container-size
+  padding: 0 1rem;
+}
+
+// ─── Search bar ────────────────────────────────────────────────────────────
+
+.o_home_menu .pan-home-search {
+  max-width: 480px;
+  width: 100%;
+}
+
+.o_home_menu .pan-home-search-box {
+  background: var(--pan-bg, #ffffff);
+  border: 1px solid var(--pan-border-strong, rgba(0, 0, 0, 0.15));
+  border-radius: var(--pan-radius-lg);
+  padding: var(--pan-space-3, 0.75rem) var(--pan-space-4, 1rem);
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  font-size: 0.875rem;
+  color: var(--pan-text-secondary);
+  box-shadow: var(--pan-shadow-sm);
+
+  &:hover {
+    border-color: var(--pan-accent);
+    box-shadow: var(--pan-shadow-md);
+  }
+}
+
+.o_home_menu .pan-home-search-shortcut {
+  display: flex;
+  gap: 3px;
+
+  kbd {
+    background: var(--pan-bg, #ffffff);
+    border: 1px solid var(--pan-border, rgba(0, 0, 0, 0.08));
+    border-radius: var(--pan-radius-sm);
+    padding: 1px 6px;
+    font-size: 0.75rem;
+    font-family: inherit;
+    color: var(--pan-text-secondary);
+    box-shadow: var(--pan-shadow-xs);
+    line-height: 1.5;
+  }
+}
+
+// ─── App grid ──────────────────────────────────────────────────────────────
+// Enterprise uses col-3 col-md-2 (6 per row on desktop)
+
+// Use flexbox (not CSS grid) — required for useSortable drag-and-drop
+.pan-home-apps {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  margin-top: 2rem;
+  user-select: none;
+}
+
+.o_draggable {
+  width: calc(100% / 6);
+  display: flex;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+  padding: 0;
+
+  @media (max-width: 768px) {
+    width: 25%;
+  }
+
+  @media (max-width: 576px) {
+    width: calc(100% / 3);
+  }
+}
+
+.pan-home-app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border-radius: var(--pan-radius-lg);
+  text-decoration: none !important;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  width: 100%;
+
+  &:hover {
+    .pan-home-app-icon {
+      box-shadow:
+        0 2px 2px rgba(0, 0, 0, 0.03),
+        0 4px 4px rgba(0, 0, 0, 0.03),
+        0 8px 8px rgba(0, 0, 0, 0.03),
+        0 12px 12px rgba(0, 0, 0, 0.03),
+        0 24px 24px rgba(0, 0, 0, 0.03);
+      transform: translateY(-2px);
+    }
+  }
+
+  &:active .pan-home-app-icon {
+    transform: translateY(-2px) scale(0.98);
+    transition: none;
+  }
+
+  // Keyboard focus
+  &.o_focused {
+    background: rgba(155, 153, 255, 0.08);
+    outline: 2px solid var(--pan-accent);
+    outline-offset: -2px;
+    border-radius: var(--pan-radius-lg);
+  }
+}
+
+.pan-home-app-icon {
+  width: 70px;  // matches Enterprise $o-home-menu-app-icon-max-width
+  height: 70px;
+  padding: 10px; // matches Enterprise $o-home-menu-app-icon-padding
+  border-radius: var(--pan-radius-lg);
+  object-fit: contain;
+  background-color: #ffffff;
+  transform-origin: center bottom;
+  transition: box-shadow ease-in 0.1s, transform ease-in 0.1s;
+  box-shadow:
+    0 1px 1px rgba(0, 0, 0, 0.02),
+    0 2px 2px rgba(0, 0, 0, 0.02),
+    0 4px 4px rgba(0, 0, 0, 0.02),
+    0 8px 8px rgba(0, 0, 0, 0.02),
+    0 16px 16px rgba(0, 0, 0, 0.02);
+}
+
+.pan-home-app-icon-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--pan-accent);
+  color: white;
+  font-size: 1.75rem;
+  padding: 10px;
+}
+
+.pan-home-app-name {
+  font-family: var(--pan-font-body);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--pan-text);
+  text-align: center;
+  line-height: 1.3;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-top: 0.25rem;
+}
+
+// ─── Drag and drop ─────────────────────────────────────────────────────────
+
+.o_dragged_app {
+  transition: transform 0.5s;
+  transform: rotate(6deg);
+
+  .pan-home-app-icon {
+    box-shadow: 0 8px 15px -10px black;
+    transform: translateY(-1px);
+  }
+}
+
+// ─── Menu toggle button styling ────────────────────────────────────────────
+
+.o_navbar_apps_menu .o_menu_toggle {
+  background: transparent;
+  border: none;
+  padding: var(--pan-space-2);
+  border-radius: var(--pan-radius-md);
+  color: var(--pan-text) !important;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+
+  .oi-apps {
+    font-size: 1.25rem;
+  }
+}

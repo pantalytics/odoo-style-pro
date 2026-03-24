@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
 
-    <!-- Add visible search bar to home menu -->
+    <!-- Add visible search bar, context menu, and hidden apps section to home menu -->
     <t t-name="pan_style_pro_enterprise.HomeMenu" t-inherit="web_enterprise.HomeMenu" t-inherit-mode="extension">
+        <!-- Search bar after hidden input -->
         <xpath expr="//input[hasclass('o_search_hidden')]" position="after">
             <div class="pan-home-search mx-auto mt-4 mb-2">
                 <div class="pan-home-search-box d-flex align-items-center" t-on-click="() => this._onSearchBarClick()">
@@ -12,6 +13,56 @@
                         <kbd>⌘</kbd><kbd>K</kbd>
                     </span>
                 </div>
+            </div>
+        </xpath>
+
+        <!-- Add right-click handler to each app -->
+        <xpath expr="//a[hasclass('o_app')]" position="attributes">
+            <attribute name="t-on-contextmenu">(ev) => this.onAppContextMenu(app, ev)</attribute>
+        </xpath>
+
+        <!-- Add hidden apps toggle + grid + context menu after the apps grid -->
+        <xpath expr="//div[hasclass('o_apps')]" position="after">
+            <!-- Hidden apps toggle -->
+            <t t-set="_hiddenApps" t-value="hiddenApps"/>
+            <div t-if="_hiddenApps.length" class="pan-hidden-apps-toggle">
+                <button class="pan-hidden-apps-btn" t-on-click="toggleHiddenApps">
+                    <i t-attf-class="fa {{ state.showHiddenApps ? 'fa-eye' : 'fa-eye-slash' }} me-2"/>
+                    <span t-esc="_hiddenApps.length"/>
+                    <span> hidden app(s)</span>
+                    <i t-attf-class="fa {{ state.showHiddenApps ? 'fa-chevron-up' : 'fa-chevron-down' }} ms-2"/>
+                </button>
+            </div>
+
+            <!-- Hidden apps grid (dimmed) -->
+            <div t-if="_hiddenApps.length and state.showHiddenApps" class="o_apps row user-select-none mx-0 pan-home-apps-hidden">
+                <div t-foreach="_hiddenApps" t-as="app" t-key="app.id" class="col-3 col-md-2 mb-3 px-0">
+                    <div class="o_app d-flex flex-column rounded-3 justify-content-start align-items-center w-100 p-1 p-md-2 pan-home-app-dimmed">
+                        <div class="pan-home-app-icon-wrapper">
+                            <img t-if="app.webIconData" class="o_app_icon rounded-3"
+                                t-attf-src="{{app.webIconData}}"/>
+                            <div t-else="" class="o_app_icon position-relative d-flex justify-content-center align-items-center p-2 rounded-3 ratio ratio-1x1"
+                                t-attf-style="background-color: {{app.webIcon.backgroundColor}};">
+                                <i t-attf-class="{{app.webIcon.iconClass}} position-relative w-auto h-auto" t-attf-style="color: {{app.webIcon.color}};"/>
+                            </div>
+                            <button class="pan-unhide-btn" t-on-click="() => this.showApp(app)"
+                                    title="Show app">
+                                <i class="fa fa-eye"/>
+                            </button>
+                        </div>
+                        <div class="o_caption w-100 text-center text-truncate mt-2" t-esc="app.label or app.name"/>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+
+        <!-- Context menu (inside the root div) -->
+        <xpath expr="//div[hasclass('o_home_menu')]/div[hasclass('container')]" position="after">
+            <div t-if="state.contextMenu.visible" class="pan-context-menu"
+                 t-attf-style="left: {{ state.contextMenu.x }}px; top: {{ state.contextMenu.y }}px;">
+                <button class="pan-context-menu-item" t-on-click="() => this.hideApp(state.contextMenu.app)">
+                    <i class="fa fa-eye-slash me-2"/>Hide app
+                </button>
             </div>
         </xpath>
     </t>

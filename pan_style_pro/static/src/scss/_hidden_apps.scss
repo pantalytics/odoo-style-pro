@@ -1,0 +1,137 @@
+// Pantalytics — hide/show apps feature (shared styles)
+
+// ─── Context menu ───────────────────────────────────────────────────────────
+
+.pan-context-menu {
+  position: fixed;
+  z-index: 1060;
+  background: var(--pan-bg, #ffffff);
+  border: 1px solid var(--pan-border-strong, rgba(0, 0, 0, 0.15));
+  border-radius: var(--pan-radius-md);
+  box-shadow: var(--pan-shadow-lg);
+  padding: var(--pan-space-1) 0;
+  min-width: 160px;
+  animation: pan-context-fade-in 0.1s ease-out;
+}
+
+@keyframes pan-context-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.pan-context-menu-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: var(--pan-space-2) var(--pan-space-3);
+  border: none;
+  background: none;
+  font-family: var(--pan-font-body);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--pan-text);
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+
+  &:hover {
+    background-color: var(--pan-bg-secondary, rgba(0, 0, 0, 0.04));
+  }
+
+  .fa {
+    width: 16px;
+    text-align: center;
+    color: var(--pan-text-secondary);
+  }
+}
+
+// ─── Hidden apps toggle ─────────────────────────────────────────────────────
+
+.pan-hidden-apps-toggle {
+  display: flex;
+  justify-content: center;
+  padding: var(--pan-space-4) 0 var(--pan-space-2);
+}
+
+.pan-hidden-apps-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--pan-space-2) var(--pan-space-3);
+  border: 1px solid var(--pan-border, rgba(0, 0, 0, 0.08));
+  border-radius: var(--pan-radius-md);
+  background: var(--pan-bg, #ffffff);
+  font-family: var(--pan-font-body);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--pan-text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    border-color: var(--pan-border-strong);
+    color: var(--pan-text);
+    box-shadow: var(--pan-shadow-sm);
+  }
+
+  .fa {
+    font-size: 0.75rem;
+  }
+}
+
+// ─── Dimmed (hidden) app state ──────────────────────────────────────────────
+
+.pan-home-apps-hidden {
+  margin-top: var(--pan-space-2);
+}
+
+.pan-home-app-dimmed {
+  opacity: 0.45;
+  transition: opacity 0.15s ease;
+
+  &:hover {
+    opacity: 0.7;
+  }
+}
+
+// ─── Unhide button overlay ──────────────────────────────────────────────────
+
+.pan-home-app-icon-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.pan-unhide-btn {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--pan-border-strong, rgba(0, 0, 0, 0.15));
+  border-radius: 50%;
+  background: var(--pan-bg, #ffffff);
+  color: var(--pan-text-secondary);
+  font-size: 0.625rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  box-shadow: var(--pan-shadow-sm);
+
+  .pan-home-app-dimmed:hover & {
+    opacity: 1;
+  }
+
+  &:hover {
+    background: var(--pan-accent);
+    border-color: var(--pan-accent);
+    color: #ffffff;
+    transform: scale(1.1);
+  }
+}

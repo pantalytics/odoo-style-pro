@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+    <!-- HomeMenuCommunity component template -->
+    <t t-name="pan_style_pro.HomeMenuCommunity">
+        <div class="o_home_menu h-100 overflow-auto">
+            <div class="pan-home-menu-container mx-auto">
+                <input t-ref="input" type="text" class="visually-hidden" t-on-input="_onInputSearch"
+                       autocomplete="off" data-allow-hotkeys="true"/>
+
+                <!-- Search bar -->
+                <div class="pan-home-search mx-auto mb-4">
+                    <div class="pan-home-search-box d-flex align-items-center"
+                         t-on-click="() => this.command.openMainPalette({ searchValue: '' })">
+                        <i class="fa fa-search me-3 opacity-50"/>
+                        <span class="opacity-50">Search apps, menus, settings...</span>
+                        <span class="pan-home-search-shortcut ms-auto">
+                            <kbd>&#x2318;</kbd><kbd>K</kbd>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Visible app grid -->
+                <div class="pan-home-apps" t-ref="root">
+                    <t t-foreach="visibleApps" t-as="app" t-key="app.id">
+                        <div class="o_draggable">
+                            <a class="pan-home-app"
+                               t-att-class="{ 'o_focused': state.focusedIndex === app_index }"
+                               t-att-href="getMenuItemHref(app)"
+                               t-att-data-menu-xmlid="app.xmlid"
+                               t-on-click.prevent="() => this._openApp(app)"
+                               t-on-contextmenu="(ev) => this.onAppContextMenu(app, ev)">
+                                <img t-if="app.webIconData" t-att-src="app.webIconData"
+                                     class="pan-home-app-icon" alt=""/>
+                                <div t-else="" class="pan-home-app-icon pan-home-app-icon-placeholder">
+                                    <i class="fa fa-cube"/>
+                                </div>
+                                <span class="pan-home-app-name" t-esc="app.name"/>
+                            </a>
+                        </div>
+                    </t>
+                </div>
+
+                <!-- Hidden apps toggle -->
+                <div t-if="hiddenApps.length" class="pan-hidden-apps-toggle">
+                    <button class="pan-hidden-apps-btn" t-on-click="toggleHiddenApps">
+                        <i t-attf-class="fa {{ state.showHiddenApps ? 'fa-eye' : 'fa-eye-slash' }} me-2"/>
+                        <span t-esc="hiddenApps.length"/>
+                        <span> hidden app(s)</span>
+                        <i t-attf-class="fa {{ state.showHiddenApps ? 'fa-chevron-up' : 'fa-chevron-down' }} ms-2"/>
+                    </button>
+                </div>
+
+                <!-- Hidden apps grid (dimmed) -->
+                <div t-if="hiddenApps.length and state.showHiddenApps" class="pan-home-apps pan-home-apps-hidden">
+                    <t t-foreach="hiddenApps" t-as="app" t-key="app.id">
+                        <div class="pan-home-app pan-home-app-dimmed">
+                            <div class="pan-home-app-icon-wrapper">
+                                <img t-if="app.webIconData" t-att-src="app.webIconData"
+                                     class="pan-home-app-icon" alt=""/>
+                                <div t-else="" class="pan-home-app-icon pan-home-app-icon-placeholder">
+                                    <i class="fa fa-cube"/>
+                                </div>
+                                <button class="pan-unhide-btn" t-on-click="() => this.showApp(app)"
+                                        title="Show app">
+                                    <i class="fa fa-eye"/>
+                                </button>
+                            </div>
+                            <span class="pan-home-app-name" t-esc="app.name"/>
+                        </div>
+                    </t>
+                </div>
+
+                <!-- Context menu -->
+                <div t-if="state.contextMenu.visible" class="pan-context-menu"
+                     t-attf-style="left: {{ state.contextMenu.x }}px; top: {{ state.contextMenu.y }}px;">
+                    <button class="pan-context-menu-item" t-on-click="() => this.hideApp(state.contextMenu.app)">
+                        <i class="fa fa-eye-slash me-2"/>Hide app
+                    </button>
+                </div>
+            </div>
+        </div>
+    </t>
+
+    <!-- Override NavBar.AppsMenu: replace Dropdown with grid icon that toggles home menu service -->
+    <t t-name="pan_style_pro.AppsMenuCommunity" t-inherit="web.NavBar.AppsMenu" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('o_navbar_apps_menu')]/Dropdown" position="replace">
+            <button class="o_menu_toggle border-0 bg-transparent" title="Home Menu"
+                    t-on-click.prevent="() => this.env.services['home_menu'] &amp;&amp; this.env.services['home_menu'].toggle()">
+                <i class="oi oi-apps"/>
+            </button>
+        </xpath>
+    </t>
+
+</templates>
