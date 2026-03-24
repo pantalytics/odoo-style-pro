@@ -7,11 +7,8 @@
         <xpath expr="//input[hasclass('o_search_hidden')]" position="after">
             <div class="pan-home-search mx-auto mt-4 mb-2">
                 <div class="pan-home-search-box d-flex align-items-center" t-on-click="() => this._onSearchBarClick()">
-                    <i class="fa fa-search me-3 opacity-50"/>
-                    <span class="opacity-50">Search apps, menus, settings…</span>
-                    <span class="pan-home-search-shortcut ms-auto">
-                        <kbd>⌘</kbd><kbd>K</kbd>
-                    </span>
+                    <i class="fa fa-search me-2 opacity-50"/>
+                    <span class="opacity-50">Search</span>
                 </div>
             </div>
         </xpath>

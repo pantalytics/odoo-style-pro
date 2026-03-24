@@ -51,23 +51,6 @@
   }
 }
 
-.o_home_menu .pan-home-search-shortcut {
-  display: flex;
-  gap: 3px;
-
-  kbd {
-    background: var(--pan-bg, #ffffff);
-    border: 1px solid var(--pan-border, rgba(0, 0, 0, 0.08));
-    border-radius: var(--pan-radius-sm);
-    padding: 1px 6px;
-    font-size: 0.75rem;
-    font-family: inherit;
-    color: var(--pan-text-secondary);
-    box-shadow: var(--pan-shadow-xs);
-    line-height: 1.5;
-  }
-}
-
 // ─── App grid ──────────────────────────────────────────────────────────────
 // Enterprise uses col-3 col-md-2 (6 per row on desktop)
 
