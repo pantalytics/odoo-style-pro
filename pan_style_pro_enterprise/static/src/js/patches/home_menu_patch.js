@@ -34,6 +34,7 @@ patch(HomeMenu.prototype, {
     },
 
     async hideApp(app) {
+        if (!app) return;
         const hidden = this._getHiddenAppXmlids();
         if (!hidden.includes(app.xmlid)) {
             hidden.push(app.xmlid);
@@ -59,11 +60,14 @@ patch(HomeMenu.prototype, {
             y: ev.clientY,
             app,
         };
-        const close = () => {
+        const close = (e) => {
+            if (e.target.closest && e.target.closest(".pan-context-menu")) return;
             this._closeContextMenu();
-            document.removeEventListener("click", close, true);
+            document.removeEventListener("mousedown", close, true);
         };
-        document.addEventListener("click", close, true);
+        setTimeout(() => {
+            document.addEventListener("mousedown", close, true);
+        }, 0);
     },
 
     _closeContextMenu() {
