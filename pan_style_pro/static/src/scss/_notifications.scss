@@ -55,16 +55,12 @@ $pan-color-danger  : #ef4444;
   }
 
   .o_notification_close {
-    color: var(--pan-text-secondary) !important;
     opacity: 0.6 !important;
     transition: opacity 0.15s ease !important;
-    background: transparent !important;
     border: none !important;
-    padding: 0 !important;
 
     &:hover {
       opacity: 1 !important;
-      color: var(--pan-text) !important;
     }
   }
 
