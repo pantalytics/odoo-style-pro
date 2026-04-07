@@ -1,5 +1,37 @@
 // Pantalytics chatter overrides
-// Styles the mail chatter: topbar, messages, composer, followers
+// Styles the mail chatter: topbar, messages, composer, followers, resize handle
+
+// ─── Chatter resize handle ─────────────────────────────────────────────────
+
+.pan-chatter-resize-handle {
+  width: 7px;
+  cursor: col-resize;
+  flex-shrink: 0;
+  align-self: stretch;
+  position: relative;
+  transition: background-color 0.2s;
+
+  // Subtle separator line (always visible)
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 3px;
+    width: 1px;
+    background-color: var(--pan-border);
+    transition: background-color 0.2s, width 0.2s;
+  }
+
+  &:hover,
+  &:active {
+    &::before {
+      width: 3px;
+      left: 2px;
+      background-color: var(--pan-accent);
+    }
+  }
+}
 
 // ─── Chatter topbar ─────────────────────────────────────────────────────────
 
