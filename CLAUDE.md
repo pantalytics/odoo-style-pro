@@ -6,12 +6,14 @@
 
 Gives Odoo a modern, consumer-grade look and feel (think Linear/Vercel) using the Pantalytics brand. Two Odoo modules: `pan_style_pro` (Community-compatible base) and `pan_style_pro_enterprise` (auto-install bridge for Enterprise features).
 
-## Brand tokens (source of truth: `pantalytics-website/src/styles/global.css`)
+## Brand tokens (source of truth: `pantalytics-brand/src/pages/kleuren.astro`)
 
-- **Accent:** `#9b99ff` / hover `#7370ff`
+- **Light accent:** `#5b58d8` / hover `#4a47c4` (WCAG AA on white)
+- **Dark accent:** `#9b99ff` / hover `#7370ff`
+- **Light bg:** `#ffffff` / secondary `#f4f5f7`
 - **Dark bg:** `#001d21` / secondary `#002328`
-- **Light bg:** `#ffffff` / secondary `#f5f5f5`
-- **Text dark:** `#001d21` | **Text light:** `#ffffff`
+- **Text dark-on-light:** `#001d21` / secondary `rgba(0,29,33,0.6)`
+- **Text light-on-dark:** `#ffffff` / secondary `rgba(255,255,255,0.6)`
 - **Heading font:** Lexend 500
 - **Body font:** Instrument Sans 400–700
 - **Prefix all tokens with:** `--pan-`

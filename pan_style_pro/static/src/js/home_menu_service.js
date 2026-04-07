@@ -7,12 +7,8 @@ import { Mutex } from "@web/core/utils/concurrency";
 import { WebClient } from "@web/webclient/webclient";
 import { patch } from "@web/core/utils/patch";
 
-// Only register if Enterprise's home menu is NOT available
-const isEnterprise = odoo.loader.modules.has(
-    "@web_enterprise/webclient/home_menu/home_menu"
-);
-
-if (!isEnterprise) {
+// Community-only home menu — removed from bundle by pan_style_pro_enterprise
+{
     // Register the HomeMenu as an action component (type "menu")
     class HomeMenuAction extends Component {
         static template = xml`<HomeMenuCommunity apps="props.apps" />`;

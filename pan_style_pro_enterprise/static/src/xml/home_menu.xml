@@ -34,32 +34,36 @@
             <!-- Hidden apps grid (dimmed) -->
             <div t-if="_hiddenApps.length and state.showHiddenApps" class="o_apps row user-select-none mx-0 pan-home-apps-hidden">
                 <div t-foreach="_hiddenApps" t-as="app" t-key="app.id" class="col-3 col-md-2 mb-3 px-0">
-                    <div class="o_app d-flex flex-column rounded-3 justify-content-start align-items-center w-100 p-1 p-md-2 pan-home-app-dimmed">
-                        <div class="pan-home-app-icon-wrapper">
-                            <img t-if="app.webIconData" class="o_app_icon rounded-3"
-                                t-attf-src="{{app.webIconData}}"/>
-                            <div t-else="" class="o_app_icon position-relative d-flex justify-content-center align-items-center p-2 rounded-3 ratio ratio-1x1"
-                                t-attf-style="background-color: {{app.webIcon.backgroundColor}};">
-                                <i t-attf-class="{{app.webIcon.iconClass}} position-relative w-auto h-auto" t-attf-style="color: {{app.webIcon.color}};"/>
-                            </div>
-                            <button class="pan-unhide-btn" t-on-click="() => this.showApp(app)"
-                                    title="Show app">
-                                <i class="fa fa-eye"/>
-                            </button>
+                    <a class="o_app o_menuitem d-flex flex-column rounded-3 justify-content-start align-items-center w-100 p-1 p-md-2 pan-home-app-dimmed"
+                       t-att-href="app.href"
+                       t-on-click.prevent="() => this._onAppClick(app)"
+                       t-on-contextmenu="(ev) => this.onAppContextMenu(app, ev)">
+                        <img t-if="app.webIconData" class="o_app_icon rounded-3"
+                            t-attf-src="{{app.webIconData}}"/>
+                        <div t-else="" class="o_app_icon position-relative d-flex justify-content-center align-items-center p-2 rounded-3 ratio ratio-1x1"
+                            t-attf-style="background-color: {{app.webIcon.backgroundColor}};">
+                            <i t-attf-class="{{app.webIcon.iconClass}} position-relative w-auto h-auto" t-attf-style="color: {{app.webIcon.color}};"/>
                         </div>
                         <div class="o_caption w-100 text-center text-truncate mt-2" t-esc="app.label or app.name"/>
-                    </div>
+                    </a>
                 </div>
             </div>
         </xpath>
 
-        <!-- Context menu (inside the root div) -->
+        <!-- Context menu (inside the root div) — dynamic Hide/Show -->
         <xpath expr="//div[hasclass('o_home_menu')]/div[hasclass('container')]" position="after">
             <div t-if="state.contextMenu.visible" class="pan-context-menu"
                  t-attf-style="left: {{ state.contextMenu.x }}px; top: {{ state.contextMenu.y }}px;">
-                <button class="pan-context-menu-item" t-on-click="() => this.hideApp(state.contextMenu.app)">
-                    <i class="fa fa-eye-slash me-2"/>Hide app
-                </button>
+                <t t-if="_isAppHidden(state.contextMenu.app)">
+                    <button class="pan-context-menu-item" t-on-click="() => this.showApp(state.contextMenu.app)">
+                        <i class="fa fa-eye me-2"/>Show app
+                    </button>
+                </t>
+                <t t-else="">
+                    <button class="pan-context-menu-item" t-on-click="() => this.hideApp(state.contextMenu.app)">
+                        <i class="fa fa-eye-slash me-2"/>Hide app
+                    </button>
+                </t>
             </div>
         </xpath>
     </t>

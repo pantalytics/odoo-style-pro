@@ -151,3 +151,111 @@
   border-bottom: 1px solid var(--pan-border) !important;
   margin-bottom: 0 !important;
 }
+
+// ─── Pantalytics Style settings — color list ────────────────────────────────
+
+.pan-color-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.pan-color-row {
+  display: grid;
+  grid-template-columns: 120px 1fr 1fr;
+  align-items: center;
+  gap: var(--pan-space-3);
+  padding: var(--pan-space-2) 0;
+
+  label,
+  .pan-color-label {
+    font-size: 0.8125rem !important;
+    font-weight: 500 !important;
+    color: var(--pan-text) !important;
+    margin: 0 !important;
+  }
+
+  .o_field_color .o_color_pill {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 50% !important;
+    border: 2px solid var(--pan-border-strong) !important;
+    box-shadow: var(--pan-shadow-sm) !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+    cursor: pointer;
+
+    &:hover {
+      transform: scale(1.1);
+      box-shadow: var(--pan-shadow-md) !important;
+    }
+  }
+
+  &--header {
+    border-bottom: 1px solid var(--pan-border);
+    padding-bottom: var(--pan-space-2);
+    margin-bottom: var(--pan-space-1);
+  }
+}
+
+.pan-color-col-header {
+  font-size: 0.6875rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pan-text-secondary) !important;
+}
+
+// ─── Fine-tuning list ────────────────────────────────────────────────────────
+
+.pan-fine-tune-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.pan-fine-tune-item {
+  display: grid;
+  grid-template-columns: 120px 1fr 1fr;
+  align-items: center;
+  gap: var(--pan-space-3);
+  padding: var(--pan-space-2) 0;
+
+  label,
+  .pan-fine-tune-label {
+    font-size: 0.8125rem !important;
+    font-weight: 500 !important;
+    color: var(--pan-text) !important;
+    margin: 0 !important;
+  }
+
+  input {
+    font-size: 0.8125rem !important;
+    font-family: "Fira Mono", monospace !important;
+    padding: var(--pan-space-1) var(--pan-space-2) !important;
+    border: 1px solid var(--pan-border-strong) !important;
+    border-radius: var(--pan-radius-md) !important;
+    background: var(--pan-bg) !important;
+    width: 100%;
+
+    &:focus {
+      border-color: var(--pan-accent) !important;
+      outline: none !important;
+      box-shadow: 0 0 0 3px rgba(155, 153, 255, 0.15) !important;
+    }
+  }
+
+  &--header {
+    border-bottom: 1px solid var(--pan-border);
+    padding-bottom: var(--pan-space-2);
+    margin-bottom: var(--pan-space-1);
+  }
+}
+
+.pan-fine-tune-col-header {
+  font-size: 0.6875rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pan-text-secondary) !important;
+}
+

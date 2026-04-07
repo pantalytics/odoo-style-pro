@@ -4,31 +4,52 @@
 // ─── Chatter resize handle ─────────────────────────────────────────────────
 
 .pan-chatter-resize-handle {
-  width: 7px;
+  width: 12px;
   cursor: col-resize;
   flex-shrink: 0;
   align-self: stretch;
   position: relative;
-  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-  // Subtle separator line (always visible)
+  // Thin separator line (always visible)
   &::before {
     content: "";
     position: absolute;
     top: 0;
     bottom: 0;
-    left: 3px;
+    left: 50%;
+    transform: translateX(-50%);
     width: 1px;
     background-color: var(--pan-border);
-    transition: background-color 0.2s, width 0.2s;
+    transition: background-color 0.2s;
+  }
+
+  // Pill indicator — solid, covers the line
+  &::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    width: 6px;
+    height: 28px;
+    border-radius: 6px;
+    background-color: var(--pan-bg, #ffffff);
+    border: 1px solid var(--pan-border);
+    transition: border-color 0.2s, height 0.2s;
   }
 
   &:hover,
   &:active {
     &::before {
-      width: 3px;
-      left: 2px;
       background-color: var(--pan-accent);
+    }
+    &::after {
+      border-color: var(--pan-accent);
+      height: 36px;
     }
   }
 }

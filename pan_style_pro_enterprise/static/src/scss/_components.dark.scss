@@ -1,0 +1,82 @@
+// Pantalytics component overrides — dark mode
+// Fixes hardcoded rgba(0,0,0,...) values that are invisible on dark backgrounds
+
+// ─── Navbar ──────────────────────────────────────────────────────────────────
+
+.o_main_navbar {
+  --NavBar-entry-backgroundColor--hover: rgba(255, 255, 255, 0.06);
+  --NavBar-entry-backgroundColor--focus: rgba(255, 255, 255, 0.06);
+  --NavBar-entry-backgroundColor--active: rgba(155, 153, 255, 0.15);
+
+  .o_nav_entry,
+  .o_menu_brand,
+  .dropdown-toggle {
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.06) !important;
+    }
+  }
+
+  .o_nav_entry.active,
+  .o_nav_entry[aria-expanded="true"] {
+    background-color: rgba(155, 153, 255, 0.15) !important;
+  }
+}
+
+// ─── Kanban columns ──────────────────────────────────────────────────────────
+
+.o_kanban_group {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+}
+
+.o_kanban_group.o_column_folded {
+  background-color: rgba(255, 255, 255, 0.02) !important;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+  }
+}
+
+// ─── Table row hover ─────────────────────────────────────────────────────────
+
+.o_list_table tbody tr:hover td {
+  background-color: rgba(155, 153, 255, 0.06) !important;
+}
+
+// ─── Modal close button ──────────────────────────────────────────────────────
+
+.modal-header .btn-close:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+// ─── Tag delete button ───────────────────────────────────────────────────────
+
+.o_tag .o_delete {
+  &:hover,
+  &:focus {
+    background-color: rgba(255, 255, 255, 0.12) !important;
+  }
+}
+
+// ─── Setting box hover ──────────────────────────────────────────────────────
+
+.o_setting_box:hover {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+}
+
+// ─── Menu toggle ─────────────────────────────────────────────────────────────
+
+.o_navbar_apps_menu .o_menu_toggle:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+// ─── Home menu app icons ─────────────────────────────────────────────────────
+
+.pan-home-app-icon {
+  background-color: var(--pan-bg-secondary) !important;
+}
+
+// ─── Context menu & hidden apps ──────────────────────────────────────────────
+
+.pan-context-menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+}

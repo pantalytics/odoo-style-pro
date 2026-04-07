@@ -9,9 +9,10 @@ patch(HomeMenu.prototype, {
         super.setup();
         this.state.showHiddenApps = false;
         this.state.contextMenu = { visible: false, x: 0, y: 0, app: null };
+        this.state.hiddenXmlids = this._parseHiddenXmlids();
     },
 
-    _getHiddenAppXmlids() {
+    _parseHiddenXmlids() {
         const raw = user.settings?.hidden_apps;
         if (!raw) return [];
         if (typeof raw === "string") {
@@ -21,11 +22,10 @@ patch(HomeMenu.prototype, {
     },
 
     _isAppHidden(app) {
-        return this._getHiddenAppXmlids().includes(app.xmlid);
+        return this.state.hiddenXmlids.includes(app.xmlid);
     },
 
     get displayedApps() {
-        // Override Enterprise's displayedApps to filter out hidden apps
         return this.props.apps.filter((app) => !this._isAppHidden(app));
     },
 
@@ -35,17 +35,21 @@ patch(HomeMenu.prototype, {
 
     async hideApp(app) {
         if (!app) return;
-        const hidden = this._getHiddenAppXmlids();
-        if (!hidden.includes(app.xmlid)) {
-            hidden.push(app.xmlid);
-            await user.setUserSettings("hidden_apps", JSON.stringify(hidden));
+        if (!this.state.hiddenXmlids.includes(app.xmlid)) {
+            this.state.hiddenXmlids.push(app.xmlid);
+            await user.setUserSettings("hidden_apps", JSON.stringify(this.state.hiddenXmlids));
         }
         this._closeContextMenu();
     },
 
     async showApp(app) {
-        const hidden = this._getHiddenAppXmlids().filter((id) => id !== app.xmlid);
-        await user.setUserSettings("hidden_apps", JSON.stringify(hidden));
+        if (!app) return;
+        const idx = this.state.hiddenXmlids.indexOf(app.xmlid);
+        if (idx !== -1) {
+            this.state.hiddenXmlids.splice(idx, 1);
+            await user.setUserSettings("hidden_apps", JSON.stringify(this.state.hiddenXmlids));
+        }
+        this._closeContextMenu();
     },
 
     toggleHiddenApps() {
