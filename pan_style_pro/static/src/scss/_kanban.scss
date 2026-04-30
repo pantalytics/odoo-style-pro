@@ -28,6 +28,27 @@
   }
 }
 
+// ─── Mobile grouped kanban ───────────────────────────────────────────────────
+// Horizontal scroll-snap between columns; vertical scroll must pass through to
+// the page so long columns are reachable. overflow-y: hidden on .o_kanban_grouped
+// and overflow: hidden on .o_kanban_group both clipped vertical content.
+
+@media (max-width: 767.98px) {
+  .o_kanban_grouped {
+    overflow-x: scroll !important;
+    overflow-y: visible !important;
+    scroll-snap-type: x mandatory;
+  }
+
+  .o_kanban_group {
+    overflow: visible !important;
+  }
+
+  .o_kanban_record {
+    touch-action: pan-y;
+  }
+}
+
 // ─── Folded column ───────────────────────────────────────────────────────────
 // Vercel-style: thin vertical strip with rotated title, click to unfold
 

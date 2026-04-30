@@ -52,6 +52,64 @@
       height: 36px;
     }
   }
+
+  // ── Collapsed state ─────────────────────────────────────────────────────
+
+  &.pan-chatter-collapsed {
+    cursor: pointer;
+
+    // Hide the pill indicator when collapsed
+    &::after {
+      display: none;
+    }
+  }
+}
+
+// ─── Toggle button (on the resize handle, top) ──────────────────────────
+
+.pan-chatter-toggle {
+  position: absolute;
+  top: var(--pan-space-2);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--pan-border);
+  border-radius: var(--pan-radius-sm);
+  background: var(--pan-bg, #ffffff);
+  color: var(--pan-text-secondary);
+  font-size: 0.75rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease,
+              background-color 0.15s ease, border-color 0.15s ease;
+
+  .pan-chatter-resize-handle:hover & {
+    opacity: 1;
+  }
+
+  // Always visible when collapsed
+  .pan-chatter-collapsed & {
+    opacity: 1;
+  }
+
+  &:hover {
+    color: var(--pan-accent);
+    border-color: var(--pan-accent);
+    background-color: var(--pan-bg-secondary, #f4f5f7);
+  }
+}
+
+// ─── Smooth collapse/expand transition ────────────────────────────────────
+
+.o_xxl_form_view .o_form_sheet_bg,
+.o_xxl_form_view .o-mail-Form-chatter.o-aside {
+  transition: flex 0.25s ease;
 }
 
 // ─── Chatter topbar ─────────────────────────────────────────────────────────
