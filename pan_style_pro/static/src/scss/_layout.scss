@@ -139,6 +139,28 @@
   box-shadow: var(--pan-shadow-sm) !important;
 }
 
+// Kolommen mogen elkaar niet overlappen.
+// Odoo's .grid gebruikt `repeat(var(--columns), 1fr)` — en 1fr is
+// minmax(auto, 1fr), dus een kolom waarvan de min-content breder is dan zijn
+// track schuift over de volgende kolom heen. Zichtbaar op het productformulier:
+// de cursieve helptekst onder Facturatiebeleid loopt door de labels Categorie
+// en Referentie rechts. Onze merkfonts zijn breder dan Odoo's default, dus bij
+// ons valt het eerder om. Tracks begrenzen en de tekst laten afbreken.
+.o_form_view .o_group.grid:not(.o_inner_group) {
+  grid-template-columns: repeat(var(--columns, 12), minmax(0, 1fr)) !important;
+
+  // Grid items houden min-width: auto (= min-content) — expliciet op 0 zetten,
+  // anders puilt het item alsnog buiten zijn track uit.
+  > * {
+    min-width: 0 !important;
+  }
+}
+
+.o_form_view .o_inner_group > .o_cell {
+  min-width: 0 !important;
+  overflow-wrap: break-word;
+}
+
 // Sectie headers in formulieren
 .o_horizontal_separator {
   color: var(--pan-text-secondary) !important;
