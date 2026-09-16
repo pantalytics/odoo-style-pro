@@ -1,0 +1,16 @@
+# Ruff configuration — deliberately narrow.
+#
+# Only rules that catch real defects: syntax errors, undefined names, unused
+# imports and unused locals. Style rules stay off; this repo is 95% SCSS and a
+# formatting sweep would produce a large diff and no behaviour change.
+line-length = 120
+target-version = "py310"
+
+exclude = ["__pycache__"]
+
+[lint]
+select = ["E9", "F"]
+
+[lint.per-file-ignores]
+# Odoo addons import submodules for the side effect of registering models.
+"__init__.py" = ["F401"]

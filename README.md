@@ -128,6 +128,22 @@ python -m odoo -c odoo.conf --update=pan_style_pro --stop-after-init -d <your_db
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full architecture, token system, and conventions.
 
+### CI
+
+The same checks GitHub runs, locally — the workflows are thin wrappers around
+these scripts, so nothing can drift apart:
+
+```bash
+pip install ruff==0.14.0 libsass==0.23.0
+tools/ci.sh lint        # ruff, SCSS compiles, asset paths, brand rules (seconds)
+tools/ci.sh install     # install pan_style_pro into a real Odoo 19 (needs Docker)
+tools/ci.sh upgrade     # install the last release, then upgrade to HEAD
+tools/ci.sh             # all of it
+```
+
+A merge to `19.0` with a bumped `pan_style_pro` version is tagged and released
+automatically.
+
 ---
 
 ## Compatibility
