@@ -5,8 +5,15 @@
     <t t-name="pan_style_pro.HomeMenuCommunity">
         <div class="o_home_menu h-100 overflow-auto">
             <div class="pan-home-menu-container mx-auto">
+                <!-- Off-screen field that captures typing on the home menu. Password
+                     managers see a lone focused text input and pop their autofill
+                     menu over the page, so opt out explicitly per manager.
+                     autocomplete="off" alone is ignored by all of them. -->
                 <input t-ref="input" type="text" class="visually-hidden" t-on-input="_onInputSearch"
-                       autocomplete="off" data-allow-hotkeys="true"/>
+                       name="pan_home_menu_search" aria-label="Type to search apps"
+                       autocomplete="off" data-allow-hotkeys="true"
+                       data-bwignore="true" data-1p-ignore="true" data-lpignore="true"
+                       data-form-type="other"/>
 
                 <!-- Search bar -->
                 <div class="pan-home-search mx-auto mb-4">

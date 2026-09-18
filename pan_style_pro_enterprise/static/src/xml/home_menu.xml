@@ -3,6 +3,16 @@
 
     <!-- Add visible search bar, context menu, and hidden apps section to home menu -->
     <t t-name="pan_style_pro_enterprise.HomeMenu" t-inherit="web_enterprise.HomeMenu" t-inherit-mode="extension">
+        <!-- Odoo's own off-screen search field: keep password managers off it,
+             otherwise Bitwarden and friends pop an autofill menu on every click
+             in the home menu. autocomplete="off" is ignored by all of them. -->
+        <xpath expr="//input[hasclass('o_search_hidden')]" position="attributes">
+            <attribute name="data-bwignore">true</attribute>
+            <attribute name="data-1p-ignore">true</attribute>
+            <attribute name="data-lpignore">true</attribute>
+            <attribute name="data-form-type">other</attribute>
+        </xpath>
+
         <!-- Search bar after hidden input -->
         <xpath expr="//input[hasclass('o_search_hidden')]" position="after">
             <div class="pan-home-search mx-auto mt-4 mb-2">
