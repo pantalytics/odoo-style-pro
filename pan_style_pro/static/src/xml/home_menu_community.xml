@@ -7,9 +7,10 @@
             <div class="pan-home-menu-container mx-auto">
                 <!-- Off-screen field that captures typing on the home menu. Password
                      managers see a lone focused text input and pop their autofill
-                     menu over the page, so opt out explicitly per manager.
-                     autocomplete="off" alone is ignored by all of them. -->
-                <input t-ref="input" type="text" class="visually-hidden" t-on-input="_onInputSearch"
+                     menu over the page. type="search" is what Bitwarden skips
+                     unconditionally (data-bwignore is opt-in per user); the data-*
+                     attributes cover the other managers. -->
+                <input t-ref="input" type="search" class="visually-hidden" t-on-input="_onInputSearch"
                        name="pan_home_menu_search" aria-label="Type to search apps"
                        autocomplete="off" data-allow-hotkeys="true"
                        data-bwignore="true" data-1p-ignore="true" data-lpignore="true"
