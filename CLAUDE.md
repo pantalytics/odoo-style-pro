@@ -58,6 +58,12 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for full details.
 - CSS classes: `pan-` prefix for any new classes (e.g. `.pan-navbar-search`)
 - Do not prefix classes that purely override existing Odoo classes
 
+## CI
+
+`tools/ci.sh lint` before pushing — ruff, SCSS compile, asset-path and brand-token
+checks. The workflows in `.github/workflows/` only wrap these scripts. Module code
+changes need a manifest version bump, per module, or CI fails.
+
 ## Related repos
 
 | Repo | Path | Purpose |

@@ -150,3 +150,18 @@
   padding-bottom: var(--pan-space-2) !important;
   margin-bottom: var(--pan-space-3) !important;
 }
+
+// ─── Buttons na een many2many_checkboxes veld ─────────────────────────────────
+
+// Odoo 19 zet in o.a. het product-formulier (Voorraad > Routes) een button
+// inline achter een many2many_checkboxes veld. Dat veld pakt de volle
+// kolombreedte, dus de button loopt rechts uit zijn kolom en komt bovenop het
+// label van de buurgroep ("Gewicht"). Dat label ligt later in de DOM en vangt
+// de klik, waardoor de button niet meer werkt. Forceer eigen regel.
+.o_form_view .o_field_many2many_checkboxes + .btn {
+  display: block !important;
+  float: none !important;
+  clear: both !important;
+  width: fit-content !important;
+  max-width: 100% !important;
+}

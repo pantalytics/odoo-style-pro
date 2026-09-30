@@ -1,0 +1,134 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: ['**']
+
+# Cancel superseded runs on the same branch — keeps push-often work cheap.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# Nothing here writes to the repository; release.yml asks for contents:write
+# separately. Stated explicitly so a compromised action cannot use the default
+# token to push.
+permissions:
+  contents: read
+
+# Every job is a thin wrapper around a script in tools/. The checks live there
+# so the same commands run on a runner, on a laptop and in a Claude cloud
+# session — a check that only exists in this YAML is a check you cannot run
+# before pushing.
+jobs:
+  # ---------------------------------------------------------------------------
+  # Static checks: seconds, no database. Catches the failures this repo
+  # actually ships — an SCSS syntax error (Odoo compiles bundles lazily, so a
+  # broken partial installs fine and breaks the backend), a mistyped asset path
+  # and a missing version bump. Local equivalent: tools/ci.sh lint
+  # ---------------------------------------------------------------------------
+  lint:
+    name: Lint and Odoo 19 checklist
+    runs-on: ubuntu-latest
+    steps:
+      # Full history: the version-bump check needs a merge base with the
+      # mainline, and a shallow clone has none.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install ruff and libsass
+        run: pip install ruff==0.14.0 libsass==0.23.0
+
+      # BASE_REF switches on the check that needs something to compare
+      # against. Empty on the mainline itself, where there is nothing.
+      - name: Static checks
+        env:
+          BASE_REF: >-
+            ${{ github.ref_name == github.event.repository.default_branch && ''
+                || format('origin/{0}', github.event.pull_request.base.ref || github.event.repository.default_branch) }}
+        run: |
+          if [ -n "$BASE_REF" ]; then
+            git fetch --no-tags --depth=200 origin "${BASE_REF#origin/}"
+          fi
+          tools/ci_lint.sh
+
+  # ---------------------------------------------------------------------------
+  # Kept as its own job because it is a required status check by name.
+  # Local equivalent: tools/ci_version_bump.sh origin/19.0
+  # ---------------------------------------------------------------------------
+  version-bump:
+    name: Manifest version bumped
+    runs-on: ubuntu-latest
+    # Skipped on the mainline itself, where there is nothing to compare against.
+    if: github.ref_name != github.event.repository.default_branch
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Compare manifest versions with the mainline
+        run: |
+          BASE_BRANCH="${{ github.event.pull_request.base.ref || github.event.repository.default_branch }}"
+          git fetch --no-tags --depth=200 origin "$BASE_BRANCH"
+          tools/ci_version_bump.sh FETCH_HEAD
+
+  # ---------------------------------------------------------------------------
+  # Install into a real Odoo of the matching series. A theme can break the
+  # install in ways lint cannot see: a bad XML view, a failing post_init_hook,
+  # an asset bundle Odoo refuses. Community image, so pan_style_pro only — the
+  # Enterprise bridge needs web_enterprise. Local equivalent: tools/ci.sh install
+  # ---------------------------------------------------------------------------
+  install:
+    name: Install
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pan_style_pro on a fresh database
+        run: tools/ci_odoo.sh --mode=fresh
+
+      - name: Upload Odoo log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: odoo-install-log
+          path: odoo-install.log
+          retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # The install job starts from nothing. Every customer database instead
+  # *upgrades*, which re-runs the data files and the post_init_hook against
+  # rows that already exist — a different code path, and until this job it only
+  # ever ran for the first time on a customer's database.
+  # Local equivalent: tools/ci.sh upgrade
+  # ---------------------------------------------------------------------------
+  upgrade:
+    name: Upgrade from last release
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      # Tags and full history: the script upgrades from the newest v<series>.*
+      # tag that is not HEAD.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install the last release, then upgrade to HEAD
+        run: tools/ci_odoo.sh --mode=upgrade
+
+      - name: Upload upgrade logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: odoo-upgrade-log
+          path: |
+            odoo-baseline.log
+            odoo-upgrade.log
+          retention-days: 7

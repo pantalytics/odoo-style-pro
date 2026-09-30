@@ -1,0 +1,76 @@
+name: Release
+
+# Tags the merge commit with the pan_style_pro manifest version and publishes a
+# release for it. The tag gives every version a fixed point to deploy from or
+# roll back to, which matters because Odoo hosts (CloudPepper, Odoo.sh) pull a
+# git ref rather than a package.
+on:
+  push:
+    branches:
+      - '19.0'
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    name: Tag and release manifest version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # pan_style_pro is the version that identifies the repo; the Enterprise
+      # bridge moves on its own and rarely.
+      - name: Read manifest version
+        id: manifest
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import ast
+          print("version=" + ast.literal_eval(open('pan_style_pro/__manifest__.py').read())['version'])
+          PY
+
+      # Not every merge is a release — docs and CI changes land without a bump.
+      # Re-tagging an existing version would move the tag under anyone who
+      # already deployed it, so skip instead.
+      - name: Create tag if new
+        id: tag
+        env:
+          VERSION: ${{ steps.manifest.outputs.version }}
+        run: |
+          if git rev-parse "v${VERSION}" >/dev/null 2>&1; then
+            echo "Tag v${VERSION} already exists — nothing to release."
+            echo "created=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "v${VERSION}" -m "pan_style_pro ${VERSION}"
+          git push origin "v${VERSION}"
+          echo "created=true" >> "$GITHUB_OUTPUT"
+          echo "Tagged v${VERSION}"
+
+      # --generate-notes writes the merged pull requests since the previous
+      # release, which is the changelog this repo would otherwise keep by hand
+      # — and a hand-kept one drifts the first time somebody merges in a hurry.
+      - name: Publish the release
+        if: steps.tag.outputs.created == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.manifest.outputs.version }}
+        run: |
+          gh release create "v${VERSION}" \
+            --title "Style Pro ${VERSION}" \
+            --generate-notes \
+            --notes-file - <<EOF
+          Odoo 19.0 · install from this tag:
+
+          \`\`\`
+          git clone --branch v${VERSION} https://github.com/${{ github.repository }}.git
+          \`\`\`
+
+          Both modules ship from this repo: \`pan_style_pro\` (Community) and
+          \`pan_style_pro_enterprise\` (auto-installs on Enterprise).
+          Upgrading an existing database: \`-u pan_style_pro\`.
+          EOF
