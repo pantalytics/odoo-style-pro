@@ -1,6 +1,6 @@
 {
     "name": "Pantalytics Style Pro",
-    "version": "19.0.1.4.3",
+    "version": "19.0.1.5.0",
     "summary": "Modern Pantalytics brand theme for Odoo backend",
     "description": """
         Gives Odoo a modern, consumer-grade look and feel using the Pantalytics brand.
@@ -42,6 +42,7 @@
             "pan_style_pro/static/src/js/patches/kanban_mobile_sortable_patch.js",
             "pan_style_pro/static/src/js/home_menu_community.js",
             "pan_style_pro/static/src/js/home_menu_service.js",
+            "pan_style_pro/static/src/js/global_search_provider.js",
             "pan_style_pro/static/src/xml/home_menu_community.xml",
         ],
     },
