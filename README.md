@@ -25,6 +25,7 @@ No third-party CSS framework. No overrides that break on update. Just tokens and
 | **Search bar** | Navbar search opens Odoo's command palette (⌘K) — works on both editions |
 | **Apps dropdown** | App icons visible in the dropdown menu |
 | **Home menu** | Styled app launcher with search bar (Enterprise only) |
+| **Home search** | The home screen search finds apps, menus, records (contacts, products, orders, invoices, tasks, ...) and chatter messages. Every word must match, in any order |
 | **Kanban** | Styled columns, hover lift on cards, full-height drop zones |
 | **List view** | Uppercase column headers, subtle row hover, cleaner borders |
 | **Form view** | Card layout with shadow, clean section separators |
