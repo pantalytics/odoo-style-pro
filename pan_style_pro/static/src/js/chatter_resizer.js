@@ -27,7 +27,7 @@ function installResizer() {
     toggle.className = "pan-chatter-toggle";
     toggle.type = "button";
     toggle.title = "Toggle chatter";
-    toggle.innerHTML = '<i class="fa fa-dedent"></i>';
+    toggle.innerHTML = '<i class="oi" data-icon="format_indent_decrease"></i>';
     handle.appendChild(toggle);
 
     chatter.parentNode.insertBefore(handle, chatter);

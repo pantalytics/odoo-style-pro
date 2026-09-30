@@ -30,7 +30,7 @@ class ResConfigSettings(models.TransientModel):
     _inherit = "res.config.settings"
 
     def action_pan_reset_colors(self):
-        set_param = self.env["ir.config_parameter"].sudo().set_param
+        set_param = self.env["ir.config_parameter"].sudo().set_str
         for key, default in PAN_DEFAULTS.items():
             set_param(key, default)
         return {

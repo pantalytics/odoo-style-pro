@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 #
 # Every static check CI runs: ruff, SCSS compiles, XML well-formed, the asset
-# manifests, the Odoo 19 checklist, the brand-token and module-split rules, and
+# manifests, the Odoo 19/20 checklist, the brand-token and module-split rules, and
 # the version bump.
 #
 #   tools/ci_lint.sh                  # everything that needs no base ref
-#   BASE_REF=origin/19.0 tools/ci_lint.sh   # + the version-bump check
+#   BASE_REF=origin/20.0 tools/ci_lint.sh   # + the version-bump check
 #
 # .github/workflows/ci.yml calls this file rather than repeating the checks, so
 # a runner, a laptop and a Claude cloud session cannot disagree about what
@@ -149,12 +149,35 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+# Odoo 20 runs OWL 3 and dropped Font Awesome and ir.config_parameter's
+# get_param/set_param. Each of these installs cleanly and only breaks in the
+# browser or on the first request, so install cannot catch them.
+step "Odoo 20 — OWL 3, icons, config parameters"
+ODOO20_OK=1
+if grep -rnE '\b(useState|useRef)\b' --include='*.js' $MODULES; then
+    fail "OWL 3 has no useState/useRef. Use proxy() and signal.ref()."; ODOO20_OK=0
+fi
+if grep -rnE 'static (props|defaultProps)\b' --include='*.js' $MODULES; then
+    fail "OWL 3 throws on static props. Use 'props = useProps({...})'."; ODOO20_OK=0
+fi
+if grep -rn 't-esc=' --include='*.xml' $MODULES; then
+    fail "t-esc is deprecated in OWL 3. Use t-out."; ODOO20_OK=0
+fi
+if grep -rnE '\bfa-[a-z]|class="fa |FontAwesome' --include='*.xml' --include='*.js' --include='*.scss' $MODULES; then
+    fail "Font Awesome is not loaded in the Odoo 20 backend. Use <i class=\"oi\" data-icon=\"...\"/>."; ODOO20_OK=0
+fi
+if grep -rnE '\.(get|set)_param\b' --include='*.py' $MODULES; then
+    fail "ir.config_parameter has no get_param/set_param in Odoo 20. Use get_str/set_str."; ODOO20_OK=0
+fi
+[ "$ODOO20_OK" = 1 ] && echo "OK: no OWL 2, Font Awesome or get_param leftovers."
+
+# ---------------------------------------------------------------------------
 # CLAUDE.md: OWL patches, no jQuery. A replaced component silently drops every
-# other module's patch on it; jQuery is not loaded in the Odoo 19 backend at
+# other module's patch on it; jQuery is not loaded in the Odoo 19+ backend at
 # all, so a `$(...)` call is a runtime error nothing here would otherwise see.
 step "JS — no jQuery"
 if grep -rn '\bjQuery\b\|[^A-Za-z_$.]\$(' --include='*.js' $MODULES; then
-    fail "No jQuery in the Odoo 19 backend — use vanilla JS or OWL."
+    fail "No jQuery in the Odoo 19+ backend — use vanilla JS or OWL."
 else
     echo "OK: no jQuery."
 fi

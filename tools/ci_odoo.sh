@@ -51,7 +51,7 @@ docker rm -f "$DB" >/dev/null 2>&1 || true
 docker network create "$NET" >/dev/null 2>&1 || true
 docker run -d --name "$DB" --network "$NET" \
     -e POSTGRES_USER=odoo -e POSTGRES_PASSWORD=odoo -e POSTGRES_DB=postgres \
-    postgres:15 >/dev/null
+    postgres:16 >/dev/null
 
 # Over TCP, not the unix socket: the image's entrypoint runs a temporary server
 # with listen_addresses='' while it initialises, so a socket check answers
@@ -84,7 +84,7 @@ assert_installed() {
     # -i and -u on a module Odoo cannot find exit 0 without doing anything,
     # which is the exact failure this job would otherwise miss.
     local state
-    state=$(docker run --rm --network "$NET" postgres:15 \
+    state=$(docker run --rm --network "$NET" postgres:16 \
         psql "postgresql://odoo:odoo@${DB}:5432/ci_style" -tAc \
         "SELECT state FROM ir_module_module WHERE name = 'pan_style_pro'" | tr -d ' ')
     if [ "$state" != "installed" ]; then

@@ -8,6 +8,7 @@ on:
   push:
     branches:
       - '19.0'
+      - '20.0'
 
 permissions:
   contents: write
@@ -64,7 +65,7 @@ jobs:
             --title "Style Pro ${VERSION}" \
             --generate-notes \
             --notes-file - <<EOF
-          Odoo 19.0 · install from this tag:
+          Odoo ${{ github.ref_name }} · install from this tag:
 
           \`\`\`
           git clone --branch v${VERSION} https://github.com/${{ github.repository }}.git

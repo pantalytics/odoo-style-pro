@@ -2,7 +2,7 @@
 
 ## Project
 
-`odoo-style-pro` — Pantalytics Style Pro for Odoo 19 (Community + Enterprise).
+`odoo-style-pro` — Pantalytics Style Pro for Odoo 20 (Community + Enterprise). Odoo 19 lives on branch `19.0`.
 
 Gives Odoo a modern, consumer-grade look and feel (think Linear/Vercel) using the Pantalytics brand. Two Odoo modules: `pan_style_pro` (Community-compatible base) and `pan_style_pro_enterprise` (auto-install bridge for Enterprise features).
 
@@ -47,9 +47,10 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for full details.
 ### SCSS
 - Partials prefixed with `_` (e.g. `_tokens.scss`, `_components.scss`)
 - No `main.scss` entry point — each partial is registered individually in `__manifest__.py`
-- Icon fonts (`oi`, `fa`) must be preserved — see `_typography.scss`
+- Icons: Odoo 20 has no Font Awesome. Use `<i class="oi" data-icon="<material symbol>"/>` (names in `web/tooling/icons/icons_wishlist.txt`)
 
 ### JavaScript
+- OWL 3: `props = useProps({...})`, `proxy()` not `useState`, `signal.ref()` not `useRef`, `this.` on every template expression
 - OWL services accessed via `useService()` in `setup()`
 - No jQuery — vanilla JS or OWL only
 - Files named in snake_case
@@ -72,7 +73,7 @@ changes need a manifest version bump, per module, or CI fails.
 | `pantalytics-brand` | `../pantalytics-brand` | Logo and brand assets |
 | `odoo-pantalytics` | `../odoo-pantalytics` | Main Pantalytics Odoo config |
 | `odoo-core` | `../odoo-core` | Custom Pantalytics addons |
-| `odoo-enterprise` | `../odoo-enterprise` | Odoo 19 Enterprise source (reference) |
+| `odoo-enterprise` | `../odoo-enterprise` | Odoo Enterprise source (reference) |
 
 ## What NOT to do
 

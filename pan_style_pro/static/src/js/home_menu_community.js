@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Component, useState, useRef, onMounted, onWillUnmount } from "@odoo/owl";
+import { Component, onMounted, onWillUnmount, proxy, signal, t, useProps } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
 import { useSortable } from "@web/core/utils/sortable_owl";
@@ -8,20 +8,20 @@ import { user } from "@web/core/user";
 
 export class HomeMenuCommunity extends Component {
     static template = "pan_style_pro.HomeMenuCommunity";
-    static props = {
-        apps: { type: Array },
-    };
+    props = useProps({
+        apps: t.array(),
+    });
+    inputRef = signal.ref();
+    rootRef = signal.ref();
 
     setup() {
         this.menus = useService("menu");
         this.command = useService("command");
         this.homeMenu = useService("home_menu");
-        this.inputRef = useRef("input");
-        this.rootRef = useRef("root");
 
         // Make apps reactive so drag reorder triggers re-render
         // Apply saved order from homemenu_config if available
-        this._apps = useState(this._applyInitialOrder(this.props.apps));
+        this._apps = proxy(this._applyInitialOrder(this.props.apps));
 
         // Drag-and-drop reordering (same as Enterprise)
         useSortable({
@@ -37,7 +37,7 @@ export class HomeMenuCommunity extends Component {
             onDrop: (params) => this._sortAppDrop(params),
         });
 
-        this.state = useState({
+        this.state = proxy({
             focusedIndex: null,
             showHiddenApps: false,
             contextMenu: { visible: false, x: 0, y: 0, app: null },
@@ -66,8 +66,8 @@ export class HomeMenuCommunity extends Component {
         onMounted(() => {
             // Sync service state — we're visible
             this.homeMenu._setHasHomeMenu(true);
-            if (this.inputRef.el) {
-                this.inputRef.el.focus({ preventScroll: true });
+            if (this.inputRef()) {
+                this.inputRef().focus({ preventScroll: true });
             }
         });
 
@@ -131,11 +131,11 @@ export class HomeMenuCommunity extends Component {
     }
 
     _onInputSearch() {
-        const searchValue = `/${this.inputRef.el.value.trim()}`;
+        const searchValue = `/${this.inputRef().value.trim()}`;
         this.command.openMainPalette({ searchValue }, () => {
-            if (this.inputRef.el) {
-                this.inputRef.el.value = "";
-                this.inputRef.el.focus();
+            if (this.inputRef()) {
+                this.inputRef().value = "";
+                this.inputRef().focus();
             }
         });
     }

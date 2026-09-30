@@ -22,7 +22,7 @@ class IrHttp(models.AbstractModel):
 
     def session_info(self):
         result = super().session_info()
-        get_param = self.env["ir.config_parameter"].sudo().get_param
+        get_param = self.env["ir.config_parameter"].sudo().get_str
         result["pan_style"] = {
             key: get_param(param, "")
             for key, param in PAN_STYLE_PARAMS.items()
