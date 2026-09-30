@@ -10,7 +10,7 @@
                      menu over the page. type="search" is what Bitwarden skips
                      unconditionally (data-bwignore is opt-in per user); the data-*
                      attributes cover the other managers. -->
-                <input t-ref="input" type="search" class="visually-hidden" t-on-input="_onInputSearch"
+                <input t-ref="this.inputRef" type="search" class="visually-hidden" t-on-input="this._onInputSearch"
                        name="pan_home_menu_search" aria-label="Type to search apps"
                        autocomplete="off" data-allow-hotkeys="true"
                        data-bwignore="true" data-1p-ignore="true" data-lpignore="true"
@@ -20,67 +20,67 @@
                 <div class="pan-home-search mx-auto mb-4">
                     <div class="pan-home-search-box d-flex align-items-center"
                          t-on-click="() => this.command.openMainPalette({ searchValue: '/' })">
-                        <i class="fa fa-search me-2 opacity-50"/>
+                        <i class="oi me-2 opacity-50" data-icon="search"/>
                         <span class="opacity-50">Search</span>
                     </div>
                 </div>
 
                 <!-- Visible app grid -->
-                <div class="pan-home-apps" t-ref="root">
-                    <t t-foreach="visibleApps" t-as="app" t-key="app.id">
+                <div class="pan-home-apps" t-ref="this.rootRef">
+                    <t t-foreach="this.visibleApps" t-as="app" t-key="app.id">
                         <div class="o_draggable">
                             <a class="pan-home-app"
-                               t-att-class="{ 'o_focused': state.focusedIndex === app_index }"
-                               t-att-href="getMenuItemHref(app)"
+                               t-att-class="{ 'o_focused': this.state.focusedIndex === app_index }"
+                               t-att-href="this.getMenuItemHref(app)"
                                t-att-data-menu-xmlid="app.xmlid"
                                t-on-click.prevent="() => this._openApp(app)"
                                t-on-contextmenu="(ev) => this.onAppContextMenu(app, ev)">
                                 <img t-if="app.webIconData" t-att-src="app.webIconData"
                                      class="pan-home-app-icon" alt=""/>
                                 <div t-else="" class="pan-home-app-icon pan-home-app-icon-placeholder">
-                                    <i class="fa fa-cube"/>
+                                    <i class="oi" data-icon="deployed_code"/>
                                 </div>
-                                <span class="pan-home-app-name" t-esc="app.name"/>
+                                <span class="pan-home-app-name" t-out="app.name"/>
                             </a>
                         </div>
                     </t>
                 </div>
 
                 <!-- Hidden apps toggle -->
-                <div t-if="hiddenApps.length" class="pan-hidden-apps-toggle">
-                    <button class="pan-hidden-apps-btn" t-on-click="toggleHiddenApps">
-                        <i t-attf-class="fa {{ state.showHiddenApps ? 'fa-eye' : 'fa-eye-slash' }} me-2"/>
-                        <span t-esc="hiddenApps.length"/>
-                        <span> hidden app(s)</span>
-                        <i t-attf-class="fa {{ state.showHiddenApps ? 'fa-chevron-up' : 'fa-chevron-down' }} ms-2"/>
+                <div t-if="this.hiddenApps.length" class="pan-hidden-apps-toggle">
+                    <button class="pan-hidden-apps-btn" t-on-click="this.toggleHiddenApps">
+                        <i class="oi me-2" t-att-data-icon="this.state.showHiddenApps ? 'visibility' : 'visibility_off'"/>
+                        <span t-out="this.hiddenApps.length"/>
+                        <span class="ms-1">hidden app(s)</span>
+                        <i class="oi ms-2" t-att-data-icon="this.state.showHiddenApps ? 'keyboard_arrow_up' : 'keyboard_arrow_down'"/>
                     </button>
                 </div>
 
                 <!-- Hidden apps grid (dimmed) -->
-                <div t-if="hiddenApps.length and state.showHiddenApps" class="pan-home-apps pan-home-apps-hidden">
-                    <t t-foreach="hiddenApps" t-as="app" t-key="app.id">
+                <div t-if="this.hiddenApps.length and this.state.showHiddenApps" class="pan-home-apps pan-home-apps-hidden">
+                    <t t-foreach="this.hiddenApps" t-as="app" t-key="app.id">
                         <div class="pan-home-app pan-home-app-dimmed">
                             <div class="pan-home-app-icon-wrapper">
                                 <img t-if="app.webIconData" t-att-src="app.webIconData"
                                      class="pan-home-app-icon" alt=""/>
                                 <div t-else="" class="pan-home-app-icon pan-home-app-icon-placeholder">
-                                    <i class="fa fa-cube"/>
+                                    <i class="oi" data-icon="deployed_code"/>
                                 </div>
                                 <button class="pan-unhide-btn" t-on-click="() => this.showApp(app)"
                                         title="Show app">
-                                    <i class="fa fa-eye"/>
+                                    <i class="oi" data-icon="visibility"/>
                                 </button>
                             </div>
-                            <span class="pan-home-app-name" t-esc="app.name"/>
+                            <span class="pan-home-app-name" t-out="app.name"/>
                         </div>
                     </t>
                 </div>
 
                 <!-- Context menu -->
-                <div t-if="state.contextMenu.visible" class="pan-context-menu"
-                     t-attf-style="left: {{ state.contextMenu.x }}px; top: {{ state.contextMenu.y }}px;">
-                    <button class="pan-context-menu-item" t-on-click="() => this.hideApp(state.contextMenu.app)">
-                        <i class="fa fa-eye-slash me-2"/>Hide app
+                <div t-if="this.state.contextMenu.visible" class="pan-context-menu"
+                     t-attf-style="left: {{ this.state.contextMenu.x }}px; top: {{ this.state.contextMenu.y }}px;">
+                    <button class="pan-context-menu-item" t-on-click="() => this.hideApp(this.state.contextMenu.app)">
+                        <i class="oi me-2" data-icon="visibility_off"/>Hide app
                     </button>
                 </div>
             </div>
@@ -92,7 +92,7 @@
         <xpath expr="//div[hasclass('o_navbar_apps_menu')]/Dropdown" position="replace">
             <button class="o_menu_toggle border-0 bg-transparent" title="Home Menu"
                     t-on-click.prevent="() => this.env.services['home_menu'] &amp;&amp; this.env.services['home_menu'].toggle()">
-                <i class="oi oi-apps"/>
+                <i class="oi" data-icon="apps"/>
             </button>
         </xpath>
     </t>

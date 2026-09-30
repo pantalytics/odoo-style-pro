@@ -60,7 +60,7 @@ jobs:
 
   # ---------------------------------------------------------------------------
   # Kept as its own job because it is a required status check by name.
-  # Local equivalent: tools/ci_version_bump.sh origin/19.0
+  # Local equivalent: tools/ci_version_bump.sh origin/20.0
   # ---------------------------------------------------------------------------
   version-bump:
     name: Manifest version bumped

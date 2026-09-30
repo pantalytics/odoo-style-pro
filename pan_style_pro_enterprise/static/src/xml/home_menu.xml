@@ -7,7 +7,7 @@
              otherwise Bitwarden and friends pop an autofill menu on every click
              in the home menu. type="search" is what Bitwarden skips
              unconditionally (data-bwignore is opt-in per user). -->
-        <xpath expr="//input[hasclass('o_search_hidden')]" position="attributes">
+        <xpath expr="//input[hasclass('o_home_menu_search_input')]" position="attributes">
             <attribute name="type">search</attribute>
             <attribute name="name">pan_home_menu_search</attribute>
             <attribute name="data-bwignore">true</attribute>
@@ -17,10 +17,10 @@
         </xpath>
 
         <!-- Search bar after hidden input -->
-        <xpath expr="//input[hasclass('o_search_hidden')]" position="after">
+        <xpath expr="//input[hasclass('o_home_menu_search_input')]" position="after">
             <div class="pan-home-search mx-auto mt-4 mb-2">
                 <div class="pan-home-search-box d-flex align-items-center" t-on-click="() => this._onSearchBarClick()">
-                    <i class="fa fa-search me-2 opacity-50"/>
+                    <i class="oi me-2 opacity-50" data-icon="search"/>
                     <span class="opacity-50">Search</span>
                 </div>
             </div>
@@ -34,18 +34,18 @@
         <!-- Add hidden apps toggle + grid + context menu after the apps grid -->
         <xpath expr="//div[hasclass('o_apps')]" position="after">
             <!-- Hidden apps toggle -->
-            <t t-set="_hiddenApps" t-value="hiddenApps"/>
+            <t t-set="_hiddenApps" t-value="this.hiddenApps"/>
             <div t-if="_hiddenApps.length" class="pan-hidden-apps-toggle">
-                <button class="pan-hidden-apps-btn" t-on-click="toggleHiddenApps">
-                    <i t-attf-class="fa {{ state.showHiddenApps ? 'fa-eye' : 'fa-eye-slash' }} me-2"/>
-                    <span t-esc="_hiddenApps.length"/>
-                    <span> hidden app(s)</span>
-                    <i t-attf-class="fa {{ state.showHiddenApps ? 'fa-chevron-up' : 'fa-chevron-down' }} ms-2"/>
+                <button class="pan-hidden-apps-btn" t-on-click="this.toggleHiddenApps">
+                    <i class="oi me-2" t-att-data-icon="this.state.showHiddenApps ? 'visibility' : 'visibility_off'"/>
+                    <span t-out="_hiddenApps.length"/>
+                    <span class="ms-1">hidden app(s)</span>
+                    <i class="oi ms-2" t-att-data-icon="this.state.showHiddenApps ? 'keyboard_arrow_up' : 'keyboard_arrow_down'"/>
                 </button>
             </div>
 
             <!-- Hidden apps grid (dimmed) -->
-            <div t-if="_hiddenApps.length and state.showHiddenApps" class="o_apps row user-select-none mx-0 pan-home-apps-hidden">
+            <div t-if="_hiddenApps.length and this.state.showHiddenApps" class="o_apps row user-select-none mx-0 pan-home-apps-hidden">
                 <div t-foreach="_hiddenApps" t-as="app" t-key="app.id" class="col-3 col-md-2 mb-3 px-0">
                     <a class="o_app o_menuitem d-flex flex-column rounded-3 justify-content-start align-items-center w-100 p-1 p-md-2 pan-home-app-dimmed"
                        t-att-href="app.href"
@@ -55,9 +55,9 @@
                             t-attf-src="{{app.webIconData}}"/>
                         <div t-else="" class="o_app_icon position-relative d-flex justify-content-center align-items-center p-2 rounded-3 ratio ratio-1x1"
                             t-attf-style="background-color: {{app.webIcon.backgroundColor}};">
-                            <i t-attf-class="{{app.webIcon.iconClass}} position-relative w-auto h-auto" t-attf-style="color: {{app.webIcon.color}};"/>
+                            <i class="oi position-relative w-auto h-auto" t-att-data-icon="app.webIcon.icon" t-attf-style="color: {{app.webIcon.color}};"/>
                         </div>
-                        <div class="o_caption w-100 text-center text-truncate mt-2" t-esc="app.label or app.name"/>
+                        <div class="o_caption w-100 text-center text-truncate mt-2" t-out="app.label or app.name"/>
                     </a>
                 </div>
             </div>
@@ -65,16 +65,16 @@
 
         <!-- Context menu (inside the root div) — dynamic Hide/Show -->
         <xpath expr="//div[hasclass('o_home_menu')]/div[hasclass('container')]" position="after">
-            <div t-if="state.contextMenu.visible" class="pan-context-menu"
-                 t-attf-style="left: {{ state.contextMenu.x }}px; top: {{ state.contextMenu.y }}px;">
-                <t t-if="_isAppHidden(state.contextMenu.app)">
-                    <button class="pan-context-menu-item" t-on-click="() => this.showApp(state.contextMenu.app)">
-                        <i class="fa fa-eye me-2"/>Show app
+            <div t-if="this.state.contextMenu.visible" class="pan-context-menu"
+                 t-attf-style="left: {{ this.state.contextMenu.x }}px; top: {{ this.state.contextMenu.y }}px;">
+                <t t-if="this._isAppHidden(this.state.contextMenu.app)">
+                    <button class="pan-context-menu-item" t-on-click="() => this.showApp(this.state.contextMenu.app)">
+                        <i class="oi me-2" data-icon="visibility"/>Show app
                     </button>
                 </t>
                 <t t-else="">
-                    <button class="pan-context-menu-item" t-on-click="() => this.hideApp(state.contextMenu.app)">
-                        <i class="fa fa-eye-slash me-2"/>Hide app
+                    <button class="pan-context-menu-item" t-on-click="() => this.hideApp(this.state.contextMenu.app)">
+                        <i class="oi me-2" data-icon="visibility_off"/>Hide app
                     </button>
                 </t>
             </div>

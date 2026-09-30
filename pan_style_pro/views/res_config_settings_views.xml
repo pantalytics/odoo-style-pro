@@ -98,7 +98,7 @@
                                         type="object"
                                         string="Reset to Defaults"
                                         class="btn btn-secondary btn-sm"
-                                        icon="fa-repeat"
+                                        icon="refresh"
                                         confirm="Reset all colors (light + dark) to Pantalytics defaults?"/>
                             </div>
                         </div>
@@ -117,7 +117,7 @@
                                         <span class="o_form_label">Documentation</span>
                                         <div class="mt-1">
                                             <a href="https://github.com/pantalytics/odoo-style-pro" target="_blank">
-                                                <i class="fa fa-external-link me-1" title="Documentation"/>github.com/pantalytics/odoo-style-pro
+                                                <i class="oi me-1" data-icon="open_in_new" title="Documentation"/>github.com/pantalytics/odoo-style-pro
                                             </a>
                                         </div>
                                     </div>

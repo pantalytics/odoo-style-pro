@@ -39,12 +39,11 @@ body,
   font-family: var(--pan-font-body) !important;
 }
 
-// Preserve icon fonts — our body font-family override must not break these
-.oi {
-  font-family: 'odoo_ui_icons' !important;
-}
-.fa {
-  font-family: 'FontAwesome' !important;
+// Odoo 20 icons are a ligature font on .oi. Our !important font rules on
+// buttons, headings and panels would turn them into plain words
+// ("close_small"), so win back the icon font with a higher specificity.
+.oi.oi.oi[data-icon] {
+  font-family: var(--icon-font-family, 'Material Symbols Outlined') !important;
 }
 
 h1, h2, h3, h4, h5, h6,

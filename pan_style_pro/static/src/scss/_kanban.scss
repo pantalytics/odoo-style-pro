@@ -281,8 +281,7 @@
   align-self: flex-start !important;
 
   // Icon if present
-  i,
-  .fa {
+  i {
     margin-bottom: var(--pan-space-1) !important;
     font-size: 1rem !important;
     color: var(--pan-text-secondary) !important;
@@ -294,8 +293,7 @@
     color: var(--pan-accent) !important;
     background-color: rgba(155, 153, 255, 0.04) !important;
 
-    i,
-    .fa {
+    i {
       color: var(--pan-accent) !important;
     }
   }

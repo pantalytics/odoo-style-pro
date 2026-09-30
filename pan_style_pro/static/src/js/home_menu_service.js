@@ -1,23 +1,23 @@
 /** @odoo-module **/
 
-import { Component, xml } from "@odoo/owl";
+import { Component, useProps, xml } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { HomeMenuCommunity } from "./home_menu_community";
 import { Mutex } from "@web/core/utils/concurrency";
 import { WebClient } from "@web/webclient/webclient";
+import { standardActionServiceProps } from "@web/webclient/actions/action_plugin";
 import { patch } from "@web/core/utils/patch";
 
 // Community-only home menu — removed from bundle by pan_style_pro_enterprise
 {
     // Register the HomeMenu as an action component (type "menu")
     class HomeMenuAction extends Component {
-        static template = xml`<HomeMenuCommunity apps="props.apps" />`;
+        static template = xml`<HomeMenuCommunity apps="this.apps" />`;
         static components = { HomeMenuCommunity };
-        static props = ["*"];
+        props = useProps({ ...standardActionServiceProps });
 
         setup() {
-            const menuService = this.env.services.menu;
-            this.props.apps = menuService.getApps();
+            this.apps = this.env.services.menu.getApps();
         }
     }
 

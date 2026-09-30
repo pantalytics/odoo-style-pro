@@ -1,6 +1,6 @@
-# Pantalytics Style Pro for Odoo 19
+# Pantalytics Style Pro for Odoo 20
 
-A modern, consumer-grade UI theme for Odoo 19 — inspired by the design language of Linear and Vercel. Built and maintained by [Pantalytics](https://pantalytics.com).
+A modern, consumer-grade UI theme for Odoo 20 — inspired by the design language of Linear and Vercel. Built and maintained by [Pantalytics](https://pantalytics.com).
 
 ![Pantalytics Style Pro — Light Mode](docs/screenshots/kanban-light.png)
 
@@ -136,12 +136,12 @@ these scripts, so nothing can drift apart:
 ```bash
 pip install ruff==0.14.0 libsass==0.23.0
 tools/ci.sh lint        # ruff, SCSS compiles, asset paths, brand rules (seconds)
-tools/ci.sh install     # install pan_style_pro into a real Odoo 19 (needs Docker)
+tools/ci.sh install     # install pan_style_pro into a real Odoo 20 (needs Docker)
 tools/ci.sh upgrade     # install the last release, then upgrade to HEAD
 tools/ci.sh             # all of it
 ```
 
-A merge to `19.0` with a bumped `pan_style_pro` version is tagged and released
+A merge to `20.0` with a bumped `pan_style_pro` version is tagged and released
 automatically.
 
 ---
@@ -150,8 +150,9 @@ automatically.
 
 | | Status |
 |---|---|
-| Odoo 19 Community | Tested |
-| Odoo 19 Enterprise | Tested |
+| Odoo 20 Community | Tested (this branch) |
+| Odoo 20 Enterprise | Needs testing (this branch) |
+| Odoo 19 Community / Enterprise | Branch `19.0` |
 | Odoo 17/18 | Not supported |
 | Light mode | Tested |
 | Dark mode | Tested (Enterprise) |
