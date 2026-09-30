@@ -5,8 +5,11 @@
     <t t-name="pan_style_pro_enterprise.HomeMenu" t-inherit="web_enterprise.HomeMenu" t-inherit-mode="extension">
         <!-- Odoo's own off-screen search field: keep password managers off it,
              otherwise Bitwarden and friends pop an autofill menu on every click
-             in the home menu. autocomplete="off" is ignored by all of them. -->
+             in the home menu. type="search" is what Bitwarden skips
+             unconditionally (data-bwignore is opt-in per user). -->
         <xpath expr="//input[hasclass('o_search_hidden')]" position="attributes">
+            <attribute name="type">search</attribute>
+            <attribute name="name">pan_home_menu_search</attribute>
             <attribute name="data-bwignore">true</attribute>
             <attribute name="data-1p-ignore">true</attribute>
             <attribute name="data-lpignore">true</attribute>
