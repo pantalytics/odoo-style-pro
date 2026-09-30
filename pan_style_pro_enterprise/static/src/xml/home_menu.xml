@@ -7,7 +7,7 @@
              otherwise Bitwarden and friends pop an autofill menu on every click
              in the home menu. type="search" is what Bitwarden skips
              unconditionally (data-bwignore is opt-in per user). -->
-        <xpath expr="//input[hasclass('o_search_hidden')]" position="attributes">
+        <xpath expr="//input[hasclass('o_home_menu_search_input')]" position="attributes">
             <attribute name="type">search</attribute>
             <attribute name="name">pan_home_menu_search</attribute>
             <attribute name="data-bwignore">true</attribute>
@@ -17,7 +17,7 @@
         </xpath>
 
         <!-- Search bar after hidden input -->
-        <xpath expr="//input[hasclass('o_search_hidden')]" position="after">
+        <xpath expr="//input[hasclass('o_home_menu_search_input')]" position="after">
             <div class="pan-home-search mx-auto mt-4 mb-2">
                 <div class="pan-home-search-box d-flex align-items-center" t-on-click="() => this._onSearchBarClick()">
                     <i class="oi me-2 opacity-50" data-icon="search"/>
@@ -39,7 +39,7 @@
                 <button class="pan-hidden-apps-btn" t-on-click="this.toggleHiddenApps">
                     <i class="oi me-2" t-att-data-icon="this.state.showHiddenApps ? 'visibility' : 'visibility_off'"/>
                     <span t-out="_hiddenApps.length"/>
-                    <span> hidden app(s)</span>
+                    <span class="ms-1">hidden app(s)</span>
                     <i class="oi ms-2" t-att-data-icon="this.state.showHiddenApps ? 'keyboard_arrow_up' : 'keyboard_arrow_down'"/>
                 </button>
             </div>

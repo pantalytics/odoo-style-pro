@@ -51,7 +51,7 @@
                     <button class="pan-hidden-apps-btn" t-on-click="this.toggleHiddenApps">
                         <i class="oi me-2" t-att-data-icon="this.state.showHiddenApps ? 'visibility' : 'visibility_off'"/>
                         <span t-out="this.hiddenApps.length"/>
-                        <span> hidden app(s)</span>
+                        <span class="ms-1">hidden app(s)</span>
                         <i class="oi ms-2" t-att-data-icon="this.state.showHiddenApps ? 'keyboard_arrow_up' : 'keyboard_arrow_down'"/>
                     </button>
                 </div>
