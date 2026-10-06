@@ -48,7 +48,7 @@
 // ─── Hover state (non-disabled buttons) ───────────────────────────────────────
 
 .o_statusbar_status button.o_arrow_button:not(:disabled):not(.disabled):hover {
-  background-color: rgba(155, 153, 255, 0.08) !important;
+  background-color: rgba(var(--pan-accent-rgb), 0.08) !important;
   border-color: var(--pan-border-strong) !important;
   color: var(--pan-text) !important;
 }

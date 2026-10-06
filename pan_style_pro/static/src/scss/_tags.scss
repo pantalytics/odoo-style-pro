@@ -111,9 +111,9 @@
 
 // Primary — accent color family
 .badge.text-bg-primary {
-  background-color: rgba(155, 153, 255, 0.15) !important;
+  background-color: rgba(var(--pan-accent-rgb), 0.15) !important;
   color: var(--pan-accent) !important;
-  border: 1px solid rgba(155, 153, 255, 0.3) !important;
+  border: 1px solid rgba(var(--pan-accent-rgb), 0.3) !important;
 }
 
 // Success — keep hue, reduce opacity

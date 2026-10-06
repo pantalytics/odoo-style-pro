@@ -104,7 +104,7 @@ $pan-color-danger  : #ef4444;
 
   &.alert-info {
     border-left-color: var(--pan-accent) !important;
-    background-color: rgba(155, 153, 255, 0.06) !important;
+    background-color: rgba(var(--pan-accent-rgb), 0.06) !important;
   }
 
   &.alert-success {

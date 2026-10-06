@@ -20,7 +20,7 @@
     background-color: var(--pan-accent-hover) !important;
     border-color: var(--pan-accent-hover) !important;
     color: #ffffff !important;
-    box-shadow: 0 0 0 3px rgba(155, 153, 255, 0.25) !important;
+    box-shadow: 0 0 0 3px rgba(var(--pan-accent-rgb), 0.25) !important;
   }
 }
 
@@ -65,7 +65,7 @@ select.form-select {
 
   &:focus {
     border-color: var(--pan-accent) !important;
-    box-shadow: 0 0 0 3px rgba(155, 153, 255, 0.2) !important;
+    box-shadow: 0 0 0 3px rgba(var(--pan-accent-rgb), 0.2) !important;
     outline: none !important;
   }
 }
@@ -95,7 +95,7 @@ select.form-select {
 
 // Discuss sidebar
 .o_discuss_sidebar .o_active {
-  background-color: rgba(155, 153, 255, 0.1) !important;
+  background-color: rgba(var(--pan-accent-rgb), 0.1) !important;
   color: var(--pan-accent) !important;
   border-radius: var(--pan-radius-md) !important;
 }
@@ -150,5 +150,5 @@ select.form-select {
 .o_menu_sections .o_nav_entry.active,
 .o_menu_sections .o_nav_entry:focus {
   color: var(--pan-accent) !important;
-  background-color: rgba(155, 153, 255, 0.08) !important;
+  background-color: rgba(var(--pan-accent-rgb), 0.08) !important;
 }

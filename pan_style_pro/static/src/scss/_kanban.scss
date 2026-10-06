@@ -292,7 +292,7 @@
   &:hover {
     border-color: var(--pan-accent) !important;
     color: var(--pan-accent) !important;
-    background-color: rgba(155, 153, 255, 0.04) !important;
+    background-color: rgba(var(--pan-accent-rgb), 0.04) !important;
 
     i,
     .fa {
@@ -314,7 +314,7 @@
 
       &:focus {
         border-color: var(--pan-accent) !important;
-        box-shadow: 0 0 0 3px rgba(155, 153, 255, 0.2) !important;
+        box-shadow: 0 0 0 3px rgba(var(--pan-accent-rgb), 0.2) !important;
         outline: none !important;
       }
     }

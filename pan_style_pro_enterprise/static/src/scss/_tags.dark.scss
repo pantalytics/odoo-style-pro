@@ -28,9 +28,9 @@
 // ─── Bootstrap badges — lighten text for dark bg ──────────────────────────────
 
 .badge.text-bg-primary {
-  background-color: rgba(155, 153, 255, 0.18) !important;
+  background-color: rgba(var(--pan-accent-rgb), 0.18) !important;
   color: var(--pan-accent-hover) !important;
-  border-color: rgba(155, 153, 255, 0.35) !important;
+  border-color: rgba(var(--pan-accent-rgb), 0.35) !important;
 }
 
 .badge.text-bg-success {
