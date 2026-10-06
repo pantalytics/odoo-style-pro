@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- First field of the search bar, so Enter uses smart search. The standard
+         Product field and every filter stay where they are. product.product's
+         search view is a primary child of this one and inherits the field. -->
+    <record id="product_template_search_view" model="ir.ui.view">
+        <field name="name">product.template.search.pan_style_pro_search</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_search_view"/>
+        <field name="arch" type="xml">
+            <field name="name" position="before">
+                <field name="x_smart_search"/>
+            </field>
+        </field>
+    </record>
+</odoo>
