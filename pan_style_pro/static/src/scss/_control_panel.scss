@@ -102,7 +102,7 @@
 
   &:focus-within {
     border-color: var(--pan-accent) !important;
-    box-shadow: 0 0 0 3px rgba(155, 153, 255, 0.15) !important;
+    box-shadow: 0 0 0 3px rgba(var(--pan-accent-rgb), 0.15) !important;
   }
 
   .o_searchview_input {
@@ -129,8 +129,8 @@
 
 .o_searchview_facet {
   // Keep original align-items: stretch for proper overlay positioning
-  background-color: rgba(155, 153, 255, 0.1) !important;
-  border: 1px solid rgba(155, 153, 255, 0.3) !important;
+  background-color: rgba(var(--pan-accent-rgb), 0.1) !important;
+  border: 1px solid rgba(var(--pan-accent-rgb), 0.3) !important;
   color: var(--pan-accent) !important;
   border-radius: var(--pan-radius-sm) !important;
   font-family: var(--pan-font-body) !important;
@@ -187,9 +187,9 @@
     }
 
     &.active {
-      background-color: rgba(155, 153, 255, 0.12) !important;
+      background-color: rgba(var(--pan-accent-rgb), 0.12) !important;
       color: var(--pan-accent) !important;
-      border-color: rgba(155, 153, 255, 0.3) !important;
+      border-color: rgba(var(--pan-accent-rgb), 0.3) !important;
     }
   }
 }

@@ -2,7 +2,7 @@
 
 ## Project
 
-`odoo-style-pro` — Pantalytics Style Pro for Odoo 20 (Community + Enterprise). Odoo 19 lives on branch `19.0`.
+`odoo-style-pro` — Style Pro by Pantalytics for Odoo 20 (Community + Enterprise). Odoo 19 lives on branch `19.0`.
 
 Gives Odoo a modern, consumer-grade look and feel (think Linear/Vercel) using the Pantalytics brand. Three Odoo modules: `pan_style_pro` (Community-compatible base), `pan_style_pro_enterprise` (auto-install bridge for Enterprise features) and `pan_style_pro_search` (smart search in every model, off by default; see docs/SMART_SEARCH.md).
 
@@ -40,8 +40,8 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for full details.
 
 ### Odoo module
 - Module technical name: `pan_style_pro`
-- Module display name: "Pantalytics Style Pro"
-- All custom CSS/SCSS must use `--pan-` prefixed tokens — never hardcode colors or fonts
+- Module display name: "Style Pro" (like "Mail Pro"; the company is in `author`)
+- All custom CSS/SCSS must use `--pan-` prefixed tokens — never hardcode colors or fonts. Accent tints: `rgba(var(--pan-accent-rgb), x)` (lint fails on a hardcoded accent in hex or rgb)
 - OWL patches use `patch()` from `@web/core/utils/patch` — never replace components wholesale
 - Enterprise-only code goes in `pan_style_pro_enterprise/`
 

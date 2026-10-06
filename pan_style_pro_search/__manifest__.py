@@ -1,6 +1,7 @@
 {
-    "name": "Pantalytics Style Pro Search",
-    "version": "20.0.2.4.2",
+    "name": "Style Pro Search",
+    "version": "20.0.2.4.4",
+    "summary": "Google-style search in every Odoo model: words in any order, typos, best match first",
     "description": """
         Adds "Smart search" as the first option of every search bar, search
         dialog and dropdown. Every word must match, in any order; words of four
@@ -29,6 +30,7 @@
     "assets": {
         "web.assets_backend": [
             "pan_style_pro_search/static/src/js/smart_search_command_provider.js",
+            "pan_style_pro_search/static/src/js/search_more_patch.js",
         ],
     },
     "installable": True,

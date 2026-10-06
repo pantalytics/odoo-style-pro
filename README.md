@@ -1,4 +1,4 @@
-# Pantalytics Style Pro for Odoo 20
+# Style Pro for Odoo 20
 
 A modern, consumer-grade UI theme for Odoo 20 — inspired by the design language of Linear and Vercel. Built and maintained by [Pantalytics](https://pantalytics.com).
 
@@ -80,7 +80,7 @@ Install the module:
 odoo -c odoo.conf -i pan_style_pro
 ```
 
-Or via **Apps** in the Odoo backend — search for `Pantalytics Style Pro`.
+Or via **Apps** in the Odoo backend — search for `Style Pro`.
 
 On Enterprise, `pan_style_pro_enterprise` auto-installs for home menu and dark mode support.
 

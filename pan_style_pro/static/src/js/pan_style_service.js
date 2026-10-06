@@ -16,6 +16,14 @@ const PAN_TOKEN_MAP = {
     navbar_border_color: "--pan-navbar-border",
 };
 
+// "#5b58d8" -> "91, 88, 216", for the --pan-accent-rgb tints; null otherwise.
+function _hexToRgb(value) {
+    const match = /^#([0-9a-f]{6})$/i.exec((value || "").trim());
+    if (!match) return null;
+    const n = parseInt(match[1], 16);
+    return `${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}`;
+}
+
 function _isDarkMode() {
     // Odoo sets color-scheme: dark on .o_web_client in dark mode
     const cs = getComputedStyle(document.documentElement).colorScheme;
@@ -38,6 +46,11 @@ const panStyleService = {
             if (value) {
                 root.style.setProperty(cssVar, value);
             }
+        }
+        // Tints (hover, active, focus rings) follow a custom accent too.
+        const accentRgb = _hexToRgb(style.accent_color);
+        if (accentRgb) {
+            root.style.setProperty("--pan-accent-rgb", accentRgb);
         }
     },
 };
