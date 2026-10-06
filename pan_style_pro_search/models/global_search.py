@@ -3,6 +3,7 @@ import logging
 from odoo import api, models
 from odoo.api import ormcache
 from odoo.fields import Domain
+from odoo.tools import SQL
 
 _logger = logging.getLogger(__name__)
 
@@ -27,31 +28,45 @@ class PanSmartSearchGlobal(models.AbstractModel):
         term = (term or "").strip()
         if len(term) < MIN_TERM_LENGTH or not self.env["base"]._pan_smart_search_enabled():
             return []
-        scored = []
+        selects = []
         for model_name in self._pan_smart_search_models():
-            # Typos only in each record's own name here: the global list is
-            # about the records themselves, and following every link (customer,
-            # salesperson, team) per model costs a round trip each.
-            model = self.env[model_name].with_context(pan_smart_search_own_name_only=True)
+            # Typos only in each record's own name, and without the "does this
+            # word occur literally?" probe: each would cost a round trip per
+            # model, and the list is about the records themselves.
+            model = self.env[model_name].with_context(
+                pan_smart_search_own_name_only=True,
+                pan_smart_search_always_fuzzy=True,
+                pan_smart_search_dropdown_paths=True,
+            )
             try:
-                hits = model._pan_smart_search_scored(Domain("x_smart_search", "ilike", term), term, PER_MODEL)
+                select = model._pan_smart_search_scored_sql(Domain("x_smart_search", "ilike", term), term, PER_MODEL)
             except Exception:  # noqa: BLE001 - one model must not break the palette
                 _logger.debug("Smart search everywhere: skipping %s", model_name, exc_info=True)
                 continue
-            scored += [(score, model_name, res_id) for res_id, score in hits]
-        # One relevance scale across models: the office chairs before an
-        # employee whose job title happens to contain "office".
-        scored.sort(key=lambda hit: -hit[0])
-        results = []
-        for _score, model_name, res_id in scored[:MAX_RESULTS]:
-            record = self.env[model_name].browse(res_id)
-            results.append({
+            if select is not None:
+                selects.append(SQL("(%s)", select))
+        if not selects:
+            return []
+        # One query for all models, one relevance scale: the office chairs
+        # before an employee whose job title happens to contain "office".
+        self.env.cr.execute(SQL(
+            "SELECT * FROM (%s) AS hits ORDER BY 3 DESC LIMIT %s",
+            SQL(" UNION ALL ").join(selects), MAX_RESULTS,
+        ))
+        hits = self.env.cr.fetchall()
+        names = {}
+        for model_name in {model_name for model_name, _id, _score in hits}:
+            ids = [res_id for name, res_id, _score in hits if name == model_name]
+            names.update({(model_name, r.id): r.display_name for r in self.env[model_name].browse(ids)})
+        return [
+            {
                 "model": model_name,
                 "model_label": self.env["ir.model"]._get(model_name).name,
                 "id": res_id,
-                "display_name": record.display_name,
-            })
-        return results
+                "display_name": names[(model_name, res_id)],
+            }
+            for model_name, res_id, _score in hits
+        ]
 
     @api.model
     @ormcache("self.env.uid")
