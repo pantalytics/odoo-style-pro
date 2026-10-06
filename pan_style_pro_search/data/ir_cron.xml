@@ -8,4 +8,12 @@
         <field name="interval_number">1</field>
         <field name="interval_type">days</field>
     </record>
+    <record id="ir_cron_smart_search_usage" model="ir.cron">
+        <field name="name">Smart search: usage statistics for ranking</field>
+        <field name="model_id" ref="pan_style_pro_search.model_pan_smart_search_usage"/>
+        <field name="state">code</field>
+        <field name="code">model._pan_smart_search_rebuild()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+    </record>
 </odoo>

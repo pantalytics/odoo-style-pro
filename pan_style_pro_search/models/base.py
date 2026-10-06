@@ -46,6 +46,10 @@ SWAP_MIN_LENGTH = 5
 # A trigram index only serves LIKE patterns of 3+ characters; shorter words
 # match the name literally, without accent folding (a seq scan otherwise).
 FOLD_MIN_LENGTH = 3
+# Usage (pan.smart.search.usage, 0..1) adds at most this much: enough to put
+# the product people actually sell first among equally good text matches, not
+# enough to beat a clearly better text match (each word adds up to 1).
+USAGE_WEIGHT = 0.5
 # An exact reference beats any similarity score.
 EXACT_CODE_BONUS = 10
 # Upper bound on searched field paths per model: every word is OR-ed over all
@@ -441,6 +445,10 @@ class Base(models.AbstractModel):
             # Tie-breaker: the name closest to the whole term, so "Plaat 3mm"
             # comes before "Plaat 3mm RVS 304 1000x2000 geslepen".
             scores.append(SQL("similarity(%s, %s)", fold(term), name))
+        scores.append(SQL(
+            "%s * COALESCE((SELECT score FROM pan_smart_search_usage WHERE model = %s AND res_id = %s), 0)",
+            USAGE_WEIGHT, self._name, self._pan_smart_search_field_sql(query, "id"),
+        ))
         return SQL("%s DESC, %s", SQL(" + ").join(scores), self._pan_smart_search_field_sql(query, "id"))
 
     @api.model
