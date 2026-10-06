@@ -60,7 +60,13 @@ A path is used only if the current user can search it:
 - the last field is `char`, `many2one`, `many2many` or `one2many`. Text and
   html fields (descriptions, mail bodies) are left out: noise, and slow.
 
-This check matters: every word is OR-ed over all paths, so one path the user
+- the user may read the models behind related and inherited fields too,
+- and building an `ilike` search on the path actually works for this user.
+  This last check catches what a field definition does not show
+  (`website.menu.url` has a search method that reads `website.page`). It runs
+  once per user and model, then the result is cached.
+
+These checks matter: every word is OR-ed over all paths, so one path the user
 cannot search would break the whole search, not just that field.
 
 At most 15 paths per model (`MAX_PATHS`), name field first.
