@@ -86,7 +86,7 @@ The term is split into words. **Every word must match**, in any order:
 | Word | Matches |
 |---|---|
 | 4+ characters | literally (`ilike`) in any searched path; in the name accent-insensitive; and, if only letters, with typos in the name or in the name of a directly linked record (a many2one in the searched paths: customer, project, salesperson) |
-| 3 characters | as above, without typos |
+| 3 characters (`rvs`) | literally in the name only, accent-insensitive |
 | 1-2 characters (`m5`, `70`) | literally in the name only, accent-sensitive (a trigram index cannot serve patterns this short). In a reference like `R0000062` or an email address, `62` matches nearly at random. |
 | contains digits or punctuation (`3mm`, `M8x20`, `hp-rvs`) | literally only. pg_trgm splits `hp-rvs` into `hp` + `rvs` and would match every RVS product. |
 
