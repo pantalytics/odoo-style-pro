@@ -1,6 +1,7 @@
 from odoo import api, fields, models
 from odoo.fields import Domain
-from odoo.tools import SQL, escape_psql
+from odoo.tools import SQL
+from odoo.tools.sql import escape_psql
 
 # Only words of letters this long get typo tolerance. A typo-tolerant "M8" or
 # "3" matches half the catalogue, and pg_trgm splits "hp-rvs" into "hp" and
@@ -62,7 +63,10 @@ class PanSmartSearchMixin(models.AbstractModel):
 
     @api.model
     def _pan_smart_search_threshold(self):
-        value = self.env["ir.config_parameter"].sudo().get_param(THRESHOLD_PARAM)
+        params = self.env["ir.config_parameter"].sudo()
+        if hasattr(params, "get_float"):  # Odoo 20 replaced get_param with typed getters
+            return params.get_float(THRESHOLD_PARAM, DEFAULT_THRESHOLD)
+        value = params.get_param(THRESHOLD_PARAM)
         try:
             return float(value) if value else DEFAULT_THRESHOLD
         except ValueError:
@@ -73,13 +77,18 @@ class PanSmartSearchMixin(models.AbstractModel):
         return self.env.registry.has_trigram and word.isalpha() and len(word) >= FUZZY_MIN_LENGTH
 
     @api.model
+    def _pan_smart_search_field_sql(self, query, field):
+        # Odoo 19: query.table is the alias string. Odoo 20: a TableSQL that
+        # resolves fields itself.
+        if isinstance(query.table, str):
+            return self._field_to_sql(query.table, field, query)
+        return query.table[field]
+
+    @api.model
     def _pan_smart_search_ids_sql(self, words):
         """Query selecting the ids of the records matching every word."""
         query = self.with_context(active_test=False)._search([])
-        texts = [
-            self._field_to_sql(query.table, field, query)
-            for field in self._pan_smart_search_match_fields
-        ]
+        texts = [self._pan_smart_search_field_sql(query, field) for field in self._pan_smart_search_match_fields]
         threshold = self._pan_smart_search_threshold()
         for word in words:
             like = f"%{escape_psql(word)}%"
@@ -113,9 +122,8 @@ class PanSmartSearchMixin(models.AbstractModel):
 
     @api.model
     def _pan_smart_search_order_sql(self, query, term):
-        alias = query.table
-        name = self._field_to_sql(alias, "name", query)
-        code = SQL("COALESCE(%s, '')", self._field_to_sql(alias, "default_code", query))
+        name = self._pan_smart_search_field_sql(query, "name")
+        code = SQL("COALESCE(%s, '')", self._pan_smart_search_field_sql(query, "default_code"))
         scores = [
             SQL("CASE WHEN %s ILIKE %s THEN %s ELSE 0 END", code, escape_psql(term), EXACT_CODE_BONUS)
         ]
@@ -128,7 +136,7 @@ class PanSmartSearchMixin(models.AbstractModel):
             # Tie-breaker: the name closest to the whole term, so "Plaat 3mm"
             # comes before "Plaat 3mm RVS 304 1000x2000 geslepen".
             scores.append(SQL("similarity(%s, %s)", term, name))
-        return SQL("%s DESC, %s", SQL(" + ").join(scores), SQL.identifier(alias, "id"))
+        return SQL("%s DESC, %s", SQL(" + ").join(scores), self._pan_smart_search_field_sql(query, "id"))
 
     @api.model
     def _pan_smart_search_ranked(self, domain, term, offset=0, limit=None, field_names=None):
