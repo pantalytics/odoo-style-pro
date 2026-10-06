@@ -15,44 +15,25 @@ msgstr ""
 "Language: nl\n"
 
 #. module: pan_style_pro_search
-#: model:ir.model.fields,field_description:pan_style_pro_search.field_pan_smart_search_mixin__x_smart_search
-#: model:ir.model.fields,field_description:pan_style_pro_search.field_product_product__x_smart_search
-#: model:ir.model.fields,field_description:pan_style_pro_search.field_product_template__x_smart_search
-#: model:ir.model.fields,field_description:pan_style_pro_search.field_res_partner__x_smart_search
-#: model:ir.model.fields,field_description:pan_style_pro_search.field_res_users__x_smart_search
-#: model:ir.model.fields,field_description:pan_style_pro_search.field_res_config_settings__group_pan_smart_search
+#. odoo-python
+#: code:addons/pan_style_pro_search/models/base.py:0
 #: model:res.groups,name:pan_style_pro_search.group_smart_search
 msgid "Smart search"
 msgstr "Slim zoeken"
 
 #. module: pan_style_pro_search
-#: model:ir.model.fields,help:pan_style_pro_search.field_pan_smart_search_mixin__x_smart_search
-#: model:ir.model.fields,help:pan_style_pro_search.field_product_product__x_smart_search
-#: model:ir.model.fields,help:pan_style_pro_search.field_product_template__x_smart_search
-#: model:ir.model.fields,help:pan_style_pro_search.field_res_partner__x_smart_search
-#: model:ir.model.fields,help:pan_style_pro_search.field_res_users__x_smart_search
-msgid ""
-"Search with separate words in any order, tolerant of typos. Results are "
-"ranked best match first."
-msgstr ""
-"Zoek met losse woorden in elke volgorde, ook met typfouten. De beste match "
-"staat bovenaan."
-
-#. module: pan_style_pro_search
-#: model:ir.model,name:pan_style_pro_search.model_pan_smart_search_mixin
-msgid "Smart search: words in any order, typos, best match first"
-msgstr "Slim zoeken: losse woorden, typfouten, beste match bovenaan"
+#: model:ir.model.fields,field_description:pan_style_pro_search.field_res_config_settings__group_pan_smart_search
+msgid "Use smart search"
+msgstr "Slim zoeken gebruiken"
 
 #. module: pan_style_pro_search
 #: model:ir.model.fields,help:pan_style_pro_search.field_res_config_settings__group_pan_smart_search
 msgid ""
-"Search products and contacts with separate words in any order, tolerant of "
-"typos, best match first. Applies to search bars, search dialogs and "
-"dropdowns."
+"Search with separate words in any order, tolerant of typos, best match "
+"first. Applies to every search bar, search dialog and dropdown."
 msgstr ""
-"Zoek producten en contacten met losse woorden in elke volgorde, ook met "
-"typfouten, beste match bovenaan. Geldt voor zoekbalken, zoekvensters en "
-"dropdowns."
+"Zoek met losse woorden in elke volgorde, ook met typfouten, beste match "
+"bovenaan. Geldt voor elke zoekbalk, elk zoekvenster en elke dropdown."
 
 #. module: pan_style_pro_search
 #: model_terms:ir.ui.view,arch_db:pan_style_pro_search.res_config_settings_view_form
@@ -62,17 +43,18 @@ msgstr "Zoeken"
 #. module: pan_style_pro_search
 #: model_terms:ir.ui.view,arch_db:pan_style_pro_search.res_config_settings_view_form
 msgid ""
-"Search products and contacts with separate words in any order,\n"
-"                                tolerant of typos, best match first. The standard search fields and filters stay."
+"Search everywhere with separate words in any order, tolerant of typos,\n"
+"                                best match first. The standard search fields and filters stay."
 msgstr ""
-"Zoek producten en contacten met losse woorden in elke volgorde,\n"
-"                                ook met typfouten, beste match bovenaan. De standaard zoekvelden en filters blijven."
+"Zoek overal met losse woorden in elke volgorde, ook met typfouten,\n"
+"                                beste match bovenaan. De standaard zoekvelden en filters blijven."
 
 #. module: pan_style_pro_search
 #: model:res.groups,comment:pan_style_pro_search.group_smart_search
-msgid ""
-"Search bars and dropdowns of products and contacts use smart search. "
-"Managed by Settings > Style Pro."
-msgstr ""
-"Zoekbalken en dropdowns van producten en contacten gebruiken slim zoeken. "
-"Beheerd via Instellingen > Style Pro."
+msgid "Search bars and dropdowns use smart search. Managed by Settings > Style Pro."
+msgstr "Zoekbalken en dropdowns gebruiken slim zoeken. Beheerd via Instellingen > Style Pro."
+
+#. module: pan_style_pro_search
+#: model:ir.cron,cron_name:pan_style_pro_search.ir_cron_smart_search_indexes
+msgid "Smart search: trigram indexes on large tables"
+msgstr "Slim zoeken: trigram-indexen op grote tabellen"

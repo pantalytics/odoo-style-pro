@@ -4,6 +4,6 @@
          (res.config.settings implied_group); nobody assigns it by hand. -->
     <record id="group_smart_search" model="res.groups">
         <field name="name">Smart search</field>
-        <field name="comment">Search bars and dropdowns of products and contacts use smart search. Managed by Settings > Style Pro.</field>
+        <field name="comment">Search bars and dropdowns use smart search. Managed by Settings > Style Pro.</field>
     </record>
 </odoo>

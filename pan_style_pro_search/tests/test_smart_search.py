@@ -1,3 +1,5 @@
+import unittest
+
 from odoo.tests import TransactionCase, tagged
 
 
@@ -6,6 +8,8 @@ class TestSmartSearch(TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        if "product.template" not in cls.env:
+            raise unittest.SkipTest("Products is not installed")
         cls._set_smart_search(True)
         Template = cls.env["product.template"]
         cls.plate = Template.create({"name": "Plaat 3mm RVS 304", "default_code": "PL-RVS-3"})
@@ -88,19 +92,23 @@ class TestSmartSearch(TransactionCase):
         names = [record["name"] for record in result["records"]]
         self.assertEqual(names, sorted(names))
 
+    def _dropdown(self, model, name):
+        result = self.env[model].web_name_search(name, {"display_name": {}}, domain=self.scope_for(model))
+        return [(row["id"], row["display_name"]) for row in result]
+
     def test_dropdown(self):
         for model in ("product.template", "product.product"):
-            result = self.env[model].name_search("rvs plaat 3mm", domain=self.scope_for(model))
+            result = self._dropdown(model, "rvs plaat 3mm")
             self.assertEqual(len(result), 1, model)
             self.assertIn("Plaat 3mm RVS 304", result[0][1])
 
     def test_dropdown_typo(self):
         self._needs_trigram()
-        result = self.env["product.product"].name_search("plaar rvs", domain=self.scope_for("product.product"))
+        result = self._dropdown("product.product", "plaar rvs")
         self.assertEqual([row[0] for row in result], self.plate.product_variant_ids.ids)
 
     def test_dropdown_keeps_standard_hits(self):
-        result = self.env["product.product"].name_search("PL-RVS-3", domain=self.scope_for("product.product"))
+        result = self._dropdown("product.product", "PL-RVS-3")
         self.assertEqual(result[0][0], self.plate.product_variant_id.id)
 
     def scope_for(self, model):
@@ -110,8 +118,7 @@ class TestSmartSearch(TransactionCase):
         """Off: standard Odoo search, no smart field in the search bar."""
         self._set_smart_search(False)
         self.assertFalse(self.env.user.has_group("pan_style_pro_search.group_smart_search"))
-        result = self.env["product.product"].name_search("rvs plaat 3mm", domain=self.scope_for("product.product"))
-        self.assertEqual(result, [])
+        self.assertEqual(self._dropdown("product.product", "rvs plaat 3mm"), [])
         arch = self.env["product.template"].get_views([(False, "search")])["views"]["search"]["arch"]
         self.assertNotIn("x_smart_search", arch)
         self._set_smart_search(True)
