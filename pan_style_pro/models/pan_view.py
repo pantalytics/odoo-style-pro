@@ -50,7 +50,7 @@ class PanView(models.Model):
     _rec_name = "res_model"
 
     user_id = fields.Many2one(
-        "res.users", required=True, index=True, ondelete="cascade", default=lambda self: self.env.user
+        "res.users", index=True, ondelete="cascade", help="Empty: the view everyone gets who has no view of their own."
     )
     res_model = fields.Char(string="Model", required=True)
     view_type = fields.Selection(VIEW_TYPES, required=True, default="list")
@@ -69,6 +69,10 @@ class PanView(models.Model):
     _unique_user_model_type = models.Constraint(
         "unique(user_id, res_model, view_type)",
         "A user has one view per model and view type.",
+    )
+    _unique_shared_model_type = models.UniqueIndex(
+        "(res_model, view_type) WHERE user_id IS NULL",
+        "There is one shared view per model and view type.",
     )
 
     def _part(self, name):
@@ -141,40 +145,57 @@ class PanView(models.Model):
         self.ensure_one()
         return {part: self._part(part) for part in VIEW_PARTS if self._part(part) is not None}
 
-    def _mine(self, res_model, view_type):
+    def _find(self, res_model, view_type, shared):
         return self.search(
-            [("user_id", "=", self.env.uid), ("res_model", "=", res_model), ("view_type", "=", view_type)],
+            [
+                ("user_id", "=", False if shared else self.env.uid),
+                ("res_model", "=", res_model),
+                ("view_type", "=", view_type),
+            ],
             limit=1,
         )
 
     @api.model
-    def get_mine(self):
-        """{res_model: {view_type: {columns, sort, filter, group_by}}} for the current user."""
+    def get_views(self):
+        """{res_model: {view_type: {mine, shared}}} for the current user; a
+        missing side is None. The web client shows mine when present, else
+        shared."""
         result = {}
-        for record in self.search([("user_id", "=", self.env.uid)]):
-            result.setdefault(record.res_model, {})[record.view_type] = record._to_dict()
+        for record in self.search(["|", ("user_id", "=", self.env.uid), ("user_id", "=", False)]):
+            side = result.setdefault(record.res_model, {}).setdefault(
+                record.view_type, {"mine": None, "shared": None}
+            )
+            side["shared" if not record.user_id else "mine"] = record._to_dict()
         return result
 
     @api.model
-    def save(self, res_model, values, view_type="list"):
-        """Create or update the current user's view on a model.
+    def save(self, res_model, values, view_type="list", shared=False):
+        """Create or update a view on a model: the current user's own, or with
+        ``shared`` everyone's (administrators only, by record rule).
 
         ``values`` holds any subset of columns, sort, filter and group_by; parts
         left out keep their stored value, a part set to None is cleared.
-        Returns the view as get_mine() would.
+        Returns the view as get_views() would.
         """
         unknown = set(values) - set(VIEW_PARTS)
         if unknown:
             raise ValidationError(self.env._("Unknown view parts: %s", ", ".join(sorted(unknown))))
-        record = self._mine(res_model, view_type)
+        record = self._find(res_model, view_type, shared)
         if record:
             record.write(values)
         else:
-            record = self.create({"res_model": res_model, "view_type": view_type, **values})
+            record = self.create(
+                {
+                    "user_id": False if shared else self.env.uid,
+                    "res_model": res_model,
+                    "view_type": view_type,
+                    **values,
+                }
+            )
         return record._to_dict()
 
     @api.model
-    def reset(self, res_model, view_type="list"):
-        """Forget the current user's view; the model's own view definition shows again."""
-        self._mine(res_model, view_type).unlink()
+    def reset(self, res_model, view_type="list", shared=False):
+        """Forget a view: the current user's own, or with ``shared`` everyone's."""
+        self._find(res_model, view_type, shared).unlink()
         return True

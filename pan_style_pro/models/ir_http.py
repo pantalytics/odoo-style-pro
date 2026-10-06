@@ -32,5 +32,5 @@ class IrHttp(models.AbstractModel):
             for key, param in PAN_STYLE_DARK_PARAMS.items()
         }
         if self.env.user._is_internal():
-            result["pan_views"] = self.env["pan.view"].get_mine()
+            result["pan_views"] = self.env["pan.view"].get_views()
         return result

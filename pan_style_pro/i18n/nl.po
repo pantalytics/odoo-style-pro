@@ -17,8 +17,32 @@ msgstr ""
 #. module: pan_style_pro
 #. odoo-javascript
 #: code:addons/pan_style_pro/static/src/xml/list_columns.xml:0
-msgid "Reset columns"
-msgstr "Kolommen herstellen"
+msgid "View"
+msgstr "Weergave"
+
+#. module: pan_style_pro
+#. odoo-javascript
+#: code:addons/pan_style_pro/static/src/xml/list_columns.xml:0
+msgid "My view"
+msgstr "Mijn weergave"
+
+#. module: pan_style_pro
+#. odoo-javascript
+#: code:addons/pan_style_pro/static/src/xml/list_columns.xml:0
+msgid "Everyone's view"
+msgstr "Weergave van iedereen"
+
+#. module: pan_style_pro
+#. odoo-javascript
+#: code:addons/pan_style_pro/static/src/xml/list_columns.xml:0
+msgid "Reset my view"
+msgstr "Mijn weergave herstellen"
+
+#. module: pan_style_pro
+#. odoo-javascript
+#: code:addons/pan_style_pro/static/src/xml/list_columns.xml:0
+msgid "Reset everyone's view"
+msgstr "Weergave van iedereen herstellen"
 
 #. module: pan_style_pro
 #. odoo-javascript

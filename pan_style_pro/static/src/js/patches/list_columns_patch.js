@@ -4,7 +4,7 @@ import { useSortable } from "@web/core/utils/sortable_owl";
 import { ListRenderer } from "@web/views/list/list_renderer";
 import { panViews } from "@pan_style_pro/js/pan_view_store";
 
-// The columns part of a user's view (pan.view): order, visible, width.
+// The columns part of a view (pan.view): order, visible, width.
 //
 // Order: drag a column header. Visible: the optional-columns dropdown, as
 // before, but remembered in the view instead of the browser. Width: drag the
@@ -12,6 +12,9 @@ import { panViews } from "@pan_style_pro/js/pan_view_store";
 // `columns` list, so a view follows the user to any browser and, being keyed
 // on the model, to every list of that model. Columns the stored list does not
 // know (typically added by a later view change) keep their arch position.
+//
+// The same dropdown is where the user picks whose view they are editing:
+// their own, or everyone's (administrators), and resets it.
 //
 // Top-level lists only. x2many lists inside a form keep their arch definition.
 
@@ -44,7 +47,6 @@ export function applyColumnOrder(columns, order) {
 patch(ListRenderer.prototype, {
     setup() {
         super.setup();
-        this.panColumnsCustom = false;
 
         useSortable({
             enable: () => this.panHasView,
@@ -111,10 +113,29 @@ patch(ListRenderer.prototype, {
         return this.panView?.columns || null;
     },
 
+    get panScope() {
+        return panViews.scope;
+    },
+
+    get panCanEditShared() {
+        return panViews.canEditShared;
+    },
+
+    /** Whether the view of the current scope exists, so it can be reset. */
+    get panScopeHasView() {
+        return panViews.has(this.props.list.resModel, panViews.scope);
+    },
+
+    /** Switch whose view is edited, and shown. */
+    panSetScope(scope) {
+        panViews.setScope(scope);
+        this.columnWidths.resetWidths();
+        this.render();
+    },
+
     processAllColumn(allColumns, list) {
         const columns = super.processAllColumn(allColumns, list);
         const stored = this.panViewColumns;
-        this.panColumnsCustom = !!stored;
         if (!stored) {
             return columns;
         }
@@ -151,10 +172,10 @@ patch(ListRenderer.prototype, {
         return super.toggleOptionalFieldGroup(groupId);
     },
 
-    // The dropdown also hosts "Reset columns", so it has to show even on a
-    // list without optional columns once the columns are custom.
+    // The dropdown also hosts the view choice, so it shows on every list
+    // that carries a view, optional columns or not.
     get displayOptionalFields() {
-        return super.displayOptionalFields || this.panColumnsCustom;
+        return super.displayOptionalFields || this.panHasView;
     },
 
     panApplyWidths() {
@@ -243,8 +264,12 @@ patch(ListRenderer.prototype, {
         this.render();
     },
 
-    panResetColumns() {
-        panViews.save(this.env, this.props.list.resModel, { columns: null });
+    /**
+     * Forget the view of the current scope. Columns follow at once; a stored
+     * filter, group by and sort stop applying from the next load.
+     */
+    panResetView() {
+        panViews.reset(this.env, this.props.list.resModel);
         this.columnWidths.resetWidths();
         this.render();
     },

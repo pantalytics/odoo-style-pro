@@ -1,15 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- A user sees and edits only their own views. -->
+    <!-- A user sees and edits their own views. -->
     <record id="pan_view_rule_own" model="ir.rule">
-        <field name="name">Personal view: own rows only</field>
+        <field name="name">View: own rows</field>
         <field name="model_id" ref="model_pan_view"/>
         <field name="domain_force">[('user_id', '=', user.id)]</field>
         <field name="groups" eval="[(4, ref('base.group_user'))]"/>
     </record>
-    <!-- Administrators can inspect and clean up everyone's views. -->
+    <!-- Everyone reads the shared views (no user). -->
+    <record id="pan_view_rule_shared_read" model="ir.rule">
+        <field name="name">View: everyone reads shared views</field>
+        <field name="model_id" ref="model_pan_view"/>
+        <field name="domain_force">[('user_id', '=', False)]</field>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <!-- Administrators write the shared views and can clean up anyone's. -->
     <record id="pan_view_rule_admin" model="ir.rule">
-        <field name="name">Personal view: administrators see all</field>
+        <field name="name">View: administrators manage all</field>
         <field name="model_id" ref="model_pan_view"/>
         <field name="domain_force">[(1, '=', 1)]</field>
         <field name="groups" eval="[(4, ref('base.group_system'))]"/>

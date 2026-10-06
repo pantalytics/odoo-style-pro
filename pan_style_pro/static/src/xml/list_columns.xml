@@ -1,15 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
 
-    <!-- "Reset columns" in the optional-columns dropdown, shown while the
-         user's view carries a columns part (order, visible or width). -->
+    <!-- Top of the optional-columns dropdown: whose view is being edited
+         (own, or everyone's for administrators) and a reset for it. -->
     <t t-name="pan_style_pro.ListRenderer.Columns" t-inherit="web.ListRenderer" t-inherit-mode="extension">
-        <xpath expr="//DropdownItem[@t-if='hasOptionalOpenFormViewColumn']" position="after">
-            <t t-if="panColumnsCustom">
-                <div t-if="optionalFieldGroups.length or hasOptionalOpenFormViewColumn" role="separator" class="dropdown-divider"/>
-                <DropdownItem class="'pan-reset-columns'" onSelected="() => this.panResetColumns()">
-                    <span class="d-flex align-items-center"><i class="fa fa-undo me-2"/><span class="text-truncate">Reset columns</span></span>
+        <xpath expr="//t[@t-set-slot='content']/t[@t-foreach='optionalFieldGroups']" position="before">
+            <t t-if="panHasView">
+                <div class="pan-view-scope px-3 py-1 small text-muted text-uppercase">View</div>
+                <DropdownItem class="'pan-view-scope-mine'" closingMode="'none'" onSelected="() => this.panSetScope('mine')">
+                    <span class="d-flex align-items-center"><i class="fa fa-fw me-2" t-att-class="panScope === 'mine' ? 'fa-check' : ''"/><span class="text-truncate">My view</span></span>
                 </DropdownItem>
+                <DropdownItem t-if="panCanEditShared" class="'pan-view-scope-shared'" closingMode="'none'" onSelected="() => this.panSetScope('shared')">
+                    <span class="d-flex align-items-center"><i class="fa fa-fw me-2" t-att-class="panScope === 'shared' ? 'fa-check' : ''"/><span class="text-truncate">Everyone's view</span></span>
+                </DropdownItem>
+                <DropdownItem t-if="panScopeHasView" class="'pan-view-reset'" onSelected="() => this.panResetView()">
+                    <span class="d-flex align-items-center"><i class="fa fa-fw fa-undo me-2"/><span class="text-truncate" t-if="panScope === 'mine'">Reset my view</span><span class="text-truncate" t-else="">Reset everyone's view</span></span>
+                </DropdownItem>
+                <div t-if="optionalFieldGroups.length or hasOptionalOpenFormViewColumn" role="separator" class="dropdown-divider"/>
             </t>
         </xpath>
     </t>
