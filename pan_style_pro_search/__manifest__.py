@@ -1,6 +1,7 @@
 {
     "name": "Style Pro Search",
     "version": "20.0.2.4.3",
+    "summary": "Google-style search in every Odoo model: words in any order, typos, best match first",
     "description": """
         Adds "Smart search" as the first option of every search bar, search
         dialog and dropdown. Every word must match, in any order; words of four
