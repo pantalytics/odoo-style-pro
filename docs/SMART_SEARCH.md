@@ -104,7 +104,10 @@ CloudPepper databases do not have, and it only affects smart search: standard
 Odoo search keeps its own behaviour.
 
 Typos use PostgreSQL `pg_trgm` on that folded name: `word <% name` (word
-similarity, default threshold 0.5). Without `pg_trgm` in the database smart search still works,
+similarity, default threshold 0.5), and only for a word that occurs nowhere as
+typed, like Google's "did you mean": "lasbogt" gets typo matching, "staal"
+does not. For a common word typo matching only added near-misses (1,165 hits
+instead of 1,070) at three times the cost. Without `pg_trgm` in the database smart search still works,
 literally only.
 
 Swapped letters (`pijpbuegel`) are not caught at 0.5; at 0.4 they are, but then
@@ -141,7 +144,7 @@ row is expensive (10,810 products: 700-950 ms per search), so that expression
 gets its own GIN trigram index:
 
 - a daily cron (**Smart search: trigram indexes on large tables**, also
-  triggered when the setting is switched on, and run during the upgrade that
+  triggered when the setting is switched on, and by the upgrade that
   introduced it) indexes the name of every eligible table with 1,000 rows or
   more (`INDEX_MIN_ROWS`); a table never analyzed yet is counted exactly;
 - with the index: 10,810 products 41-88 ms per search bar request.
@@ -157,8 +160,13 @@ Two more rules keep it cheap:
   search themselves; technical comodels (`ir.model.fields`, ...) are large and
   unindexed (one goal-definition search took 450 ms because of it).
 
-End result on 10,810 real products (local, full search bar request including
-the count Odoo adds): 41-88 ms.
+- Ranking uses plain `lower()` on the name, not the folded text: folding
+  every matched row for every score term cost ~145 ms on a 1,070-hit word.
+
+End result on 10,830 real products (local, full search bar request including
+the count Odoo adds): 31-103 ms, dropdowns 33-73 ms. The broadest single word
+("staal", 1,070 hits) is the 103 ms case; standard Odoo search takes 39 ms for
+it.
 
 Sweep over every eligible model of a demo database with 20 apps (250 models
 as admin, 177 as a regular user): smart search works wherever standard search
