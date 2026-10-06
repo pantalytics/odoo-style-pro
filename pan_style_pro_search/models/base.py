@@ -38,6 +38,10 @@ FUZZY_MIN_LENGTH = 4
 # Shorter words only match the name: "62" inside a reference like R0000062,
 # or inside an email address, matches nearly at random.
 SHORT_WORD_LENGTH = 4
+# Words this long that occur nowhere as typed also try every variant with two
+# neighbouring letters swapped ("pijpbuegel" -> "pijpbeugel"), which trigram
+# similarity misses at a threshold that does not add noise.
+SWAP_MIN_LENGTH = 5
 # A trigram index only serves LIKE patterns of 3+ characters; shorter words
 # match the name literally, without accent folding (a seq scan otherwise).
 FOLD_MIN_LENGTH = 3
@@ -386,10 +390,23 @@ class Base(models.AbstractModel):
             # "did you mean": "lasbogt" gets typo matching, "staal" does not
             # (that only added near-misses: 1,165 hits instead of 1,070, and
             # three times the time).
-            query.add_where(SQL("(%s OR %s <%% %s)", literal, folded, text))
+            options = [literal, SQL("%s <%% %s", folded, text)]
+            if len(folded) >= SWAP_MIN_LENGTH:
+                # One regular expression, not one LIKE per variant: separate
+                # ORs made PostgreSQL drop the index and fold every row a dozen
+                # times (3.4 s). Letters only (fuzzy words), so no escaping.
+                options.append(SQL("%s ~ %s", text, "|".join(self._pan_smart_search_swaps(folded))))
+            query.add_where(SQL("(%s)", SQL(" OR ").join(options)))
         else:
             query.add_where(literal)
         return query
+
+    @api.model
+    def _pan_smart_search_swaps(self, word):
+        """`word` with each pair of neighbouring letters swapped."""
+        variants = {word[:i] + word[i + 1] + word[i] + word[i + 2:] for i in range(len(word) - 1)}
+        variants.discard(word)
+        return sorted(variants)
 
     @api.model
     def _pan_smart_search_name_exists(self, fname, literal):
