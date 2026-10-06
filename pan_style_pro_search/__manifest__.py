@@ -1,6 +1,6 @@
 {
     "name": "Pantalytics Style Pro Search",
-    "version": "20.0.2.3.0",
+    "version": "20.0.2.4.0",
     "description": """
         Adds "Smart search" as the first option of every search bar, search
         dialog and dropdown. Every word must match, in any order; words of four
@@ -26,6 +26,11 @@
         "data/ir_cron.xml",
         "views/res_config_settings_views.xml",
     ],
+    "assets": {
+        "web.assets_backend": [
+            "pan_style_pro_search/static/src/js/smart_search_command_provider.js",
+        ],
+    },
     "installable": True,
     "auto_install": True,
     "application": False,
