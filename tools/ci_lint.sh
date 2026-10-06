@@ -208,6 +208,16 @@ else
     echo "OK: brand hex only in token definitions."
 fi
 
+# The same accents in rgb() notation, the way tints used to be written
+# (rgba(155, 153, 255, 0.1) is the dark accent leaking into light mode).
+# Tints go through rgba(var(--pan-accent-rgb), x).
+step "Brand — accent in rgb() only where --pan-accent-rgb is defined"
+if grep -rnE 'rgba?\(\s*(91,\s*88,\s*216|155,\s*153,\s*255)' --include='*.scss' $MODULES; then
+    fail "Accent rgb values belong in --pan-accent-rgb — use rgba(var(--pan-accent-rgb), x)."
+else
+    echo "OK: no hardcoded accent rgb."
+fi
+
 # ---------------------------------------------------------------------------
 # CLAUDE.md module split: pan_style_pro stays Community-installable. A
 # web_enterprise dependency there makes the module uninstallable on Community

@@ -6,7 +6,7 @@
 .o_main_navbar {
   --NavBar-entry-backgroundColor--hover: rgba(255, 255, 255, 0.06);
   --NavBar-entry-backgroundColor--focus: rgba(255, 255, 255, 0.06);
-  --NavBar-entry-backgroundColor--active: rgba(155, 153, 255, 0.15);
+  --NavBar-entry-backgroundColor--active: rgba(var(--pan-accent-rgb), 0.15);
 
   .o_nav_entry,
   .o_menu_brand,
@@ -18,7 +18,7 @@
 
   .o_nav_entry.active,
   .o_nav_entry[aria-expanded="true"] {
-    background-color: rgba(155, 153, 255, 0.15) !important;
+    background-color: rgba(var(--pan-accent-rgb), 0.15) !important;
   }
 }
 
@@ -39,7 +39,7 @@
 // ─── Table row hover ─────────────────────────────────────────────────────────
 
 .o_list_table tbody tr:hover td {
-  background-color: rgba(155, 153, 255, 0.06) !important;
+  background-color: rgba(var(--pan-accent-rgb), 0.06) !important;
 }
 
 // ─── Modal close button ──────────────────────────────────────────────────────
