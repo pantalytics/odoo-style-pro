@@ -36,5 +36,5 @@ class IrHttp(models.AbstractModel):
         # restart in between serves it). Until -u has created the table, the
         # web client simply gets no views; it must never fail to load.
         if self.env.user._is_internal() and table_exists(self.env.cr, "pan_view"):
-            result["pan_views"] = self.env["pan.view"].get_views()
+            result["pan_views"] = self.env["pan.view"].get_user_views()
         return result

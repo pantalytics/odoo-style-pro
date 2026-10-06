@@ -51,10 +51,14 @@ user can see, limited to business documents (models with a chatter:
 contacts, products, orders, invoices, tasks; not countries or units of
 measure), a child of an `_inherits` parent dropped in favour of the parent
 (products, not also variants), largest tables first, at most 8. Cached per
-user. Typos are matched on each record's own name only here (not through
-linked records), and the "does this word occur literally?" probe is cached per
-request, so a search over 8 models costs ~27 SQL queries instead of 68. Demo
-database with 20 apps: 61-102 ms per keystroke (after the palette's debounce).
+user. Per model it looks the record up the way a dropdown does (the dropdown
+fields, `_rec_names_search`, not the whole search view), typos on the record's
+own name, without the "does this word occur literally?" probe; all models go
+into one `UNION ALL` query and the typo threshold is set once per request. One
+search is 1-2 SQL queries instead of 28-40: 14-34 ms on a 20-app demo database
+(was 46-103 ms). Trade-off: "gemini" lists the contact Gemini Furniture, not
+also its orders (an order's dropdown searches the order number); the orders are
+one click away on the contact.
 
 Code: `models/global_search.py` (`pan.smart.search.global.search_everywhere`),
 `static/src/js/smart_search_command_provider.js`.

@@ -35,41 +35,41 @@ class TestPanView(TransactionCase):
         saved = Melle.save("res.partner", {"columns": COLUMNS})
         self.assertEqual(saved, {"columns": COLUMNS})
         self.assertEqual(
-            Melle.get_views(), {"res.partner": {"list": {"mine": {"columns": COLUMNS}, "shared": None}}}
+            Melle.get_user_views(), {"res.partner": {"list": {"mine": {"columns": COLUMNS}, "shared": None}}}
         )
 
         # a later save adds parts and keeps the rest; one row per model and type
         Melle.save("res.partner", {"sort": [{"name": "email", "asc": False}], "filter": FILTER})
         self.assertEqual(Melle.search_count([("res_model", "=", "res.partner")]), 1)
-        view = Melle.get_views()["res.partner"]["list"]["mine"]
+        view = Melle.get_user_views()["res.partner"]["list"]["mine"]
         self.assertEqual(view["columns"], COLUMNS)
         self.assertEqual(view["sort"], [{"name": "email", "asc": False}])
         self.assertEqual(view["filter"], FILTER)
 
         # a part set to None is cleared, the others stay
         Melle.save("res.partner", {"filter": None, "group_by": ["country_id"]})
-        view = Melle.get_views()["res.partner"]["list"]["mine"]
+        view = Melle.get_user_views()["res.partner"]["list"]["mine"]
         self.assertNotIn("filter", view)
         self.assertEqual(view["group_by"], ["country_id"])
 
         # another type on the same model is its own view
         Melle.save("res.partner", {"group_by": ["user_id"]}, view_type="kanban")
-        self.assertEqual(set(Melle.get_views()["res.partner"]), {"list", "kanban"})
+        self.assertEqual(set(Melle.get_user_views()["res.partner"]), {"list", "kanban"})
         Melle.save("res.users", {"columns": [{"name": "login"}]})
-        self.assertEqual(set(Melle.get_views()), {"res.partner", "res.users"})
+        self.assertEqual(set(Melle.get_user_views()), {"res.partner", "res.users"})
 
         Melle.reset("res.partner")
-        self.assertEqual(set(Melle.get_views()["res.partner"]), {"kanban"})
+        self.assertEqual(set(Melle.get_user_views()["res.partner"]), {"kanban"})
         Melle.reset("res.partner")  # resetting twice is fine
         Melle.reset("res.partner", view_type="kanban")
-        self.assertEqual(set(Melle.get_views()), {"res.users"})
+        self.assertEqual(set(Melle.get_user_views()), {"res.users"})
 
     def test_views_are_per_user(self):
         Melle, Ron = self._views(self.melle), self._views(self.ron)
         Melle.save("res.partner", {"columns": [{"name": "email"}, {"name": "phone"}]})
         Ron.save("res.partner", {"columns": [{"name": "phone"}, {"name": "email"}]})
-        self.assertEqual(Melle.get_views()["res.partner"]["list"]["mine"]["columns"][0]["name"], "email")
-        self.assertEqual(Ron.get_views()["res.partner"]["list"]["mine"]["columns"][0]["name"], "phone")
+        self.assertEqual(Melle.get_user_views()["res.partner"]["list"]["mine"]["columns"][0]["name"], "email")
+        self.assertEqual(Ron.get_user_views()["res.partner"]["list"]["mine"]["columns"][0]["name"], "phone")
 
         # Ron neither sees nor touches Melle's row
         melle_row = Melle.search([("res_model", "=", "res.partner")])
@@ -125,7 +125,7 @@ class TestPanView(TransactionCase):
             Melle.save("res.partner", {"colour": "red"})
         with self.assertRaises(ValueError):
             Melle.save("res.partner", {"columns": []}, view_type="spreadsheet")
-        self.assertFalse(Melle.get_views())
+        self.assertFalse(Melle.get_user_views())
 
     def test_shared_view(self):
         Admin = self.env["pan.view"]  # the test runs as the superuser's admin, in group_system
@@ -136,7 +136,7 @@ class TestPanView(TransactionCase):
 
         # everyone sees it, nobody but an administrator changes it
         for user in (Melle, Ron):
-            self.assertEqual(user.get_views()["res.partner"]["list"], {"mine": None, "shared": {"columns": COLUMNS, "sort": [{"name": "email", "asc": True}]}})
+            self.assertEqual(user.get_user_views()["res.partner"]["list"], {"mine": None, "shared": {"columns": COLUMNS, "sort": [{"name": "email", "asc": True}]}})
         with self.assertRaises(AccessError):
             Melle.save("res.partner", {"columns": []}, shared=True)
         shared_row = Admin.search([("res_model", "=", "res.partner"), ("user_id", "=", False)])
@@ -150,14 +150,14 @@ class TestPanView(TransactionCase):
 
         # an own view sits next to the shared one
         Melle.save("res.partner", {"columns": [{"name": "phone"}]})
-        views = Melle.get_views()["res.partner"]["list"]
+        views = Melle.get_user_views()["res.partner"]["list"]
         self.assertEqual(views["mine"], {"columns": [{"name": "phone"}]})
         self.assertEqual(views["shared"]["columns"], COLUMNS)
-        self.assertEqual(Ron.get_views()["res.partner"]["list"]["mine"], None)
+        self.assertEqual(Ron.get_user_views()["res.partner"]["list"]["mine"], None)
 
         Admin.reset("res.partner", shared=True)
-        self.assertEqual(Melle.get_views()["res.partner"]["list"]["shared"], None)
-        self.assertEqual(Melle.get_views()["res.partner"]["list"]["mine"], {"columns": [{"name": "phone"}]})
+        self.assertEqual(Melle.get_user_views()["res.partner"]["list"]["shared"], None)
+        self.assertEqual(Melle.get_user_views()["res.partner"]["list"]["mine"], {"columns": [{"name": "phone"}]})
 
     def test_row_goes_with_user(self):
         self._views(self.ron).save("res.partner", {"columns": COLUMNS})

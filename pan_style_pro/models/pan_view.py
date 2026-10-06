@@ -156,10 +156,11 @@ class PanView(models.Model):
         )
 
     @api.model
-    def get_views(self):
+    def get_user_views(self):
         """{res_model: {view_type: {mine, shared}}} for the current user; a
         missing side is None. The web client shows mine when present, else
-        shared."""
+        shared. Not named get_views: that is Odoo's view loader, which this
+        shadowed (opening pan.view in any view raised a TypeError)."""
         result = {}
         for record in self.search(["|", ("user_id", "=", self.env.uid), ("user_id", "=", False)]):
             side = result.setdefault(record.res_model, {}).setdefault(

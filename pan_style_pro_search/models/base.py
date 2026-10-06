@@ -112,6 +112,10 @@ class Base(models.AbstractModel):
     def _search_x_smart_search(self, operator, value):
         if operator != "ilike" or not isinstance(value, str):
             return NotImplemented
+        # The global search looks a record up by name, like a dropdown does:
+        # the dropdown fields are fewer and cheaper than the search view's.
+        if self.env.context.get("pan_smart_search_dropdown_paths"):
+            return self._pan_smart_search_domain(value, self._pan_smart_search_dropdown_paths())
         return self._pan_smart_search_domain(value, self._pan_smart_search_view_paths())
 
     # ------------------------------------------------------------------
@@ -321,9 +325,12 @@ class Base(models.AbstractModel):
         if not words:
             return Domain.TRUE
         name = self._pan_smart_search_name_field()
-        if any(self._pan_smart_search_fuzzy(word) for word in words):
+        cr_state = self.env.cr.__dict__
+        if any(self._pan_smart_search_fuzzy(word) for word in words) and not cr_state.get("_pan_smart_search_threshold_set"):
+            cr_state["_pan_smart_search_threshold_set"] = True
             # <% uses a trigram index when there is one; the threshold is per
-            # transaction, like Odoo's own website search does it.
+            # transaction, like Odoo's own website search does it. Once per
+            # request: a search over several models would set it every time.
             self.env.cr.execute(
                 SQL("SELECT set_config('pg_trgm.word_similarity_threshold', %s, true)", str(self._pan_smart_search_threshold()))
             )
@@ -389,7 +396,12 @@ class Base(models.AbstractModel):
         query = self.with_context(active_test=False)._search([])
         text = self._pan_smart_search_name_text_sql(query, fname)
         literal = SQL("%s LIKE %s", text, f"%{escape_psql(folded)}%")
-        if self._pan_smart_search_fuzzy(word) and not self._pan_smart_search_name_exists(fname, literal, folded):
+        if self._pan_smart_search_fuzzy(word) and (
+            # The global search skips the probe: one round trip per model, and
+            # it only shows the top 12 by relevance anyway.
+            self.env.context.get("pan_smart_search_always_fuzzy")
+            or not self._pan_smart_search_name_exists(fname, literal, folded)
+        ):
             # Typos only for a word that occurs nowhere as typed, like Google's
             # "did you mean": "lasbogt" gets typo matching, "staal" does not
             # (that only added near-misses: 1,165 hits instead of 1,070, and
@@ -450,13 +462,23 @@ class Base(models.AbstractModel):
     @api.model
     def _pan_smart_search_scored(self, domain, term, limit):
         """[(id, score)] of the best matches, for comparing across models."""
+        select = self._pan_smart_search_scored_sql(domain, term, limit)
+        if select is None:
+            return []
+        self.env.cr.execute(select)
+        return [(res_id, score) for _model, res_id, score in self.env.cr.fetchall()]
+
+    @api.model
+    def _pan_smart_search_scored_sql(self, domain, term, limit):
+        """SELECT model, id, score of the best `limit` matches, or None. One
+        per model, so a search over several models can be one UNION ALL."""
         query = self._search(domain, limit=limit)
         if query.is_empty():
-            return []
+            return None
+        record_id = self._pan_smart_search_field_sql(query, "id")
         score = self._pan_smart_search_score_sql(query, term)
-        query.order = SQL("%s DESC, %s", score, self._pan_smart_search_field_sql(query, "id"))
-        self.env.cr.execute(query.select(self._pan_smart_search_field_sql(query, "id"), score))
-        return self.env.cr.fetchall()
+        query.order = SQL("%s DESC, %s", score, record_id)
+        return query.select(SQL("%s", self._name), record_id, score)
 
     @api.model
     def _pan_smart_search_score_sql(self, query, term):
