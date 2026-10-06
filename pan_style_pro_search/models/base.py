@@ -259,17 +259,19 @@ class Base(models.AbstractModel):
         return Domain.AND(word_domains)
 
     @api.model
-    def _pan_smart_search_fuzzy_query(self, word):
-        """Records whose name contains `word`, typos allowed. Written so it can
-        use a trigram index."""
-        fname = self._pan_smart_search_name_field()
+    def _pan_smart_search_fuzzy_query(self, word, fname=None):
+        """Records whose `fname` (default: the name field) contains `word`,
+        typos allowed. Written so it can use a trigram index."""
+        fname = fname or self._pan_smart_search_name_field()
         field = self._fields[fname]
         if field.inherited:
-            # product.product's name lives on product.template: search there
-            # (with its index) and follow the _inherits link.
+            # product.product's name lives on product.template: search that
+            # exact field there (with its index) and follow the _inherits link.
+            # Not the parent's own name field: res.users.role inherits `name`
+            # from res.groups, whose _rec_name is not stored.
             parent = self.env[field.inherited_field.model_name]
             link = self._inherits[parent._name]
-            matches = Domain("id", "in", parent._pan_smart_search_fuzzy_query(word))
+            matches = Domain("id", "in", parent._pan_smart_search_fuzzy_query(word, field.inherited_field.name))
             return self.with_context(active_test=False)._search([(link, "any", matches)])
         query = self.with_context(active_test=False)._search([])
         if field.translate:
