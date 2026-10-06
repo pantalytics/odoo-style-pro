@@ -45,13 +45,16 @@ pan_style_pro/                          # Community + Enterprise base
 │       │   ├── _chatter.scss           # Mail chatter
 │       │   ├── _settings.scss          # Settings page
 │       │   ├── _stat_buttons.scss      # Stat buttons on forms
+│       │   ├── _list_column_order.scss # Dragged column header and drop slot
 │       │   ├── _navbar_search.scss     # Command palette search bar
 │       │   └── _login.scss             # Login page (assets_frontend)
 │       ├── js/
 │       │   └── patches/
-│       │       └── navbar_search_patch.js  # Patches NavBar to add search
+│       │       ├── navbar_search_patch.js  # Patches NavBar to add search
+│       │       └── list_column_order_patch.js # Drag list columns; order saved in favorites
 │       └── xml/
 │           ├── navbar_search.xml       # Search bar template (extends web.NavBar)
+│           ├── list_column_order.xml   # "Reset column order" item (extends web.ListRenderer)
 │           └── apps_menu.xml           # App icons in dropdown (extends web.NavBar.AppsMenu)
 
 pan_style_pro_enterprise/               # Enterprise-only features

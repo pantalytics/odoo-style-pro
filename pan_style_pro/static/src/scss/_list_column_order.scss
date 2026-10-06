@@ -1,0 +1,16 @@
+// Column drag in list views (list_column_order_patch.js): the header being
+// dragged and the slot it will land in.
+
+.o_list_table thead {
+  th.o_dragged {
+    background: var(--pan-bg) !important;
+    border-radius: var(--pan-radius-sm);
+    box-shadow: var(--pan-shadow-lg);
+    opacity: 0.95;
+  }
+
+  th.pan-column-placeholder {
+    background: color-mix(in srgb, var(--pan-accent) 12%, transparent) !important;
+    border-bottom: 2px solid var(--pan-accent) !important;
+  }
+}

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+    <!-- "Reset column order" in the optional-columns dropdown, shown only
+         while the order differs from the view's own. -->
+    <t t-name="pan_style_pro.ListRenderer.ColumnOrder" t-inherit="web.ListRenderer" t-inherit-mode="extension">
+        <xpath expr="//DropdownItem[@t-if='hasOptionalOpenFormViewColumn']" position="after">
+            <t t-if="panOrderIsCustom">
+                <div t-if="optionalFieldGroups.length or hasOptionalOpenFormViewColumn" role="separator" class="dropdown-divider"/>
+                <DropdownItem class="'pan-reset-column-order'" onSelected="() => this.panResetColumnOrder()">
+                    <span class="d-flex align-items-center"><i class="fa fa-undo me-2"/><span class="text-truncate">Reset column order</span></span>
+                </DropdownItem>
+            </t>
+        </xpath>
+    </t>
+
+</templates>
