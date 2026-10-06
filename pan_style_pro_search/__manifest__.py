@@ -22,7 +22,7 @@
     "depends": ["pan_style_pro"],
     "data": [
         "security/pan_style_pro_search_groups.xml",
-        "security/ir.model.access.csv",
+        "security/ir.access.csv",
         "data/ir_cron.xml",
         "views/res_config_settings_views.xml",
     ],
