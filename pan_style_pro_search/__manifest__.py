@@ -1,6 +1,6 @@
 {
     "name": "Pantalytics Style Pro Search",
-    "version": "20.0.2.2.0",
+    "version": "20.0.2.3.0",
     "description": """
         Adds "Smart search" as the first option of every search bar, search
         dialog and dropdown. Every word must match, in any order; words of four
@@ -22,6 +22,7 @@
     "depends": ["pan_style_pro"],
     "data": [
         "security/pan_style_pro_search_groups.xml",
+        "security/ir.model.access.csv",
         "data/ir_cron.xml",
         "views/res_config_settings_views.xml",
     ],

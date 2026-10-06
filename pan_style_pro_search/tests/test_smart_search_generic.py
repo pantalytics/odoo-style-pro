@@ -114,3 +114,14 @@ class TestSmartSearchGeneric(TransactionCase):
         # "vlindreklep": e and r swapped; trigram similarity alone misses it.
         self.assertEqual(self.env["res.partner"].search(scope + [("x_smart_search", "ilike", "vlindreklep")]), partner)
         self.assertEqual(self.env["res.partner"]._pan_smart_search_swaps("abc"), ["acb", "bac"])
+
+    def test_usage_ranks_equal_matches(self):
+        Partner = self.env["res.partner"]
+        quiet, busy = Partner.create([{"name": "Acme Supply Noord", "is_company": True}, {"name": "Acme Supply Zuid", "is_company": True}])
+        Partner.create([{"name": f"Contact {i}", "parent_id": busy.id} for i in range(3)])
+        self.env["pan.smart.search.usage"]._pan_smart_search_rebuild()
+        result = Partner.web_search_read([("id", "in", (quiet | busy).ids), ("x_smart_search", "ilike", "acme supply")], {})
+        self.assertEqual([r["id"] for r in result["records"]], [busy.id, quiet.id])
+        # Text still wins: a clearly better match beats a used record.
+        result = Partner.web_search_read([("id", "in", (quiet | busy).ids), ("x_smart_search", "ilike", "acme supply noord")], {})
+        self.assertEqual(result["records"][0]["id"], quiet.id)

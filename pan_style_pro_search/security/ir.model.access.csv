@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_pan_smart_search_usage_system,pan.smart.search.usage system,model_pan_smart_search_usage,base.group_system,1,0,0,0

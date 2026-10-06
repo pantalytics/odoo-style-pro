@@ -127,8 +127,30 @@ Highest score first, then id:
 3. tie-breaker: similarity of the whole term with the name, so "Plaat 3mm"
    comes before "Plaat 3mm RVS 304 1000x2000 geslepen"
 
+4. usage, as a tie-breaker: up to +0.5 (`USAGE_WEIGHT`) for records people
+   actually use, so among equally good text matches the product that is sold
+   most comes first. Each word adds up to 1, so a clearly better text match
+   still wins.
+
 Applies to list and kanban (`web_search_read`) when the domain has a smart
 search term and the user did not sort on a column, and to dropdowns.
+
+### Usage
+
+A nightly cron (**Smart search: usage statistics for ranking**, also triggered
+when the setting is switched on and by the upgrade that introduced it) counts,
+for every record of every eligible model, how often other records referred to
+it in the last 365 days, through every stored many2one in the database. A
+product counts the sale, purchase and stock lines that use it, a contact its
+orders, invoices and tasks; custom models count too, nothing is configured.
+Child models add up to their `_inherits` parent (variant usage counts for the
+product). Left out: technical, messaging and logging tables (`ir.*`, `mail.*`,
+...), the fields every record has (`create_uid`, `company_id`, ...), and
+company-dependent fields (jsonb). The result is `ln(1 + uses)`, scaled to 0..1
+per model, in `pan.smart.search.usage`.
+
+Demo database: rebuild 0.2 s; "desk" now lists the desks that are sold first,
+"table" and "office chair" keep their exact name match on top.
 
 ## Performance
 
