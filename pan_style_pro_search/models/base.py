@@ -371,14 +371,28 @@ class Base(models.AbstractModel):
             parent_query = parent._pan_smart_search_name_query(word, field.inherited_field.name)
             parent_query.add_where(SQL("%s IN (%s)", parent._pan_smart_search_field_sql(parent_query, "id"), own._search([]).subselect(link)))
             return own._search([(link, "any", Domain("id", "in", parent_query))])
+        folded = fold(word)
         query = self.with_context(active_test=False)._search([])
         text = self._pan_smart_search_name_text_sql(query, fname)
-        folded = fold(word)
-        condition = SQL("%s LIKE %s", text, f"%{escape_like_value(folded)}%")
-        if self._pan_smart_search_fuzzy(word):
-            condition = SQL("(%s OR %s <%% %s)", condition, folded, text)
-        query.add_where(condition)
+        literal = SQL("%s LIKE %s", text, f"%{escape_like_value(folded)}%")
+        if self._pan_smart_search_fuzzy(word) and not self._pan_smart_search_name_exists(fname, literal):
+            # Typos only for a word that occurs nowhere as typed, like Google's
+            # "did you mean": "lasbogt" gets typo matching, "staal" does not
+            # (that only added near-misses: 1,165 hits instead of 1,070, and
+            # three times the time).
+            query.add_where(SQL("(%s OR %s <%% %s)", literal, folded, text))
+        else:
+            query.add_where(literal)
         return query
+
+    @api.model
+    def _pan_smart_search_name_exists(self, fname, literal):
+        """Does any record this user can see match `literal`? One indexed row."""
+        probe = self._search([])
+        probe.add_where(literal)
+        probe.limit = 1
+        self.env.cr.execute(probe.select())
+        return bool(self.env.cr.fetchone())
 
     # ------------------------------------------------------------------
     # Ranking
@@ -398,7 +412,9 @@ class Base(models.AbstractModel):
 
     @api.model
     def _pan_smart_search_order_sql(self, query, term):
-        name = fold_sql(SQL("COALESCE(%s, '')", self._pan_smart_search_field_sql(query, self._pan_smart_search_name_field())))
+        # Plain lower(), not fold_sql(): folding every matched row for every
+        # score term cost ~145 ms on a 1,070-hit word; ranking does not need it.
+        name = SQL("lower(COALESCE(%s, ''))", self._pan_smart_search_field_sql(query, self._pan_smart_search_name_field()))
         code_field = self._pan_smart_search_code_field()
         code = SQL("COALESCE(%s, '')", self._pan_smart_search_field_sql(query, code_field)) if code_field else SQL("''")
         scores = [SQL("CASE WHEN %s ILIKE %s THEN %s ELSE 0 END", code, escape_like_value(term), EXACT_CODE_BONUS)]
