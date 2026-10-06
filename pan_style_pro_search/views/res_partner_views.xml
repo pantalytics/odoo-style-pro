@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Same as on products: first field of the contact search bar, also in
+         the "Search: ..." dialogs, only while the Style Pro setting is on. -->
+    <record id="view_res_partner_filter" model="ir.ui.view">
+        <field name="name">res.partner.select.pan_style_pro_search</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_res_partner_filter"/>
+        <field name="arch" type="xml">
+            <field name="name" position="before">
+                <field name="x_smart_search" groups="pan_style_pro_search.group_smart_search"/>
+            </field>
+        </field>
+    </record>
+</odoo>
