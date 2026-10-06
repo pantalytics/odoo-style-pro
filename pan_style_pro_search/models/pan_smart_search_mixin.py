@@ -16,19 +16,27 @@ EXACT_CODE_BONUS = 10
 
 
 class PanSmartSearchMixin(models.AbstractModel):
-    """Google-style search on a model with ``name`` and ``default_code``.
+    """Google-style search: words in any order, typos, best match first.
 
     Every word of the search term must match, in any order: literally (ilike)
     in one of ``_pan_smart_search_match_fields`` (the first one, the name,
     only for short words), or, for words of
     FUZZY_MIN_LENGTH letters or more, with typos via pg_trgm word_similarity
     on the name. Without pg_trgm it degrades to literal matching only.
+
+    A model opts in by inheriting this mixin, setting the two attributes
+    below, overriding web_search_read and name_search like product.product
+    does, and adding x_smart_search to its search view.
     """
 
     _name = "pan.smart.search.mixin"
     _description = "Smart search: words in any order, typos, best match first"
 
+    # Stored text fields searched literally; the first is the name, which
+    # also gets typo tolerance and ranks the results.
     _pan_smart_search_match_fields = ("name", "default_code")
+    # Reference field: an exact match on it ranks first.
+    _pan_smart_search_code_field = "default_code"
 
     x_smart_search = fields.Char(
         string="Smart search",
@@ -121,8 +129,8 @@ class PanSmartSearchMixin(models.AbstractModel):
 
     @api.model
     def _pan_smart_search_order_sql(self, query, term):
-        name = self._pan_smart_search_field_sql(query, "name")
-        code = SQL("COALESCE(%s, '')", self._pan_smart_search_field_sql(query, "default_code"))
+        name = self._pan_smart_search_field_sql(query, self._pan_smart_search_match_fields[0])
+        code = SQL("COALESCE(%s, '')", self._pan_smart_search_field_sql(query, self._pan_smart_search_code_field))
         scores = [
             SQL("CASE WHEN %s ILIKE %s THEN %s ELSE 0 END", code, escape_psql(term), EXACT_CODE_BONUS)
         ]
@@ -147,7 +155,7 @@ class PanSmartSearchMixin(models.AbstractModel):
 
     # ------------------------------------------------------------------
     # Entry points, called from the concrete models' overrides (a mixin
-    # method would sit behind product.template's own name_search in the MRO)
+    # method would sit behind the model's own name_search in the MRO)
     # ------------------------------------------------------------------
 
     @api.model
