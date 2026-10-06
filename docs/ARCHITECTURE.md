@@ -46,17 +46,18 @@ pan_style_pro/                          # Community + Enterprise base
 │       │   ├── _chatter.scss           # Mail chatter
 │       │   ├── _settings.scss          # Settings page
 │       │   ├── _stat_buttons.scss      # Stat buttons on forms
-│       │   ├── _list_columns.scss      # Dragged column header and drop slot
+│       │   ├── _list_columns.scss      # Column drag (grip, faded column, drop line, label) and the column list
 │       │   ├── _navbar_search.scss     # Command palette search bar
 │       │   └── _login.scss             # Login page (assets_frontend)
 │       ├── js/
 │       │   └── patches/
 │       │       ├── navbar_search_patch.js  # Patches NavBar to add search
 │       │       ├── list_columns_patch.js   # Columns part of pan.view: order (drag), visible, width
+│       │   ├── pan_field_list.js       # Column list in the ⚙ dropdown: grip, switch, lock
 │       │       └── search_view_patch.js    # filter, group_by and sort parts of pan.view
 │       └── xml/
 │           ├── navbar_search.xml       # Search bar template (extends web.NavBar)
-│           ├── list_columns.xml        # "Reset columns" item (extends web.ListRenderer)
+│           ├── list_columns.xml        # Header grip, view scope and column list (extends web.ListRenderer)
 │           └── apps_menu.xml           # App icons in dropdown (extends web.NavBar.AppsMenu)
 
 pan_style_pro_enterprise/               # Enterprise-only features
@@ -182,5 +183,28 @@ This is defined in `_typography.scss`.
 One Postgres table, `pan_view`: one row per user, model and view type (unique), plus at most one shared row per model and type (`user_id` empty, written by administrators, read by everyone). A row is a view on a model in the Airtable sense: `columns` (ordered `{name, visible, width}`), `sort`, `filter` (the search bar as facets: a predefined filter by XML name, a typed value for a search field, or a custom domain) and `group_by` as JSON. Record rules keep users on their own rows and let them read the shared ones; administrators manage all. The web client gets the user's own and the shared rows once at login (`session_info.pan_views`, `{model: {type: {mine, shared}}}`), shows mine when present, else shared, and calls `pan.view.save(res_model, values, view_type, shared)` on each change, `pan.view.reset` to drop one. Keyed on the model, not on an `ir.ui.view`, so a view follows the user into every list of that model. Only `list` is wired in the web client today; the table is ready for a name, several views per model and shared views.
 
 Web client (`js/pan_view_store.js` holds the session copy and writes through):
-- `list_columns_patch.js` on `ListRenderer`: order by dragging a header, visible via the optional-columns dropdown, width via the resize handle. Saved as one `columns` list; "Reset columns" in the dropdown clears it. x2many lists in forms are left alone.
+- `list_columns_patch.js` on `ListRenderer`: order by dragging a column (in the table or in the column list), visible via the column list, width via the resize handle. Saved as one `columns` list; "Reset my view" in the dropdown clears it. x2many lists in forms are left alone.
+
+### Moving columns: interaction design
+
+Two places, one result: the table and the column list stay in sync.
+
+**In the table**
+- Hover a header: a grip (⋮⋮) shows on the left and the label moves aside for it. The grip is the sign that the column moves.
+- Press the header (or the grip) and move more than 4 px: that is a drag. A press without moving stays a click and sorts, as in Odoo; the right edge still resizes.
+- While dragging: the column (header and every cell) fades to 35 %, a label with its name follows the pointer, and a 2 px accent line over the table's full height marks where it lands. No line when the spot equals where it already is. The list scrolls along near its left and right edge.
+- Release drops it and saves; Esc cancels and leaves no trace. The drop's click does not sort.
+
+**In the column list** (the ⚙ at the end of the header row, after Airtable's "Hide fields")
+- Every column in table order: a grip, the name, and a switch to show or hide it. Columns the view always shows carry a lock ("This list always shows this column"); hidden ones are greyed.
+- Drag a row by its grip: an accent-outlined slot shows where it goes; the table follows on release, the list stays open.
+- From 12 columns a search field filters the list; dragging is off while it filters (an order among a few visible rows says nothing about the hidden ones) and the list says so.
+- Above the columns: whose view you edit (mine, or everyone's for administrators) and a reset.
+- Property columns keep Odoo's own grouped list below.
+
+**Implementation notes**
+- The table drag is our own pointer handling, not Odoo's `useSortable`: that moves only the `<th>`, so the cells did not follow and the target was unclear.
+- `list_columns.xml` is inserted right after `web/static/src/views/list/list_renderer.xml` in the bundle (`("after", ...)` in the manifest). Modules that copy `web.ListRenderer` as a primary template (account's file-upload list: sales orders, invoices) only take the extensions loaded before their copy; at the end of the bundle the columns feature was missing from those lists.
+- The column list is reached through a prototype getter (`t-component="panFieldList"`), not `ListRenderer.components`: subclasses copy those at load time.
+- An open dropdown is not re-rendered with fresh data when the list behind it is, so the column list applies a move or a switch from its own state and drops that state when new props differ.
 - `search_view_patch.js` on `SearchModel` and `DynamicList`: when an action opens, the stored `filter` facets and `group_by` are *added* to the action's own defaults (never replacing them, so two actions on one model keep their meaning); every search bar change is saved back. A column-header sort is saved as `sort` and applies below a favorite's order, above the action's default. Dialog lists are left alone.

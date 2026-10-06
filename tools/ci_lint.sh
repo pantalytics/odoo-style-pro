@@ -93,11 +93,13 @@ modules = sys.argv[1:]
 declared, missing, problems = set(), [], 0
 
 def walk(entry):
-    # Bundle entries are paths, or ("remove", path) / ("prepend", path) tuples.
+    # Bundle entries are paths, or directive tuples: ("prepend", path),
+    # ("remove", path), ("after"|"before"|"replace", target, path). Only the
+    # last element is ours; a target can be another module's file.
     if isinstance(entry, str):
         return [entry]
-    if isinstance(entry, (list, tuple)):
-        return [e for e in entry if isinstance(e, str) and "/" in e]
+    if isinstance(entry, (list, tuple)) and entry and isinstance(entry[-1], str):
+        return [entry[-1]]
     return []
 
 for module in modules:
@@ -146,6 +148,27 @@ if grep -rn '^\s*_sql_constraints\s*=' --include='*.py' $MODULES; then
     fail "Odoo 19 ignores _sql_constraints and only warns, so the constraint is silently absent. Use models.Constraint."
 else
     echo "OK: no _sql_constraints assignment found."
+fi
+
+# ---------------------------------------------------------------------------
+# Odoo bundles every backend JS file into one asset; one syntax error (a
+# missing comma between patch() methods) blanks the whole web client, and
+# nothing else here would notice. Parse each file as a module.
+step "JS parses"
+if command -v node >/dev/null 2>&1; then
+    js_failed=0
+    while IFS= read -r file; do
+        # node --check parses without resolving the @web/... imports; the .mjs
+        # copy makes it parse as an ES module.
+        cp "$file" /tmp/pan_js_check.mjs
+        if ! node --check /tmp/pan_js_check.mjs 2>/tmp/pan_js_check.err; then
+            echo "::error file=$file::$(grep -m1 -E 'SyntaxError' /tmp/pan_js_check.err)"
+            js_failed=1
+        fi
+    done < <(find $MODULES -name '*.js' -path '*static/src*' | sort)
+    [ "$js_failed" = 0 ] && echo "OK: every JS file parses." || fail "JS syntax error."
+else
+    fail "node is not installed (needed to parse the JS)."
 fi
 
 # ---------------------------------------------------------------------------
