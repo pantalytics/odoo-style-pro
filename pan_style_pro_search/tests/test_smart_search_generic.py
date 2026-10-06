@@ -86,3 +86,14 @@ class TestSmartSearchGeneric(TransactionCase):
         # "noordenvld" has a typo and sits in the parent's name, not the person's.
         found = self.env["res.partner"].search([("id", "=", person.id), ("x_smart_search", "ilike", "kuipers noordenvld")])
         self.assertEqual(found, person)
+
+    def test_inherited_name_whose_parent_has_no_name_field(self):
+        """res.users gets `name` from res.partner via _inherits; the fuzzy match
+        must use that exact field on the parent, whatever the parent's own
+        name field is (res.users.role on Enterprise inherits from res.groups,
+        whose _rec_name is not stored)."""
+        if not self.env.registry.has_trigram:
+            self.skipTest("pg_trgm is not installed in this database")
+        Users = self.env["res.users"]
+        query = Users._pan_smart_search_fuzzy_query("administratr", "name")
+        self.assertIn(self.env.ref("base.user_admin").id, Users.browse(query).ids)
