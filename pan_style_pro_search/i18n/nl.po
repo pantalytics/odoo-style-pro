@@ -64,3 +64,9 @@ msgstr "Slim zoeken: trigram-indexen op grote tabellen"
 #: code:addons/pan_style_pro_search/static/src/js/smart_search_command_provider.js:0
 msgid "Records"
 msgstr "Records"
+
+#. module: pan_style_pro_search
+#. odoo-javascript
+#: code:addons/pan_style_pro_search/static/src/js/search_more_patch.js:0
+msgid "Smart search: %s"
+msgstr "Slim zoeken: %s"

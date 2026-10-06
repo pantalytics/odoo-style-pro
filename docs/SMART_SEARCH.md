@@ -30,6 +30,7 @@ Settings > Style Pro > Search > **Use smart search**. Off by default.
 | Search bar of a list, kanban or "Search: ..." dialog | **Smart search** is the first option in the autocomplete, so Enter uses it. "Product", "Name", filters, group-bys, favourites and custom filters are untouched and combine with it as usual. |
 | Results | Best match first, unless the user clicks a column to sort. |
 | Many2one dropdowns (a product on a quotation line, a contact on a task) | Smart matches first, ranked, then the standard matches that were not among them. |
+| "Search More..." under a dropdown | The dialog opens with a **Smart search: term** filter holding the same matches as the dropdown. Odoo's own "Quick search" used a plain name_search and found nothing for words in another order. |
 
 ## Search everything at once
 
