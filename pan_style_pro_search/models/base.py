@@ -188,7 +188,14 @@ class Base(models.AbstractModel):
         """Name field first, then the candidates this user can search, capped."""
         name = self._pan_smart_search_name_field()
         paths = [name] if name else []
-        paths += [path for path in candidates if path not in paths and self._pan_smart_search_valid_path(path)]
+        # The link to an _inherits parent (product.product.product_tmpl_id)
+        # repeats fields this model already has, at the cost of a second search.
+        parent_links = set(self._inherits.values())
+        paths += [
+            path
+            for path in candidates
+            if path not in paths and path.split(".")[0] not in parent_links and self._pan_smart_search_valid_path(path)
+        ]
         return paths[:MAX_PATHS]
 
     # ------------------------------------------------------------------
@@ -260,11 +267,27 @@ class Base(models.AbstractModel):
 
     @api.model
     def _pan_smart_search_fuzzy_query(self, word):
-        """Records whose name contains `word`, typos allowed."""
+        """Records whose name contains `word`, typos allowed. Written so it can
+        use a trigram index."""
+        fname = self._pan_smart_search_name_field()
+        field = self._fields[fname]
+        if field.inherited:
+            # product.product's name lives on product.template: search there
+            # (with its index) and follow the _inherits link.
+            parent = self.env[field.inherited_field.model_name]
+            link = self._inherits[parent._name]
+            matches = Domain("id", "in", parent._pan_smart_search_fuzzy_query(word))
+            return self.with_context(active_test=False)._search([(link, "any", matches)])
         query = self.with_context(active_test=False)._search([])
-        name = self._pan_smart_search_field_sql(query, self._pan_smart_search_name_field())
-        # Parentheses: "word <% col->>'nl_NL'" parses as "(word <% col)->>'nl_NL'".
-        query.add_where(SQL("%s <%% (%s)", word, name))
+        if field.translate:
+            # Same expression as Odoo's own trigram index on translated fields
+            # (index="trigram", e.g. the product name): all languages at once.
+            alias = query.table if isinstance(query.table, str) else query.table._alias
+            text = SQL("jsonb_path_query_array(%s, '$.*')::text", SQL.identifier(alias, fname))
+        else:
+            text = self._pan_smart_search_field_sql(query, fname)
+        # Parentheses: "word <% col->>'nl_NL'" would parse as "(word <% col)->>'nl_NL'".
+        query.add_where(SQL("%s <%% (%s)", word, text))
         return query
 
     # ------------------------------------------------------------------

@@ -120,12 +120,25 @@ Measured server-side.
 | 500,000 contacts, no trigram index | 106 ms | 261 ms literal; typo match **563 ms per word** |
 | 500,000 contacts, trigram index on the name | 1 ms | typo match **7 ms** |
 
-So typos on large tables need a trigram index on the name field. The module
-handles that itself: a daily cron (**Smart search: trigram indexes on large
-tables**, also triggered when the setting is switched on) adds a GIN trigram
-index on the name field of every eligible table above 50,000 rows
-(`INDEX_MIN_ROWS`) that has none. Translated names (jsonb, e.g. the product
-name) are skipped; Odoo indexes those itself where it matters.
+Two things keep typo matching fast:
+
+- **Translated names** (jsonb, e.g. the product name) are matched against the
+  same expression Odoo's own trigram index uses (`index="trigram"`:
+  `jsonb_path_query_array(name, '$.*')::text`), so that index is used.
+  10,810 products: 44 ms -> 1.4 ms per typo word.
+- **Other names on large tables** get a trigram index from the module: a daily
+  cron (**Smart search: trigram indexes on large tables**, also triggered when
+  the setting is switched on) adds a GIN trigram index on the name field of
+  every eligible table above 50,000 rows (`INDEX_MIN_ROWS`) that has none.
+
+A name inherited from a parent table (`product.product` gets its name from
+`product.template`) is matched on the parent, with its index. The link to an
+`_inherits` parent (`product_tmpl_id`) is never searched as a separate path: it
+repeats fields the model already has.
+
+End result on 10,810 real products (local, full search bar request including
+the count Odoo adds): `product.product` 207 -> 58 ms, `product.template`
+146 -> 83 ms.
 
 Sweep over every eligible model of a demo database with 20 apps (250 models
 as admin, 177 as a regular user): smart search works wherever standard search
