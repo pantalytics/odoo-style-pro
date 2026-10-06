@@ -335,7 +335,7 @@ class Base(models.AbstractModel):
                 # The name, accent-insensitive ("muller" finds "Müller"), with
                 # typos for longer words.
                 options.append(Domain("id", "in", self._pan_smart_search_name_query(word)))
-            if name and self._pan_smart_search_fuzzy(word):
+            if name and self._pan_smart_search_fuzzy(word) and not self.env.context.get("pan_smart_search_own_name_only"):
                 # Also in the name of directly linked records: "gemini
                 # furnitre" finds the orders of Gemini Furniture.
                 for path in searched:
@@ -414,12 +414,18 @@ class Base(models.AbstractModel):
 
     @api.model
     def _pan_smart_search_name_exists(self, fname, literal):
-        """Does any record this user can see match `literal`? One indexed row."""
-        probe = self._search([])
-        probe.add_where(literal)
-        probe.limit = 1
-        self.env.cr.execute(probe.select())
-        return bool(self.env.cr.fetchone())
+        """Does any record this user can see match `literal`? One indexed row,
+        remembered for the rest of the request: a search over several models
+        asks the same about res.partner for every partner_id."""
+        cache = self.env.cr.__dict__.setdefault("_pan_smart_search_exists", {})
+        key = (self._name, fname, self.env.uid, literal.code, tuple(literal.params))
+        if key not in cache:
+            probe = self._search([])
+            probe.add_where(literal)
+            probe.limit = 1
+            self.env.cr.execute(probe.select())
+            cache[key] = bool(self.env.cr.fetchone())
+        return cache[key]
 
     # ------------------------------------------------------------------
     # Ranking
