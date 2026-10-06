@@ -6,6 +6,7 @@
 
 - **`pan_style_pro`** — Community-compatible base (depends only on `web`)
 - **`pan_style_pro_enterprise`** — Enterprise bridge (auto-installs when `web_enterprise` is present)
+- **`pan_style_pro_search`** — Smart search in every search bar and dropdown, off by default (auto-installs with `pan_style_pro`). Works differently from the theme modules (Python on `base`, no styling); see [SMART_SEARCH.md](SMART_SEARCH.md)
 
 Three mechanisms are used:
 
