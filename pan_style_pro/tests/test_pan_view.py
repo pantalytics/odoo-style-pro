@@ -1,6 +1,13 @@
 from odoo.exceptions import AccessError, ValidationError
 from odoo.tests import HttpCase, TransactionCase, tagged
 
+FILTER = [
+    {"type": "filter", "name": "type_company"},
+    {"type": "filter", "name": "creation_date", "options": ["year"]},
+    {"type": "field", "name": "country_id", "value": 21, "label": "Netherlands"},
+    {"type": "domain", "domain": [["email", "ilike", "@acme"]], "label": "Acme mail"},
+]
+
 COLUMNS = [
     {"name": "display_name"},
     {"name": "email", "width": 220},
@@ -27,17 +34,17 @@ class TestPanView(TransactionCase):
         self.assertEqual(Melle.get_mine(), {"res.partner": {"list": {"columns": COLUMNS}}})
 
         # a later save adds parts and keeps the rest; one row per model and type
-        Melle.save("res.partner", {"sort": [{"name": "email", "asc": False}], "domain": [["is_company", "=", True]]})
+        Melle.save("res.partner", {"sort": [{"name": "email", "asc": False}], "filter": FILTER})
         self.assertEqual(Melle.search_count([("res_model", "=", "res.partner")]), 1)
         view = Melle.get_mine()["res.partner"]["list"]
         self.assertEqual(view["columns"], COLUMNS)
         self.assertEqual(view["sort"], [{"name": "email", "asc": False}])
-        self.assertEqual(view["domain"], [["is_company", "=", True]])
+        self.assertEqual(view["filter"], FILTER)
 
         # a part set to None is cleared, the others stay
-        Melle.save("res.partner", {"domain": None, "group_by": ["country_id"]})
+        Melle.save("res.partner", {"filter": None, "group_by": ["country_id"]})
         view = Melle.get_mine()["res.partner"]["list"]
-        self.assertNotIn("domain", view)
+        self.assertNotIn("filter", view)
         self.assertEqual(view["group_by"], ["country_id"])
 
         # another type on the same model is its own view
@@ -89,8 +96,19 @@ class TestPanView(TransactionCase):
         for bad in ("email desc", [{"name": "email", "asc": "no"}], [{"asc": True}]):
             with self.subTest(sort=bad), self.assertRaises(ValidationError):
                 Melle.save("res.partner", {"sort": bad})
-        with self.assertRaises(ValidationError):
-            Melle.save("res.partner", {"domain": "[('a', '=', 1)]"})
+        bad_filter = (
+            "[('a', '=', 1)]",
+            [["email", "ilike", "acme"]],
+            [{"type": "favorite", "name": "x"}],
+            [{"type": "filter"}],
+            [{"type": "filter", "name": "type_company", "options": "year"}],
+            [{"type": "field", "name": "country_id", "value": 21}],
+            [{"type": "field", "name": "country_id", "value": 21, "label": "NL", "colour": "red"}],
+            [{"type": "domain", "domain": "[]"}],
+        )
+        for bad in bad_filter:
+            with self.subTest(filter=bad), self.assertRaises(ValidationError):
+                Melle.save("res.partner", {"filter": bad})
         with self.assertRaises(ValidationError):
             Melle.save("res.partner", {"group_by": [1]})
         with self.assertRaises(ValidationError):
