@@ -27,6 +27,7 @@ No third-party CSS framework. No overrides that break on update. Just tokens and
 | **Home menu** | Styled app launcher with search bar (Enterprise only) |
 | **Kanban** | Styled columns, hover lift on cards, full-height drop zones |
 | **List view** | Uppercase column headers, subtle row hover, cleaner borders |
+| **Personal views** | Drag column headers to reorder, hide and resize them, sort, filter and group: all remembered per user and model (`pan.view`), on every device |
 | **Form view** | Card layout with shadow, clean section separators |
 | **Control panel** | Aligned search bar, styled filter pills, view switcher |
 | **Dropdowns** | Rounded, shadowed panels with proper dark mode support |
