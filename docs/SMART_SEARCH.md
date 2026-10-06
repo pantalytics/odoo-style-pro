@@ -50,8 +50,10 @@ user can see, limited to business documents (models with a chatter:
 contacts, products, orders, invoices, tasks; not countries or units of
 measure), a child of an `_inherits` parent dropped in favour of the parent
 (products, not also variants), largest tables first, at most 8. Cached per
-user. Demo database with 20 apps: 52-294 ms per keystroke (after the
-palette's debounce).
+user. Typos are matched on each record's own name only here (not through
+linked records), and the "does this word occur literally?" probe is cached per
+request, so a search over 8 models costs ~27 SQL queries instead of 68. Demo
+database with 20 apps: 61-102 ms per keystroke (after the palette's debounce).
 
 Code: `models/global_search.py` (`pan.smart.search.global.search_everywhere`),
 `static/src/js/smart_search_command_provider.js`.
