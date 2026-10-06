@@ -1,6 +1,6 @@
 {
     "name": "Pantalytics Style Pro Search",
-    "version": "19.0.2.2.0",
+    "version": "19.0.2.3.0",
     "summary": "Google-style search in every Odoo model: words in any order, typos, best match first",
     "description": """
         Adds "Smart search" as the first option of every search bar, search
@@ -23,6 +23,7 @@
     "depends": ["pan_style_pro"],
     "data": [
         "security/pan_style_pro_search_groups.xml",
+        "security/ir.model.access.csv",
         "data/ir_cron.xml",
         "views/res_config_settings_views.xml",
     ],

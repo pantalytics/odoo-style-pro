@@ -19,3 +19,4 @@ class ResConfigSettings(models.TransientModel):
         super().set_values()
         if self.group_pan_smart_search:
             self.env.ref("pan_style_pro_search.ir_cron_smart_search_indexes")._trigger()
+            self.env.ref("pan_style_pro_search.ir_cron_smart_search_usage")._trigger()
