@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Switched on and off for all internal users by the Style Pro setting
+         (res.config.settings implied_group); nobody assigns it by hand. -->
+    <record id="group_smart_search" model="res.groups">
+        <field name="name">Smart product search</field>
+        <field name="comment">Search bar and dropdowns use smart product search. Managed by Settings > Style Pro.</field>
+    </record>
+</odoo>
