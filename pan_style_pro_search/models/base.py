@@ -433,6 +433,21 @@ class Base(models.AbstractModel):
 
     @api.model
     def _pan_smart_search_order_sql(self, query, term):
+        return SQL("%s DESC, %s", self._pan_smart_search_score_sql(query, term), self._pan_smart_search_field_sql(query, "id"))
+
+    @api.model
+    def _pan_smart_search_scored(self, domain, term, limit):
+        """[(id, score)] of the best matches, for comparing across models."""
+        query = self._search(domain, limit=limit)
+        if query.is_empty():
+            return []
+        score = self._pan_smart_search_score_sql(query, term)
+        query.order = SQL("%s DESC, %s", score, self._pan_smart_search_field_sql(query, "id"))
+        self.env.cr.execute(query.select(self._pan_smart_search_field_sql(query, "id"), score))
+        return self.env.cr.fetchall()
+
+    @api.model
+    def _pan_smart_search_score_sql(self, query, term):
         # Plain lower(), not fold_sql(): folding every matched row for every
         # score term cost ~145 ms on a 1,070-hit word; ranking does not need it.
         name = SQL("lower(COALESCE(%s, ''))", self._pan_smart_search_field_sql(query, self._pan_smart_search_name_field()))
@@ -449,7 +464,7 @@ class Base(models.AbstractModel):
             "%s * COALESCE((SELECT score FROM pan_smart_search_usage WHERE model = %s AND res_id = %s), 0)",
             USAGE_WEIGHT, self._name, self._pan_smart_search_field_sql(query, "id"),
         ))
-        return SQL("%s DESC, %s", SQL(" + ").join(scores), self._pan_smart_search_field_sql(query, "id"))
+        return SQL("(%s)", SQL(" + ").join(scores))
 
     @api.model
     def _pan_smart_search_ranked(self, domain, term, offset=0, limit=None, field_names=None):

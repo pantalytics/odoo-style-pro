@@ -31,6 +31,31 @@ Settings > Style Pro > Search > **Use smart search**. Off by default.
 | Results | Best match first, unless the user clicks a column to sort. |
 | Many2one dropdowns (a product on a quotation line, a contact on a task) | Smart matches first, ranked, then the standard matches that were not among them. |
 
+## Search everything at once
+
+Style Pro's navbar search (and Ctrl+K, then `/`) opens Odoo's command palette
+on menus. With smart search on, from 3 characters it also shows **Records**:
+the best matches across the user's main models, ranked on one relevance scale,
+at most 4 per model and 12 in total; Enter opens the record.
+
+```
+/gemini furnitre  ->  Gemini Furniture · Contact
+                      Gemini Furniture, Oscar Morgan · Contact
+                      [FURN_7777] Office Chair · Product      (supplier Gemini Furniture)
+                      S00004 · Sales Order
+```
+
+Which models, without configuration: the window actions behind the menus this
+user can see, limited to business documents (models with a chatter:
+contacts, products, orders, invoices, tasks; not countries or units of
+measure), a child of an `_inherits` parent dropped in favour of the parent
+(products, not also variants), largest tables first, at most 8. Cached per
+user. Demo database with 20 apps: 52-294 ms per keystroke (after the
+palette's debounce).
+
+Code: `models/global_search.py` (`pan.smart.search.global.search_everywhere`),
+`static/src/js/smart_search_command_provider.js`.
+
 ## How it decides what to search
 
 Nothing is configured per model. Each model tells us itself:
