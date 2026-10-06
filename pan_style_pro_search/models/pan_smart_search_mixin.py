@@ -63,14 +63,7 @@ class PanSmartSearchMixin(models.AbstractModel):
 
     @api.model
     def _pan_smart_search_threshold(self):
-        params = self.env["ir.config_parameter"].sudo()
-        if hasattr(params, "get_float"):  # Odoo 20 replaced get_param with typed getters
-            return params.get_float(THRESHOLD_PARAM, DEFAULT_THRESHOLD)
-        value = params.get_param(THRESHOLD_PARAM)
-        try:
-            return float(value) if value else DEFAULT_THRESHOLD
-        except ValueError:
-            return DEFAULT_THRESHOLD
+        return self.env["ir.config_parameter"].sudo().get_float(THRESHOLD_PARAM, DEFAULT_THRESHOLD)
 
     @api.model
     def _pan_smart_search_fuzzy(self, word):

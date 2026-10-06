@@ -1,6 +1,6 @@
 {
     "name": "Pantalytics Style Pro Search",
-    "version": "19.0.1.0.1",
+    "version": "20.0.1.0.0",
     "summary": "Google-style product search: words in any order, typos, best match first",
     "description": """
         Adds a "Smart search" field to the product search bar and to product
