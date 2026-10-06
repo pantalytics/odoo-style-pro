@@ -1,9 +1,25 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
 
-    <!-- Top of the optional-columns dropdown: whose view is being edited
-         (own, or everyone's for administrators) and a reset for it. -->
     <t t-name="pan_style_pro.ListRenderer.Columns" t-inherit="web.ListRenderer" t-inherit-mode="extension">
+        <!-- A grip on each column header, shown on hover: the sign that the
+             column can be moved. The edge still resizes. -->
+        <xpath expr="//thead//th[@t-if=&quot;column.type === 'field'&quot;]/t[@t-if=&quot;column.hasLabel and column.widget !== 'handle'&quot;]/div" position="before">
+            <span t-if="panHasView" class="pan-column-grip" title="Drag to move this column"
+                  t-on-pointerdown.stop.prevent="(ev) => this.panStartColumnDrag(ev, column.name)"
+                  t-on-click.stop="">
+                <i class="oi oi-draggable"/>
+            </span>
+        </xpath>
+
+        <!-- Top of the ⚙ dropdown: whose view is being edited (own, or
+             everyone's for administrators), a reset for it, and the columns. -->
+        <!-- The whole header drags too, once the pointer moves a few pixels;
+             a click without moving still sorts. -->
+        <xpath expr="//thead//th[@t-if=&quot;column.type === 'field'&quot;]" position="attributes">
+            <attribute name="t-on-pointerdown">(ev) => this.panHeaderPointerDown(ev, column.name)</attribute>
+        </xpath>
+
         <xpath expr="//t[@t-set-slot='content']/t[@t-foreach='optionalFieldGroups']" position="before">
             <t t-if="panHasView">
                 <div class="pan-view-scope px-3 py-1 small text-muted text-uppercase">View</div>
@@ -16,9 +32,47 @@
                 <DropdownItem t-if="panScopeHasView" class="'pan-view-reset'" onSelected="() => this.panResetView()">
                     <span class="d-flex align-items-center"><i class="fa fa-fw fa-undo me-2"/><span class="text-truncate" t-if="panScope === 'mine'">Reset my view</span><span class="text-truncate" t-else="">Reset everyone's view</span></span>
                 </DropdownItem>
-                <div t-if="optionalFieldGroups.length or hasOptionalOpenFormViewColumn" role="separator" class="dropdown-divider"/>
+                <div role="separator" class="dropdown-divider"/>
+                <t t-component="panFieldList" fields="panFieldListItems"
+                              onToggle="(name) => this.toggleOptionalField(name)"
+                              onReorder="(names) => this.panReorderColumns(names)"/>
+                <div t-if="panPropertyFieldGroups.length or hasOptionalOpenFormViewColumn" role="separator" class="dropdown-divider"/>
             </t>
         </xpath>
+        <!-- With the column list above, Odoo's own list only still shows the
+             property columns (grouped per property field). -->
+        <xpath expr="//t[@t-set-slot='content']/t[@t-foreach='optionalFieldGroups']" position="attributes">
+            <attribute name="t-foreach">panHasView ? panPropertyFieldGroups : optionalFieldGroups</attribute>
+        </xpath>
+    </t>
+
+    <t t-name="pan_style_pro.FieldList">
+        <div class="pan-field-list">
+            <div class="px-3 pt-1 pb-2 small text-muted text-uppercase">Columns</div>
+            <div t-if="showFilter" class="px-3 pb-2">
+                <input type="search" class="form-control form-control-sm" placeholder="Find a column"
+                       t-model="state.filter"/>
+                <div t-if="state.filter" class="small text-muted pt-1">Clear the search to drag columns.</div>
+            </div>
+            <div t-ref="root" class="pan-field-rows">
+                <div t-foreach="visibleFields" t-as="field" t-key="field.name"
+                     class="pan-field-row d-flex align-items-center gap-2 px-3"
+                     t-att-data-name="field.name"
+                     t-att-class="{'pan-field-hidden': !field.visible}">
+                    <span class="pan-field-grip" t-att-class="{'invisible': state.filter}" title="Drag to move this column">
+                        <i class="oi oi-draggable"/>
+                    </span>
+                    <span class="flex-grow-1 text-truncate" t-esc="field.label"/>
+                    <div t-if="field.optional" class="form-check form-switch m-0">
+                        <input class="form-check-input" type="checkbox" role="switch"
+                               t-att-checked="field.visible"
+                               t-att-title="field.visible ? titles.hide : titles.show"
+                               t-on-change="() => this.toggle(field)"/>
+                    </div>
+                    <i t-else="" class="fa fa-lock text-muted pan-field-lock" title="This list always shows this column"/>
+                </div>
+            </div>
+        </div>
     </t>
 
 </templates>

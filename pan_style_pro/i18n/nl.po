@@ -49,3 +49,45 @@ msgstr "Weergave van iedereen herstellen"
 #: code:addons/pan_style_pro/static/src/js/pan_view_store.js:0
 msgid "Your view could not be saved."
 msgstr "Je weergave kon niet worden opgeslagen."
+
+#. module: pan_style_pro
+#. odoo-javascript
+#: code:addons/pan_style_pro/static/src/xml/list_columns.xml:0
+msgid "Drag to move this column"
+msgstr "Sleep om deze kolom te verplaatsen"
+
+#. module: pan_style_pro
+#. odoo-javascript
+#: code:addons/pan_style_pro/static/src/xml/list_columns.xml:0
+msgid "Columns"
+msgstr "Kolommen"
+
+#. module: pan_style_pro
+#. odoo-javascript
+#: code:addons/pan_style_pro/static/src/xml/list_columns.xml:0
+msgid "Find a column"
+msgstr "Kolom zoeken"
+
+#. module: pan_style_pro
+#. odoo-javascript
+#: code:addons/pan_style_pro/static/src/xml/list_columns.xml:0
+msgid "Clear the search to drag columns."
+msgstr "Maak het zoekveld leeg om kolommen te slepen."
+
+#. module: pan_style_pro
+#. odoo-javascript
+#: code:addons/pan_style_pro/static/src/xml/list_columns.xml:0
+msgid "This list always shows this column"
+msgstr "Deze lijst toont deze kolom altijd"
+
+#. module: pan_style_pro
+#. odoo-javascript
+#: code:addons/pan_style_pro/static/src/js/pan_field_list.js:0
+msgid "Hide this column"
+msgstr "Kolom verbergen"
+
+#. module: pan_style_pro
+#. odoo-javascript
+#: code:addons/pan_style_pro/static/src/js/pan_field_list.js:0
+msgid "Show this column"
+msgstr "Kolom tonen"

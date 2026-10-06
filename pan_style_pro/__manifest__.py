@@ -1,6 +1,6 @@
 {
     "name": "Style Pro",
-    "version": "19.0.1.5.3",
+    "version": "19.0.1.6.0",
     "summary": "Modern Pantalytics brand theme for Odoo backend",
     "description": """
         Gives Odoo a modern, consumer-grade look and feel using the Pantalytics brand.
@@ -44,12 +44,17 @@
             "pan_style_pro/static/src/js/patches/home_menu_community_patch.js",
             "pan_style_pro/static/src/js/patches/kanban_mobile_sortable_patch.js",
             "pan_style_pro/static/src/js/pan_view_store.js",
+            "pan_style_pro/static/src/js/pan_field_list.js",
             "pan_style_pro/static/src/js/patches/list_columns_patch.js",
             "pan_style_pro/static/src/js/patches/search_view_patch.js",
             "pan_style_pro/static/src/js/home_menu_community.js",
             "pan_style_pro/static/src/js/home_menu_service.js",
             "pan_style_pro/static/src/xml/home_menu_community.xml",
-            "pan_style_pro/static/src/xml/list_columns.xml",
+            # Right after Odoo's own list template, not at the end of the
+            # bundle: modules that copy web.ListRenderer (account's file-upload
+            # list for sales orders and invoices, ...) only take the extensions
+            # loaded before their copy.
+            ("after", "web/static/src/views/list/list_renderer.xml", "pan_style_pro/static/src/xml/list_columns.xml"),
         ],
     },
     "post_init_hook": "_cleanup_stale_fields",

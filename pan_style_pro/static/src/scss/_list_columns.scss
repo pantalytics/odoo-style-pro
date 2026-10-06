@@ -1,16 +1,123 @@
-// Column drag in list views (list_columns_patch.js): the header being
-// dragged and the slot it will land in.
+// Moving columns in list views (list_columns_patch.js, pan_field_list.js).
+//
+// Table: a grip shows on the header on hover; while dragging, the column
+// fades, a label follows the pointer and an accent line marks where it lands.
+// Column list in the ⚙ dropdown: a grip and a switch per row.
 
-.o_list_table thead {
-  th.o_dragged {
-    background: var(--pan-bg) !important;
-    border-radius: var(--pan-radius-sm);
-    box-shadow: var(--pan-shadow-lg);
-    opacity: 0.95;
+// ─── Table ───────────────────────────────────────────────────────────────────
+
+.o_list_table thead th[data-name] {
+  .pan-column-grip {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    padding: 0 0.15rem;
+    color: var(--pan-text-secondary);
+    cursor: grab;
+    opacity: 0;
+    transition: opacity 0.12s;
+    z-index: 2;
   }
 
-  th.pan-column-placeholder {
-    background: color-mix(in srgb, var(--pan-accent) 12%, transparent) !important;
-    border-bottom: 2px solid var(--pan-accent) !important;
+  // On hover the label moves aside for the grip instead of hiding under it.
+  > .d-flex {
+    transition: transform 0.12s;
   }
+
+  &:hover .pan-column-grip {
+    opacity: 1;
+  }
+
+  &:hover > .d-flex {
+    transform: translateX(0.85rem);
+  }
+
+  .pan-column-grip:hover {
+    color: var(--pan-accent);
+  }
+}
+
+.o_list_table .pan-column-dragged {
+  opacity: 0.35;
+}
+
+.pan-column-drop-line {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  background: var(--pan-accent);
+  box-shadow: 0 0 0 2px rgba(var(--pan-accent-rgb), 0.2);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.pan-column-chip {
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: var(--pan-space-1) var(--pan-space-3);
+  border-radius: var(--pan-radius-md);
+  background: var(--pan-bg);
+  color: var(--pan-text);
+  border: 1px solid var(--pan-accent);
+  box-shadow: var(--pan-shadow-lg);
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 2000;
+}
+
+body.pan-column-dragging,
+body.pan-column-dragging * {
+  cursor: grabbing !important;
+  user-select: none !important;
+}
+
+// ─── Column list in the ⚙ dropdown ───────────────────────────────────────────
+
+.pan-field-list {
+  min-width: 16rem;
+}
+
+.pan-field-rows {
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.pan-field-row {
+  min-height: 2rem;
+  border-radius: var(--pan-radius-sm);
+
+  &:hover {
+    background: rgba(var(--pan-accent-rgb), 0.06);
+  }
+
+  &.pan-field-hidden > span:not(.pan-field-grip) {
+    color: var(--pan-text-secondary);
+  }
+
+  .form-check-input {
+    cursor: pointer;
+  }
+}
+
+.pan-field-grip {
+  color: var(--pan-text-secondary);
+  cursor: grab;
+
+  &:hover {
+    color: var(--pan-accent);
+  }
+}
+
+.pan-field-lock {
+  width: 2rem;
+  text-align: center;
+  opacity: 0.6;
+}
+
+.pan-field-placeholder {
+  background: rgba(var(--pan-accent-rgb), 0.1);
+  box-shadow: inset 0 0 0 1px rgba(var(--pan-accent-rgb), 0.4);
 }
