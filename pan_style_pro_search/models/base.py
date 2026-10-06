@@ -162,12 +162,29 @@ class Base(models.AbstractModel):
                 return False
             if field.relational and not self.env[field.comodel_name].has_access("read"):
                 return False
+            if not self._pan_smart_search_chain_readable(model, field):
+                return False
             if position < len(names) - 1:
                 if not field.relational:
                     return False
                 model = self.env[field.comodel_name]
             elif field.type not in MATCH_TYPES:
                 return False
+        return True
+
+    @api.model
+    def _pan_smart_search_chain_readable(self, model, field):
+        """A related or inherited field reads other models behind the scenes
+        (website.menu.url is page_id.url); the user needs read access on each."""
+        if field.inherited and not self.env[field.inherited_field.model_name].has_access("read"):
+            return False
+        if field.related:
+            current = model
+            for name in field.related.split(".")[:-1]:
+                link = current._fields.get(name)
+                if link is None or not link.relational or not self.env[link.comodel_name].has_access("read"):
+                    return False
+                current = self.env[link.comodel_name]
         return True
 
     @api.model
@@ -221,17 +238,37 @@ class Base(models.AbstractModel):
     @api.model
     def _pan_smart_search_usable(self, candidates):
         """Name field first, then the candidates this user can search, capped."""
+        return list(self._pan_smart_search_usable_cached(tuple(candidates)))
+
+    @api.model
+    @tools.ormcache("self.env.uid", "candidates")
+    def _pan_smart_search_usable_cached(self, candidates):
         name = self._pan_smart_search_name_field()
         paths = [name] if name else []
         # The link to an _inherits parent (product.product.product_tmpl_id)
         # repeats fields this model already has, at the cost of a second search.
         parent_links = set(self._inherits.values())
-        paths += [
-            path
-            for path in candidates
-            if path not in paths and path.split(".")[0] not in parent_links and self._pan_smart_search_valid_path(path)
-        ]
-        return paths[:MAX_PATHS]
+        for path in candidates:
+            if (
+                path not in paths
+                and path.split(".")[0] not in parent_links
+                and self._pan_smart_search_valid_path(path)
+                and self._pan_smart_search_path_works(path)
+            ):
+                paths.append(path)
+        return tuple(paths[:MAX_PATHS])
+
+    @api.model
+    def _pan_smart_search_path_works(self, path):
+        """Build (not run) an ilike search on `path` as this user. Catches what
+        the field definition does not show: website.menu.url has a search
+        method that reads website.page, which a normal user may not."""
+        try:
+            self._search([(path, "ilike", "x")])
+        except Exception:  # noqa: BLE001 - any failure means: not for this user
+            _logger.debug("Smart search: skipping %s.%s for user %s", self._name, path, self.env.uid)
+            return False
+        return True
 
     # ------------------------------------------------------------------
     # Matching
