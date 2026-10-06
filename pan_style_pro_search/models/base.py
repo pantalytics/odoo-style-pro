@@ -383,7 +383,7 @@ class Base(models.AbstractModel):
         query = self.with_context(active_test=False)._search([])
         text = self._pan_smart_search_name_text_sql(query, fname)
         literal = SQL("%s LIKE %s", text, f"%{escape_like_value(folded)}%")
-        if self._pan_smart_search_fuzzy(word) and not self._pan_smart_search_name_exists(fname, literal):
+        if self._pan_smart_search_fuzzy(word) and not self._pan_smart_search_name_exists(fname, literal, folded):
             # Typos only for a word that occurs nowhere as typed, like Google's
             # "did you mean": "lasbogt" gets typo matching, "staal" does not
             # (that only added near-misses: 1,165 hits instead of 1,070, and
@@ -407,12 +407,12 @@ class Base(models.AbstractModel):
         return sorted(variants)
 
     @api.model
-    def _pan_smart_search_name_exists(self, fname, literal):
+    def _pan_smart_search_name_exists(self, fname, literal, pattern):
         """Does any record this user can see match `literal`? One indexed row,
         remembered for the rest of the request: a search over several models
         asks the same about res.partner for every partner_id."""
         cache = self.env.cr.__dict__.setdefault("_pan_smart_search_exists", {})
-        key = (self._name, fname, self.env.uid, literal.code, tuple(literal.params))
+        key = (self._name, fname, self.env.uid, pattern)
         if key not in cache:
             probe = self._search([])
             probe.add_where(literal)
