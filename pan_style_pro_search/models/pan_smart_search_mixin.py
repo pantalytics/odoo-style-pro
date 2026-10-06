@@ -10,6 +10,7 @@ FUZZY_MIN_LENGTH = 4
 CODE_MIN_LENGTH = 4
 THRESHOLD_PARAM = "pan_style_pro_search.word_similarity_threshold"
 DEFAULT_THRESHOLD = 0.5
+GROUP = "pan_style_pro_search.group_smart_search"
 # An exact internal reference beats any similarity score.
 EXACT_CODE_BONUS = 10
 
@@ -51,6 +52,11 @@ class PanSmartSearchMixin(models.AbstractModel):
     # ------------------------------------------------------------------
     # Matching
     # ------------------------------------------------------------------
+
+    @api.model
+    def _pan_smart_search_enabled(self):
+        """The Style Pro setting: smart search on, for every internal user."""
+        return self.env.user.has_group(GROUP)
 
     @api.model
     def _pan_smart_search_words(self, term):
@@ -160,7 +166,7 @@ class PanSmartSearchMixin(models.AbstractModel):
     @api.model
     def _pan_smart_search_name_search(self, result, name, domain, operator, limit):
         """Ranked smart-search hits first, then the standard hits not among them."""
-        if operator != "ilike" or not self._pan_smart_search_words(name):
+        if operator != "ilike" or not self._pan_smart_search_words(name) or not self._pan_smart_search_enabled():
             return result
         smart_domain = Domain(domain or Domain.TRUE) & Domain("x_smart_search", "ilike", name)
         ranked = self._pan_smart_search_ranked(smart_domain, name, limit=limit, field_names=["display_name"])

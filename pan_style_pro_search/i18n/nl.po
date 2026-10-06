@@ -36,3 +36,41 @@ msgstr ""
 #: model:ir.model,name:pan_style_pro_search.model_pan_smart_search_mixin
 msgid "Smart search: words in any order, typos, best match first"
 msgstr "Slim zoeken: losse woorden, typfouten, beste match bovenaan"
+
+#. module: pan_style_pro_search
+#: model:res.groups,name:pan_style_pro_search.group_smart_search
+#: model:ir.model.fields,field_description:pan_style_pro_search.field_res_config_settings__group_pan_smart_search
+msgid "Smart product search"
+msgstr "Slim zoeken in producten"
+
+#. module: pan_style_pro_search
+#: model:ir.model.fields,help:pan_style_pro_search.field_res_config_settings__group_pan_smart_search
+msgid ""
+"Search products with separate words in any order, tolerant of typos, best "
+"match first. Applies to the product search bar and product dropdowns."
+msgstr ""
+"Zoek producten met losse woorden in elke volgorde, ook met typfouten, beste "
+"match bovenaan. Geldt voor de zoekbalk en de productdropdowns."
+
+#. module: pan_style_pro_search
+#: model_terms:ir.ui.view,arch_db:pan_style_pro_search.res_config_settings_view_form
+msgid "Search"
+msgstr "Zoeken"
+
+#. module: pan_style_pro_search
+#: model_terms:ir.ui.view,arch_db:pan_style_pro_search.res_config_settings_view_form
+msgid ""
+"Search products with separate words in any order, tolerant of typos,\n"
+"                                best match first. The standard search fields and filters stay."
+msgstr ""
+"Zoek producten met losse woorden in elke volgorde, ook met typfouten,\n"
+"                                beste match bovenaan. De standaard zoekvelden en filters blijven."
+
+#. module: pan_style_pro_search
+#: model:res.groups,comment:pan_style_pro_search.group_smart_search
+msgid ""
+"Search bar and dropdowns use smart product search. Managed by Settings > "
+"Style Pro."
+msgstr ""
+"Zoekbalk en dropdowns gebruiken slim zoeken in producten. Beheerd via "
+"Instellingen > Style Pro."

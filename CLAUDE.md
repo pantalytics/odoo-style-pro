@@ -34,7 +34,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for full details.
 |---|---|---|---|
 | `pan_style_pro` | `web` | No | All Community-compatible styling, navbar search bar, app icons |
 | `pan_style_pro_enterprise` | `pan_style_pro`, `web_enterprise` | **Yes** | Home menu patch, dark mode tokens |
-| `pan_style_pro_search` | `product` | No | Google-style product search: words in any order, typos (pg_trgm), best match first |
+| `pan_style_pro_search` | `pan_style_pro`, `product` | **Yes** | Google-style product search: words in any order, typos (pg_trgm), best match first. Off until switched on in Settings > Style Pro |
 
 ## Conventions
 

@@ -6,6 +6,7 @@ class TestSmartSearch(TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        cls._set_smart_search(True)
         Template = cls.env["product.template"]
         cls.plate = Template.create({"name": "Plaat 3mm RVS 304", "default_code": "PL-RVS-3"})
         cls.cover = Template.create({"name": "Afdekplaat staal", "default_code": "AFD-01"})
@@ -15,6 +16,10 @@ class TestSmartSearch(TransactionCase):
         )
         cls.templates = cls.plate | cls.cover | cls.angle | cls.bolt
         cls.scope = [("id", "in", cls.templates.ids)]
+
+    @classmethod
+    def _set_smart_search(cls, enabled):
+        cls.env["res.config.settings"].create({"group_pan_smart_search": enabled}).execute()
 
     def _search(self, term, model="product.template", extra=None):
         Model = self.env[model]
@@ -100,3 +105,15 @@ class TestSmartSearch(TransactionCase):
 
     def scope_for(self, model):
         return self.scope if model == "product.template" else [("product_tmpl_id", "in", self.templates.ids)]
+
+    def test_setting_off(self):
+        """Off: standard Odoo search, no smart field in the search bar."""
+        self._set_smart_search(False)
+        self.assertFalse(self.env.user.has_group("pan_style_pro_search.group_smart_search"))
+        result = self.env["product.product"].name_search("rvs plaat 3mm", domain=self.scope_for("product.product"))
+        self.assertEqual(result, [])
+        arch = self.env["product.template"].get_views([(False, "search")])["views"]["search"]["arch"]
+        self.assertNotIn("x_smart_search", arch)
+        self._set_smart_search(True)
+        arch = self.env["product.template"].get_views([(False, "search")])["views"]["search"]["arch"]
+        self.assertIn("x_smart_search", arch)
