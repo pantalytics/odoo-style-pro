@@ -20,11 +20,12 @@ import unicodedata
 
 from lxml import etree
 
-from odoo import api, fields, models, tools
+from odoo import api, fields, models
+from odoo.api import ormcache
 from odoo.fields import Domain
 from odoo.tools import SQL
 from odoo.tools.safe_eval import safe_eval
-from odoo.tools.sql import escape_psql
+from odoo.tools.sql import escape_like_value
 
 _logger = logging.getLogger(__name__)
 
@@ -162,6 +163,8 @@ class Base(models.AbstractModel):
                 return False
             if field.relational and not self.env[field.comodel_name].has_access("read"):
                 return False
+            if not self._pan_smart_search_chain_readable(model, field):
+                return False
             if position < len(names) - 1:
                 if not field.relational:
                     return False
@@ -171,7 +174,22 @@ class Base(models.AbstractModel):
         return True
 
     @api.model
-    @tools.ormcache(cache="templates")
+    def _pan_smart_search_chain_readable(self, model, field):
+        """A related or inherited field reads other models behind the scenes
+        (website.menu.url is page_id.url); the user needs read access on each."""
+        if field.inherited and not self.env[field.inherited_field.model_name].has_access("read"):
+            return False
+        if field.related:
+            current = model
+            for name in field.related.split(".")[:-1]:
+                link = current._fields.get(name)
+                if link is None or not link.relational or not self.env[link.comodel_name].has_access("read"):
+                    return False
+                current = self.env[link.comodel_name]
+        return True
+
+    @api.model
+    @ormcache(cache="templates")
     def _pan_smart_search_view_candidates(self):
         """Field paths of the default search view, in view order (cached until
         a view changes)."""
@@ -221,17 +239,37 @@ class Base(models.AbstractModel):
     @api.model
     def _pan_smart_search_usable(self, candidates):
         """Name field first, then the candidates this user can search, capped."""
+        return list(self._pan_smart_search_usable_cached(tuple(candidates)))
+
+    @api.model
+    @ormcache("self.env.uid", "candidates")
+    def _pan_smart_search_usable_cached(self, candidates):
         name = self._pan_smart_search_name_field()
         paths = [name] if name else []
         # The link to an _inherits parent (product.product.product_tmpl_id)
         # repeats fields this model already has, at the cost of a second search.
         parent_links = set(self._inherits.values())
-        paths += [
-            path
-            for path in candidates
-            if path not in paths and path.split(".")[0] not in parent_links and self._pan_smart_search_valid_path(path)
-        ]
-        return paths[:MAX_PATHS]
+        for path in candidates:
+            if (
+                path not in paths
+                and path.split(".")[0] not in parent_links
+                and self._pan_smart_search_valid_path(path)
+                and self._pan_smart_search_path_works(path)
+            ):
+                paths.append(path)
+        return tuple(paths[:MAX_PATHS])
+
+    @api.model
+    def _pan_smart_search_path_works(self, path):
+        """Build (not run) an ilike search on `path` as this user. Catches what
+        the field definition does not show: website.menu.url has a search
+        method that reads website.page, which a normal user may not."""
+        try:
+            self._search([(path, "ilike", "x")])
+        except Exception:  # noqa: BLE001 - any failure means: not for this user
+            _logger.debug("Smart search: skipping %s.%s for user %s", self._name, path, self.env.uid)
+            return False
+        return True
 
     # ------------------------------------------------------------------
     # Matching
@@ -336,7 +374,7 @@ class Base(models.AbstractModel):
         query = self.with_context(active_test=False)._search([])
         text = self._pan_smart_search_name_text_sql(query, fname)
         folded = fold(word)
-        condition = SQL("%s LIKE %s", text, f"%{escape_psql(folded)}%")
+        condition = SQL("%s LIKE %s", text, f"%{escape_like_value(folded)}%")
         if self._pan_smart_search_fuzzy(word):
             condition = SQL("(%s OR %s <%% %s)", condition, folded, text)
         query.add_where(condition)
@@ -363,7 +401,7 @@ class Base(models.AbstractModel):
         name = fold_sql(SQL("COALESCE(%s, '')", self._pan_smart_search_field_sql(query, self._pan_smart_search_name_field())))
         code_field = self._pan_smart_search_code_field()
         code = SQL("COALESCE(%s, '')", self._pan_smart_search_field_sql(query, code_field)) if code_field else SQL("''")
-        scores = [SQL("CASE WHEN %s ILIKE %s THEN %s ELSE 0 END", code, escape_psql(term), EXACT_CODE_BONUS)]
+        scores = [SQL("CASE WHEN %s ILIKE %s THEN %s ELSE 0 END", code, escape_like_value(term), EXACT_CODE_BONUS)]
         if self.env.registry.has_trigram:
             haystack = SQL("(%s || ' ' || lower(%s))", name, code)
             scores += [SQL("word_similarity(%s, %s)", fold(word), haystack) for word in self._pan_smart_search_words(term)]
