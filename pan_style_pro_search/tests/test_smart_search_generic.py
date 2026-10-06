@@ -125,3 +125,22 @@ class TestSmartSearchGeneric(TransactionCase):
         # Text still wins: a clearly better match beats a used record.
         result = Partner.web_search_read([("id", "in", (quiet | busy).ids), ("x_smart_search", "ilike", "acme supply noord")], {})
         self.assertEqual(result["records"][0]["id"], quiet.id)
+
+    def test_search_everywhere(self):
+        Global = self.env["pan.smart.search.global"]
+        models = Global._pan_smart_search_models()
+        self.assertTrue(models, "the user's menus give at least one model")
+        for model_name in models:
+            Model = self.env[model_name]
+            name_field = Model._pan_smart_search_name_field()
+            record = Model.search([(name_field, "!=", False)], limit=1)
+            words = [w for w in (record[name_field] or "").split() if len(w) >= 4 and w.isalpha()]
+            if record and words:
+                break
+        else:
+            self.skipTest("no record with a searchable name in the user's menus")
+        found = Global.search_everywhere(words[0])
+        self.assertIn((model_name, record.id), [(r["model"], r["id"]) for r in found])
+        self.assertEqual(Global.search_everywhere(words[0][:2]), [], "too short")
+        self._set(False)
+        self.assertEqual(Global.search_everywhere(words[0]), [], "off")
