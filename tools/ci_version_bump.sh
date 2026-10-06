@@ -25,7 +25,7 @@ python3 - "$MERGE_BASE" <<'PY'
 import ast, subprocess, sys
 
 base = sys.argv[1]
-MODULES = ["pan_style_pro", "pan_style_pro_enterprise"]
+MODULES = ["pan_style_pro", "pan_style_pro_enterprise", "pan_style_pro_search"]
 
 def version(text):
     return tuple(int(p) for p in ast.literal_eval(text)["version"].split("."))

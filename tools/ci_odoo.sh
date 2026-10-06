@@ -4,7 +4,8 @@
 # everything runs in Docker, so it behaves the same on a GitHub runner, on a
 # laptop and in a Claude cloud session.
 #
-#   tools/ci_odoo.sh                # install pan_style_pro on a fresh database
+#   tools/ci_odoo.sh                # install pan_style_pro and pan_style_pro_search
+#                                   # on a fresh database and run their tests
 #   tools/ci_odoo.sh --mode=upgrade # install the last release, then upgrade to HEAD
 #
 # Env:
@@ -83,15 +84,17 @@ odoo_run() {
 assert_installed() {
     # -i and -u on a module Odoo cannot find exit 0 without doing anything,
     # which is the exact failure this job would otherwise miss.
-    local state
-    state=$(docker run --rm --network "$NET" postgres:15 \
-        psql "postgresql://odoo:odoo@${DB}:5432/ci_style" -tAc \
-        "SELECT state FROM ir_module_module WHERE name = 'pan_style_pro'" | tr -d ' ')
-    if [ "$state" != "installed" ]; then
-        echo "::error::pan_style_pro is '${state:-absent}', not installed."
-        exit 1
-    fi
-    echo "pan_style_pro is installed."
+    local module state
+    for module in "$@"; do
+        state=$(docker run --rm --network "$NET" postgres:15 \
+            psql "postgresql://odoo:odoo@${DB}:5432/ci_style" -tAc \
+            "SELECT state FROM ir_module_module WHERE name = '${module}'" | tr -d ' ')
+        if [ "$state" != "installed" ]; then
+            echo "::error::${module} is '${state:-absent}', not installed."
+            exit 1
+        fi
+        echo "${module} is installed."
+    done
 }
 
 BASE_ADDONS=""
@@ -107,9 +110,12 @@ if [ "$MODE" = "fresh" ]; then
     set -o pipefail
     # --log-handler=odoo.tools.convert:DEBUG turns "Invalid view <name>
     # definition" with an empty context into a real traceback.
-    odoo_run "$REPO" -i pan_style_pro --without-demo=all --log-level=info \
+    # pan_style_pro_search ships unit tests; a failing test logs an ERROR,
+    # which the grep below turns into a failed job.
+    odoo_run "$REPO" -i pan_style_pro,pan_style_pro_search --without-demo=all --log-level=info \
+        --test-enable --test-tags /pan_style_pro_search \
         --log-handler=odoo.tools.convert:DEBUG 2>&1 | tee "$LOG"
-    assert_installed
+    assert_installed pan_style_pro pan_style_pro_search
     if grep -E '^[0-9-]+ [0-9:,]+ [0-9]+ (ERROR|CRITICAL)' "$LOG"; then
         echo "::error::Odoo logged an error while installing."
         exit 1
@@ -151,7 +157,7 @@ odoo_run "$BASE_ADDONS" -i pan_style_pro --without-demo=all --log-level=warn 2>&
     | tee "$LOG_DIR/odoo-baseline.log"
 odoo_run "$REPO" -u pan_style_pro --log-level=info 2>&1 \
     | tee "$LOG_DIR/odoo-upgrade.log"
-assert_installed
+assert_installed pan_style_pro
 if grep -E '^[0-9-]+ [0-9:,]+ [0-9]+ (ERROR|CRITICAL)' "$LOG_DIR/odoo-upgrade.log"; then
     echo "::error::Odoo logged an error while upgrading."
     exit 1

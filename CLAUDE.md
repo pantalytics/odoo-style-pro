@@ -4,7 +4,7 @@
 
 `odoo-style-pro` — Pantalytics Style Pro for Odoo 19 (Community + Enterprise).
 
-Gives Odoo a modern, consumer-grade look and feel (think Linear/Vercel) using the Pantalytics brand. Two Odoo modules: `pan_style_pro` (Community-compatible base) and `pan_style_pro_enterprise` (auto-install bridge for Enterprise features).
+Gives Odoo a modern, consumer-grade look and feel (think Linear/Vercel) using the Pantalytics brand. Three Odoo modules: `pan_style_pro` (Community-compatible base), `pan_style_pro_enterprise` (auto-install bridge for Enterprise features) and `pan_style_pro_search` (optional smart product search).
 
 ## Brand tokens (source of truth: `pantalytics-brand/src/pages/kleuren.astro`)
 
@@ -34,6 +34,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for full details.
 |---|---|---|---|
 | `pan_style_pro` | `web` | No | All Community-compatible styling, navbar search bar, app icons |
 | `pan_style_pro_enterprise` | `pan_style_pro`, `web_enterprise` | **Yes** | Home menu patch, dark mode tokens |
+| `pan_style_pro_search` | `product` | No | Google-style product search: words in any order, typos (pg_trgm), best match first |
 
 ## Conventions
 
