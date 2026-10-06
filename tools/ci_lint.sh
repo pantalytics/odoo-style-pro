@@ -14,7 +14,7 @@ set -uo pipefail
 
 cd "$(dirname "$0")/.."
 
-MODULES="pan_style_pro pan_style_pro_enterprise"
+MODULES="pan_style_pro pan_style_pro_enterprise pan_style_pro_search"
 
 FAILURES=0
 step() { printf '\n=== %s\n' "$1"; }
