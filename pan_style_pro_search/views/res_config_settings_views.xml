@@ -15,8 +15,8 @@
                         <div class="o_setting_right_pane">
                             <label for="group_pan_smart_search"/>
                             <div class="text-muted">
-                                Search products and contacts with separate words in any order,
-                                tolerant of typos, best match first. The standard search fields and filters stay.
+                                Search everywhere with separate words in any order, tolerant of typos,
+                                best match first. The standard search fields and filters stay.
                             </div>
                         </div>
                     </div>
