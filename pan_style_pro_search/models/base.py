@@ -16,6 +16,7 @@ See docs/SMART_SEARCH.md.
 """
 
 import logging
+import unicodedata
 
 from lxml import etree
 
@@ -37,6 +38,9 @@ FUZZY_MIN_LENGTH = 4
 # Shorter words only match the name: "62" inside a reference like R0000062,
 # or inside an email address, matches nearly at random.
 SHORT_WORD_LENGTH = 4
+# A trigram index only serves LIKE patterns of 3+ characters; shorter words
+# match the name literally, without accent folding (a seq scan otherwise).
+FOLD_MIN_LENGTH = 3
 # An exact reference beats any similarity score.
 EXACT_CODE_BONUS = 10
 # Upper bound on searched field paths per model: every word is OR-ed over all
@@ -48,6 +52,37 @@ CODE_FIELDS = ("default_code", "ref", "code", "barcode")
 # out on purpose: long descriptions and mail bodies are noise and slow.
 MATCH_TYPES = ("char", "many2one", "many2many", "one2many")
 _MARK = "__pan_smart_search__"
+
+
+def _fold_table():
+    """Accented Latin letters (both cases) -> plain lower-case letters, for
+    PostgreSQL translate(). Both cases, because lower() only lowercases ASCII
+    in a database with LC_CTYPE C."""
+    extra = {"ł": "l", "Ł": "l", "đ": "d", "Đ": "d", "ø": "o", "Ø": "o", "ß": "s", "æ": "a", "Æ": "a",
+             "œ": "o", "Œ": "o", "ı": "i", "ħ": "h", "Ħ": "h", "þ": "t", "Þ": "t", "ð": "d", "Ð": "d"}
+    pairs = dict(extra)
+    for code in range(0xC0, 0x250):
+        char = chr(code)
+        base = unicodedata.normalize("NFKD", char)[0].lower()
+        if char not in pairs and base != char.lower() and base.isascii() and base.isalpha():
+            pairs[char] = base
+    return "".join(pairs), "".join(pairs.values())
+
+
+FOLD_FROM, FOLD_TO = _fold_table()
+
+
+_FOLD_PY = str.maketrans(FOLD_FROM, FOLD_TO)
+
+
+def fold(text):
+    """Lower case without accents: "SPÓŁKA" -> "spolka"."""
+    return (text or "").lower().translate(_FOLD_PY)
+
+
+def fold_sql(expression):
+    """SQL counterpart of fold(); the trigram index cron uses the same expression."""
+    return SQL("translate(lower(%s), %s, %s)", expression, FOLD_FROM, FOLD_TO)
 
 
 class Base(models.AbstractModel):
@@ -244,24 +279,45 @@ class Base(models.AbstractModel):
         for word in words:
             searched = paths if len(word) >= SHORT_WORD_LENGTH or not name else [name]
             options = [Domain(path, "ilike", word) for path in searched]
+            if name and len(fold(word)) >= FOLD_MIN_LENGTH:
+                # The name, accent-insensitive ("muller" finds "Müller"), with
+                # typos for longer words.
+                options.append(Domain("id", "in", self._pan_smart_search_name_query(word)))
             if name and self._pan_smart_search_fuzzy(word):
-                options.append(Domain("id", "in", self._pan_smart_search_fuzzy_query(word)))
-                # Typos also in the name of directly linked records: "gemini
+                # Also in the name of directly linked records: "gemini
                 # furnitre" finds the orders of Gemini Furniture.
                 for path in searched:
                     field = self._fields.get(path)
                     if field and field.type == "many2one":
                         comodel = self.env[field.comodel_name]
-                        if comodel._pan_smart_search_name_field():
-                            fuzzy = Domain("id", "in", comodel._pan_smart_search_fuzzy_query(word))
-                            options.append(Domain(path, "any", fuzzy))
+                        # Only models that take part themselves: technical
+                        # comodels (ir.model.fields, ...) are large and unindexed.
+                        if comodel._pan_smart_search_eligible():
+                            linked = Domain("id", "in", comodel._pan_smart_search_name_query(word))
+                            options.append(Domain(path, "any", linked))
             word_domains.append(Domain.OR(options))
         return Domain.AND(word_domains)
 
     @api.model
-    def _pan_smart_search_fuzzy_query(self, word, fname=None):
+    def _pan_smart_search_name_expression(self, column, fname):
+        """The accent-folded text smart search matches a name on. `column` is
+        the column as SQL (with or without table alias); the trigram index
+        cron builds its index on this same expression. For translated fields
+        it is the expression Odoo indexes: all languages at once."""
+        if self._fields[fname].translate:
+            column = SQL("jsonb_path_query_array(%s, '$.*')::text", column)
+        return fold_sql(column)
+
+    @api.model
+    def _pan_smart_search_name_text_sql(self, query, fname):
+        alias = query.table if isinstance(query.table, str) else query.table._alias
+        return self._pan_smart_search_name_expression(SQL.identifier(alias, fname), fname)
+
+    @api.model
+    def _pan_smart_search_name_query(self, word, fname=None):
         """Records whose `fname` (default: the name field) contains `word`,
-        typos allowed. Written so it can use a trigram index."""
+        accent-insensitive, typos allowed for longer letter words. Written so
+        it can use the trigram index the cron builds on the same expression."""
         fname = fname or self._pan_smart_search_name_field()
         field = self._fields[fname]
         if field.inherited:
@@ -271,18 +327,19 @@ class Base(models.AbstractModel):
             # from res.groups, whose _rec_name is not stored.
             parent = self.env[field.inherited_field.model_name]
             link = self._inherits[parent._name]
-            matches = Domain("id", "in", parent._pan_smart_search_fuzzy_query(word, field.inherited_field.name))
-            return self.with_context(active_test=False)._search([(link, "any", matches)])
+            own = self.with_context(active_test=False)
+            # Only the parent records of this model: website.page inherits its
+            # name from ir.ui.view, and folding every view's name is slow.
+            parent_query = parent._pan_smart_search_name_query(word, field.inherited_field.name)
+            parent_query.add_where(SQL("%s IN (%s)", parent._pan_smart_search_field_sql(parent_query, "id"), own._search([]).subselect(link)))
+            return own._search([(link, "any", Domain("id", "in", parent_query))])
         query = self.with_context(active_test=False)._search([])
-        if field.translate:
-            # Same expression as Odoo's own trigram index on translated fields
-            # (index="trigram", e.g. the product name): all languages at once.
-            alias = query.table if isinstance(query.table, str) else query.table._alias
-            text = SQL("jsonb_path_query_array(%s, '$.*')::text", SQL.identifier(alias, fname))
-        else:
-            text = self._pan_smart_search_field_sql(query, fname)
-        # Parentheses: "word <% col->>'nl_NL'" would parse as "(word <% col)->>'nl_NL'".
-        query.add_where(SQL("%s <%% (%s)", word, text))
+        text = self._pan_smart_search_name_text_sql(query, fname)
+        folded = fold(word)
+        condition = SQL("%s LIKE %s", text, f"%{escape_psql(folded)}%")
+        if self._pan_smart_search_fuzzy(word):
+            condition = SQL("(%s OR %s <%% %s)", condition, folded, text)
+        query.add_where(condition)
         return query
 
     # ------------------------------------------------------------------
@@ -303,16 +360,16 @@ class Base(models.AbstractModel):
 
     @api.model
     def _pan_smart_search_order_sql(self, query, term):
-        name = self._pan_smart_search_field_sql(query, self._pan_smart_search_name_field())
+        name = fold_sql(SQL("COALESCE(%s, '')", self._pan_smart_search_field_sql(query, self._pan_smart_search_name_field())))
         code_field = self._pan_smart_search_code_field()
         code = SQL("COALESCE(%s, '')", self._pan_smart_search_field_sql(query, code_field)) if code_field else SQL("''")
         scores = [SQL("CASE WHEN %s ILIKE %s THEN %s ELSE 0 END", code, escape_psql(term), EXACT_CODE_BONUS)]
         if self.env.registry.has_trigram:
-            haystack = SQL("(COALESCE(%s, '') || ' ' || %s)", name, code)
-            scores += [SQL("word_similarity(%s, %s)", word, haystack) for word in self._pan_smart_search_words(term)]
+            haystack = SQL("(%s || ' ' || lower(%s))", name, code)
+            scores += [SQL("word_similarity(%s, %s)", fold(word), haystack) for word in self._pan_smart_search_words(term)]
             # Tie-breaker: the name closest to the whole term, so "Plaat 3mm"
             # comes before "Plaat 3mm RVS 304 1000x2000 geslepen".
-            scores.append(SQL("similarity(%s, COALESCE(%s, ''))", term, name))
+            scores.append(SQL("similarity(%s, %s)", fold(term), name))
         return SQL("%s DESC, %s", SQL(" + ").join(scores), self._pan_smart_search_field_sql(query, "id"))
 
     @api.model

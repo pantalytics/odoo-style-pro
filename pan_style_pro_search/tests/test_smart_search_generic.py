@@ -74,7 +74,7 @@ class TestSmartSearchGeneric(TransactionCase):
         Partner = self.env["res.partner"]
         self.assertFalse(Partner._pan_smart_search_ensure_index(10**9), "small table: no index")
         self.assertTrue(Partner._pan_smart_search_ensure_index(0))
-        self.env.cr.execute("SELECT 1 FROM pg_indexes WHERE tablename = 'res_partner' AND indexdef ILIKE '%(complete_name gin_trgm_ops)%'")
+        self.env.cr.execute("SELECT 1 FROM pg_indexes WHERE tablename = 'res_partner' AND indexname = 'res_partner__complete_name_pan_fold_trgm'")
         self.assertTrue(self.env.cr.fetchone())
         self.assertFalse(Partner._pan_smart_search_ensure_index(0), "already indexed")
 
@@ -95,5 +95,15 @@ class TestSmartSearchGeneric(TransactionCase):
         if not self.env.registry.has_trigram:
             self.skipTest("pg_trgm is not installed in this database")
         Users = self.env["res.users"]
-        query = Users._pan_smart_search_fuzzy_query("administratr", "name")
+        query = Users._pan_smart_search_name_query("administratr", "name")
         self.assertIn(self.env.ref("base.user_admin").id, Users.browse(query).ids)
+
+    def test_accent_insensitive(self):
+        Partner = self.env["res.partner"]
+        partners = Partner.create([{"name": n} for n in ("Jürgen Köhler", "SPÓŁKA Budowlana", "Zoë Lindqvist")])
+        scope = [("id", "in", partners.ids)]
+        for term, name in (("kohler", "Jürgen Köhler"), ("spolka", "SPÓŁKA Budowlana"), ("zoe lindqvist", "Zoë Lindqvist"), ("köhler", "Jürgen Köhler")):
+            found = Partner.search(scope + [("x_smart_search", "ilike", term)])
+            self.assertEqual(found.mapped("name"), [name], term)
+        dropdown = Partner.web_name_search("jurgen kohler", {"display_name": {}}, domain=scope)
+        self.assertEqual([row["id"] for row in dropdown], [partners[0].id])
