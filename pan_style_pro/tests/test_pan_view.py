@@ -20,6 +20,9 @@ class TestPanView(TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        # Shared views are visible to everyone, so a database that already
+        # has some would leak into the expectations below.
+        cls.env["pan.view"].search([]).unlink()
         group = cls.env.ref("base.group_user")
         cls.melle = cls.env["res.users"].create({"name": "Melle", "login": "melle", "group_ids": [(6, 0, [group.id])]})
         cls.ron = cls.env["res.users"].create({"name": "Ron", "login": "ron", "group_ids": [(6, 0, [group.id])]})
@@ -165,6 +168,10 @@ class TestPanView(TransactionCase):
 
 @tagged("post_install", "-at_install")
 class TestPanViewSession(HttpCase):
+    def setUp(self):
+        super().setUp()
+        self.env["pan.view"].search([]).unlink()
+
     def test_session_info_carries_views(self):
         group = self.env.ref("base.group_user")
         self.env["res.users"].create(
@@ -183,3 +190,13 @@ class TestPanViewSession(HttpCase):
         self.authenticate("ron", "ron-ron-ron")
         info = self.make_jsonrpc_request("/web/session/get_session_info", {})
         self.assertEqual(info["pan_views"], {})
+
+    def test_session_info_survives_code_before_upgrade(self):
+        """New code on disk, module upgrade not run yet: no table, but the web client loads."""
+        self.env.cr.execute("ALTER TABLE pan_view RENAME TO pan_view_not_yet")
+        try:
+            self.authenticate("admin", "admin")
+            info = self.make_jsonrpc_request("/web/session/get_session_info", {})
+            self.assertNotIn("pan_views", info)
+        finally:
+            self.env.cr.execute("ALTER TABLE pan_view_not_yet RENAME TO pan_view")

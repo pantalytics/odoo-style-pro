@@ -1,6 +1,6 @@
 {
     "name": "Style Pro Search",
-    "version": "19.0.2.4.3",
+    "version": "19.0.2.4.4",
     "summary": "Google-style search in every Odoo model: words in any order, typos, best match first",
     "description": """
         Adds "Smart search" as the first option of every search bar, search
@@ -30,6 +30,7 @@
     "assets": {
         "web.assets_backend": [
             "pan_style_pro_search/static/src/js/smart_search_command_provider.js",
+            "pan_style_pro_search/static/src/js/search_more_patch.js",
         ],
     },
     "installable": True,
