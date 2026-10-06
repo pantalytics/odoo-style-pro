@@ -29,7 +29,10 @@ class PanSmartSearchGlobal(models.AbstractModel):
             return []
         scored = []
         for model_name in self._pan_smart_search_models():
-            model = self.env[model_name]
+            # Typos only in each record's own name here: the global list is
+            # about the records themselves, and following every link (customer,
+            # salesperson, team) per model costs a round trip each.
+            model = self.env[model_name].with_context(pan_smart_search_own_name_only=True)
             try:
                 hits = model._pan_smart_search_scored(Domain("x_smart_search", "ilike", term), term, PER_MODEL)
             except Exception:  # noqa: BLE001 - one model must not break the palette
