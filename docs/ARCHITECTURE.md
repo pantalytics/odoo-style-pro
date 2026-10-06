@@ -174,3 +174,7 @@ This is defined in `_typography.scss`.
 | Bridge module over conditional loading | JS `import` and XML `t-inherit` can't be made conditional |
 | No `main.scss` entry point | Odoo's asset pipeline handles ordering; individual registration is more explicit |
 | Navbar search bar opens command palette | Vercel/Linear pattern — makes ⌘K discoverable |
+
+## Personal views (`pan.view`)
+
+One Postgres table, `pan_view`: one row per user, model and view type (unique). A row is a user's view on a model in the Airtable sense: `columns` (ordered `{name, visible, width}`), `sort`, `domain` and `group_by` as JSON. Record rules keep users on their own rows; administrators see all. The web client gets every row of the user once at login (`session_info.pan_views`) and calls `pan.view.save(res_model, values, view_type)` on each change, `pan.view.reset` to drop one. Keyed on the model, not on an `ir.ui.view`, so a view follows the user into every list of that model. Only `list` is wired in the web client today; the table is ready for a name, several views per model and shared views.

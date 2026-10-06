@@ -12,6 +12,8 @@
     "license": "LGPL-3",
     "depends": ["web"],
     "data": [
+        "security/ir.model.access.csv",
+        "security/pan_view_rules.xml",
         "views/res_config_settings_views.xml",
     ],
     "assets": {
