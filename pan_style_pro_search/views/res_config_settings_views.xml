@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.pan_style_pro_search</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="pan_style_pro.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//app[@name='pan_style_pro']/h2[1]" position="before">
+                <h2>Search</h2>
+                <div class="row mt-4 o_settings_container">
+                    <div class="col-12 col-lg-6 o_setting_box">
+                        <div class="o_setting_left_pane">
+                            <field name="group_pan_smart_search"/>
+                        </div>
+                        <div class="o_setting_right_pane">
+                            <label for="group_pan_smart_search"/>
+                            <div class="text-muted">
+                                Search everywhere with separate words in any order, tolerant of typos,
+                                best match first. The standard search fields and filters stay.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

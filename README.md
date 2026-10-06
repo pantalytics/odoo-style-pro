@@ -93,7 +93,7 @@ On Enterprise, `pan_style_pro_enterprise` auto-installs for home menu and dark m
 |---|---|---|---|
 | `pan_style_pro` | `web` | No | All base styling, navbar search, app icons |
 | `pan_style_pro_enterprise` | `pan_style_pro`, `web_enterprise` | Yes | Home menu, dark mode tokens |
-| `pan_style_pro_search` | `product` | No | Smart product search: separate words in any order, typo tolerance, best match first. Install it where people search a large catalogue. |
+| `pan_style_pro_search` | `pan_style_pro` | Yes | Smart search in every search bar and dropdown: separate words in any order, typo tolerance, best match first. Off by default; switch on in Settings > Style Pro > Search. See [docs/SMART_SEARCH.md](docs/SMART_SEARCH.md). |
 
 ---
 

@@ -110,9 +110,10 @@ if [ "$MODE" = "fresh" ]; then
     set -o pipefail
     # --log-handler=odoo.tools.convert:DEBUG turns "Invalid view <name>
     # definition" with an empty context into a real traceback.
-    # Both modules ship unit tests; a failing test logs an ERROR, which the
-    # grep below turns into a failed job.
-    odoo_run "$REPO" -i pan_style_pro,pan_style_pro_search --without-demo=all --log-level=info \
+    # Both modules ship unit tests; product is installed only so the product
+    # tests of pan_style_pro_search run. A failing test logs an ERROR, which
+    # the grep below turns into a failed job.
+    odoo_run "$REPO" -i pan_style_pro,pan_style_pro_search,product --without-demo=all --log-level=info \
         --test-enable --test-tags /pan_style_pro,/pan_style_pro_search \
         --log-handler=odoo.tools.convert:DEBUG 2>&1 | tee "$LOG"
     assert_installed pan_style_pro pan_style_pro_search
