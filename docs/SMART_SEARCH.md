@@ -110,9 +110,13 @@ does not. For a common word typo matching only added near-misses (1,165 hits
 instead of 1,070) at three times the cost. Without `pg_trgm` in the database smart search still works,
 literally only.
 
-Swapped letters (`pijpbuegel`) are not caught at 0.5; at 0.4 they are, but then
-`moer m8` also finds anchors and `slang` finds chains. Measured on 10,810 real
-product names; 0.5 is the default.
+Swapped letters (`pijpbuegel`, `verloposchakel`) are not caught by trigram
+similarity at 0.5 (at 0.4 they are, but then `moer m8` also finds anchors and
+`slang` finds chains). So a word of 5+ letters that occurs nowhere as typed
+also tries every variant with two neighbouring letters swapped, as one regular
+expression on the folded name (`text ~ 'pijpbeugel|ipjpbuegel|...'`), which
+the trigram index serves: 25-65 ms. One `LIKE` per variant made PostgreSQL drop
+the index (3.4 s).
 
 ## Ranking
 

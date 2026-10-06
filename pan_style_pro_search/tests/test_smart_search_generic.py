@@ -107,3 +107,10 @@ class TestSmartSearchGeneric(TransactionCase):
             self.assertEqual(found.mapped("name"), [name], term)
         dropdown = Partner.web_name_search("jurgen kohler", {"display_name": {}}, domain=scope)
         self.assertEqual([row["id"] for row in dropdown], [partners[0].id])
+
+    def test_swapped_letters(self):
+        partner = self.env["res.partner"].create({"name": "Vlinderklep Hoogland"})
+        scope = [("id", "=", partner.id)]
+        # "vlindreklep": e and r swapped; trigram similarity alone misses it.
+        self.assertEqual(self.env["res.partner"].search(scope + [("x_smart_search", "ilike", "vlindreklep")]), partner)
+        self.assertEqual(self.env["res.partner"]._pan_smart_search_swaps("abc"), ["acb", "bac"])
