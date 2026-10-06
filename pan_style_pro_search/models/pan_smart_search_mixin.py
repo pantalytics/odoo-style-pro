@@ -95,7 +95,9 @@ class PanSmartSearchMixin(models.AbstractModel):
     def _pan_smart_search_ids_sql(self, words):
         """Query selecting the ids of the records matching every word."""
         query = self.with_context(active_test=False)._search([])
-        texts = [self._pan_smart_search_field_sql(query, field) for field in self._pan_smart_search_match_fields]
+        # Skip fields this database does not have (company_registry left base in Odoo 20).
+        fields_ = [field for field in self._pan_smart_search_match_fields if field in self._fields]
+        texts = [self._pan_smart_search_field_sql(query, field) for field in fields_]
         threshold = self._pan_smart_search_threshold()
         for word in words:
             like = f"%{escape_psql(word)}%"
