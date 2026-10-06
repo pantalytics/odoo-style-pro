@@ -74,7 +74,7 @@ class TestSmartSearchGeneric(TransactionCase):
         Partner = self.env["res.partner"]
         self.assertFalse(Partner._pan_smart_search_ensure_index(10**9), "small table: no index")
         self.assertTrue(Partner._pan_smart_search_ensure_index(0))
-        self.env.cr.execute("SELECT 1 FROM pg_indexes WHERE tablename = 'res_partner' AND indexdef ILIKE '%(complete_name gin_trgm_ops)%'")
+        self.env.cr.execute("SELECT 1 FROM pg_indexes WHERE tablename = 'res_partner' AND indexname = 'res_partner__complete_name_pan_fold_trgm'")
         self.assertTrue(self.env.cr.fetchone())
         self.assertFalse(Partner._pan_smart_search_ensure_index(0), "already indexed")
 
@@ -86,3 +86,61 @@ class TestSmartSearchGeneric(TransactionCase):
         # "noordenvld" has a typo and sits in the parent's name, not the person's.
         found = self.env["res.partner"].search([("id", "=", person.id), ("x_smart_search", "ilike", "kuipers noordenvld")])
         self.assertEqual(found, person)
+
+    def test_inherited_name_whose_parent_has_no_name_field(self):
+        """res.users gets `name` from res.partner via _inherits; the fuzzy match
+        must use that exact field on the parent, whatever the parent's own
+        name field is (res.users.role on Enterprise inherits from res.groups,
+        whose _rec_name is not stored)."""
+        if not self.env.registry.has_trigram:
+            self.skipTest("pg_trgm is not installed in this database")
+        Users = self.env["res.users"]
+        query = Users._pan_smart_search_name_query("administratr", "name")
+        self.assertIn(self.env.ref("base.user_admin").id, Users.browse(query).ids)
+
+    def test_accent_insensitive(self):
+        Partner = self.env["res.partner"]
+        partners = Partner.create([{"name": n} for n in ("Jürgen Köhler", "SPÓŁKA Budowlana", "Zoë Lindqvist")])
+        scope = [("id", "in", partners.ids)]
+        for term, name in (("kohler", "Jürgen Köhler"), ("spolka", "SPÓŁKA Budowlana"), ("zoe lindqvist", "Zoë Lindqvist"), ("köhler", "Jürgen Köhler")):
+            found = Partner.search(scope + [("x_smart_search", "ilike", term)])
+            self.assertEqual(found.mapped("name"), [name], term)
+        dropdown = Partner.web_name_search("jurgen kohler", {"display_name": {}}, domain=scope)
+        self.assertEqual([row["id"] for row in dropdown], [partners[0].id])
+
+    def test_swapped_letters(self):
+        partner = self.env["res.partner"].create({"name": "Vlinderklep Hoogland"})
+        scope = [("id", "=", partner.id)]
+        # "vlindreklep": e and r swapped; trigram similarity alone misses it.
+        self.assertEqual(self.env["res.partner"].search(scope + [("x_smart_search", "ilike", "vlindreklep")]), partner)
+        self.assertEqual(self.env["res.partner"]._pan_smart_search_swaps("abc"), ["acb", "bac"])
+
+    def test_usage_ranks_equal_matches(self):
+        Partner = self.env["res.partner"]
+        quiet, busy = Partner.create([{"name": "Acme Supply Noord", "is_company": True}, {"name": "Acme Supply Zuid", "is_company": True}])
+        Partner.create([{"name": f"Contact {i}", "parent_id": busy.id} for i in range(3)])
+        self.env["pan.smart.search.usage"]._pan_smart_search_rebuild()
+        result = Partner.web_search_read([("id", "in", (quiet | busy).ids), ("x_smart_search", "ilike", "acme supply")], {})
+        self.assertEqual([r["id"] for r in result["records"]], [busy.id, quiet.id])
+        # Text still wins: a clearly better match beats a used record.
+        result = Partner.web_search_read([("id", "in", (quiet | busy).ids), ("x_smart_search", "ilike", "acme supply noord")], {})
+        self.assertEqual(result["records"][0]["id"], quiet.id)
+
+    def test_search_everywhere(self):
+        Global = self.env["pan.smart.search.global"]
+        models = Global._pan_smart_search_models()
+        self.assertTrue(models, "the user's menus give at least one model")
+        for model_name in models:
+            Model = self.env[model_name]
+            name_field = Model._pan_smart_search_name_field()
+            record = Model.search([(name_field, "!=", False)], limit=1)
+            words = [w for w in (record[name_field] or "").split() if len(w) >= 4 and w.isalpha()]
+            if record and words:
+                break
+        else:
+            self.skipTest("no record with a searchable name in the user's menus")
+        found = Global.search_everywhere(words[0])
+        self.assertIn((model_name, record.id), [(r["model"], r["id"]) for r in found])
+        self.assertEqual(Global.search_everywhere(words[0][:2]), [], "too short")
+        self._set(False)
+        self.assertEqual(Global.search_everywhere(words[0]), [], "off")

@@ -31,6 +31,33 @@ Settings > Style Pro > Search > **Use smart search**. Off by default.
 | Results | Best match first, unless the user clicks a column to sort. |
 | Many2one dropdowns (a product on a quotation line, a contact on a task) | Smart matches first, ranked, then the standard matches that were not among them. |
 
+## Search everything at once
+
+Style Pro's navbar search (and Ctrl+K, then `/`) opens Odoo's command palette
+on menus. With smart search on, from 3 characters it also shows **Records**:
+the best matches across the user's main models, ranked on one relevance scale,
+at most 4 per model and 12 in total; Enter opens the record.
+
+```
+/gemini furnitre  ->  Gemini Furniture · Contact
+                      Gemini Furniture, Oscar Morgan · Contact
+                      [FURN_7777] Office Chair · Product      (supplier Gemini Furniture)
+                      S00004 · Sales Order
+```
+
+Which models, without configuration: the window actions behind the menus this
+user can see, limited to business documents (models with a chatter:
+contacts, products, orders, invoices, tasks; not countries or units of
+measure), a child of an `_inherits` parent dropped in favour of the parent
+(products, not also variants), largest tables first, at most 8. Cached per
+user. Typos are matched on each record's own name only here (not through
+linked records), and the "does this word occur literally?" probe is cached per
+request, so a search over 8 models costs ~27 SQL queries instead of 68. Demo
+database with 20 apps: 61-102 ms per keystroke (after the palette's debounce).
+
+Code: `models/global_search.py` (`pan.smart.search.global.search_everywhere`),
+`static/src/js/smart_search_command_provider.js`.
+
 ## How it decides what to search
 
 Nothing is configured per model. Each model tells us itself:
@@ -60,7 +87,13 @@ A path is used only if the current user can search it:
 - the last field is `char`, `many2one`, `many2many` or `one2many`. Text and
   html fields (descriptions, mail bodies) are left out: noise, and slow.
 
-This check matters: every word is OR-ed over all paths, so one path the user
+- the user may read the models behind related and inherited fields too,
+- and building an `ilike` search on the path actually works for this user.
+  This last check catches what a field definition does not show
+  (`website.menu.url` has a search method that reads `website.page`). It runs
+  once per user and model, then the result is cached.
+
+These checks matter: every word is OR-ed over all paths, so one path the user
 cannot search would break the whole search, not just that field.
 
 At most 15 paths per model (`MAX_PATHS`), name field first.
@@ -85,17 +118,32 @@ The term is split into words. **Every word must match**, in any order:
 
 | Word | Matches |
 |---|---|
-| 4+ characters | literally (`ilike`) in any searched path, or, if only letters, with typos in the name or in the name of a directly linked record (a many2one in the searched paths: customer, project, salesperson) |
-| 1-3 characters (`m5`, `70`, `rvs`) | literally in the name only. In a reference like `R0000062` or an email address, `62` matches nearly at random. |
+| 4+ characters | literally (`ilike`) in any searched path; in the name accent-insensitive; and, if only letters, with typos in the name or in the name of a directly linked record (a many2one in the searched paths: customer, project, salesperson) |
+| 3 characters (`rvs`) | literally in the name only, accent-insensitive |
+| 1-2 characters (`m5`, `70`) | literally in the name only, accent-sensitive (a trigram index cannot serve patterns this short). In a reference like `R0000062` or an email address, `62` matches nearly at random. |
 | contains digits or punctuation (`3mm`, `M8x20`, `hp-rvs`) | literally only. pg_trgm splits `hp-rvs` into `hp` + `rvs` and would match every RVS product. |
 
-Typos use PostgreSQL `pg_trgm`: `word <% name` (word similarity, default
-threshold 0.5). Without `pg_trgm` in the database smart search still works,
+Names are matched **accent-insensitive**: "muller" finds "Müller", "spolka"
+finds "SPÓŁKA", "köhler" finds "Kohler". Both sides are folded the same way
+(PostgreSQL `translate()` with one table of accented Latin letters, both cases,
+mirrored in Python), so this works without the `unaccent` extension, which
+CloudPepper databases do not have, and it only affects smart search: standard
+Odoo search keeps its own behaviour.
+
+Typos use PostgreSQL `pg_trgm` on that folded name: `word <% name` (word
+similarity, default threshold 0.5), and only for a word that occurs nowhere as
+typed, like Google's "did you mean": "lasbogt" gets typo matching, "staal"
+does not. For a common word typo matching only added near-misses (1,165 hits
+instead of 1,070) at three times the cost. Without `pg_trgm` in the database smart search still works,
 literally only.
 
-Swapped letters (`pijpbuegel`) are not caught at 0.5; at 0.4 they are, but then
-`moer m8` also finds anchors and `slang` finds chains. Measured on 10,810 real
-product names; 0.5 is the default.
+Swapped letters (`pijpbuegel`, `verloposchakel`) are not caught by trigram
+similarity at 0.5 (at 0.4 they are, but then `moer m8` also finds anchors and
+`slang` finds chains). So a word of 5+ letters that occurs nowhere as typed
+also tries every variant with two neighbouring letters swapped, as one regular
+expression on the folded name (`text ~ 'pijpbeugel|ipjpbuegel|...'`), which
+the trigram index serves: 25-65 ms. One `LIKE` per variant made PostgreSQL drop
+the index (3.4 s).
 
 ## Ranking
 
@@ -106,8 +154,30 @@ Highest score first, then id:
 3. tie-breaker: similarity of the whole term with the name, so "Plaat 3mm"
    comes before "Plaat 3mm RVS 304 1000x2000 geslepen"
 
+4. usage, as a tie-breaker: up to +0.5 (`USAGE_WEIGHT`) for records people
+   actually use, so among equally good text matches the product that is sold
+   most comes first. Each word adds up to 1, so a clearly better text match
+   still wins.
+
 Applies to list and kanban (`web_search_read`) when the domain has a smart
 search term and the user did not sort on a column, and to dropdowns.
+
+### Usage
+
+A nightly cron (**Smart search: usage statistics for ranking**, also triggered
+when the setting is switched on and by the upgrade that introduced it) counts,
+for every record of every eligible model, how often other records referred to
+it in the last 365 days, through every stored many2one in the database. A
+product counts the sale, purchase and stock lines that use it, a contact its
+orders, invoices and tasks; custom models count too, nothing is configured.
+Child models add up to their `_inherits` parent (variant usage counts for the
+product). Left out: technical, messaging and logging tables (`ir.*`, `mail.*`,
+...), the fields every record has (`create_uid`, `company_id`, ...), and
+company-dependent fields (jsonb). The result is `ln(1 + uses)`, scaled to 0..1
+per model, in `pan.smart.search.usage`.
+
+Demo database: rebuild 0.2 s; "desk" now lists the desks that are sold first,
+"table" and "office chair" keep their exact name match on top.
 
 ## Performance
 
@@ -120,25 +190,36 @@ Measured server-side.
 | 500,000 contacts, no trigram index | 106 ms | 261 ms literal; typo match **563 ms per word** |
 | 500,000 contacts, trigram index on the name | 1 ms | typo match **7 ms** |
 
-Two things keep typo matching fast:
+Name matching (accents and typos) runs on one expression,
+`translate(lower(<name>), <accented>, <plain>)`, for translated names on the
+text Odoo indexes (`jsonb_path_query_array(name, '$.*')::text`). Folding every
+row is expensive (10,810 products: 700-950 ms per search), so that expression
+gets its own GIN trigram index:
 
-- **Translated names** (jsonb, e.g. the product name) are matched against the
-  same expression Odoo's own trigram index uses (`index="trigram"`:
-  `jsonb_path_query_array(name, '$.*')::text`), so that index is used.
-  10,810 products: 44 ms -> 1.4 ms per typo word.
-- **Other names on large tables** get a trigram index from the module: a daily
-  cron (**Smart search: trigram indexes on large tables**, also triggered when
-  the setting is switched on) adds a GIN trigram index on the name field of
-  every eligible table above 50,000 rows (`INDEX_MIN_ROWS`) that has none.
+- a daily cron (**Smart search: trigram indexes on large tables**, also
+  triggered when the setting is switched on, and by the upgrade that
+  introduced it) indexes the name of every eligible table with 1,000 rows or
+  more (`INDEX_MIN_ROWS`); a table never analyzed yet is counted exactly;
+- with the index: 10,810 products 41-88 ms per search bar request.
 
-A name inherited from a parent table (`product.product` gets its name from
-`product.template`) is matched on the parent, with its index. The link to an
-`_inherits` parent (`product_tmpl_id`) is never searched as a separate path: it
-repeats fields the model already has.
+Two more rules keep it cheap:
 
-End result on 10,810 real products (local, full search bar request including
-the count Odoo adds): `product.product` 207 -> 58 ms, `product.template`
-146 -> 83 ms.
+- A name inherited from a parent table (`product.product` gets its name from
+  `product.template`) is matched on the parent, restricted to the parent
+  records of this model (`website.page` inherits from `ir.ui.view`; folding
+  every view name took 300 ms). The link to an `_inherits` parent
+  (`product_tmpl_id`) is never a separate path.
+- Typos in linked records are only checked on models that take part in smart
+  search themselves; technical comodels (`ir.model.fields`, ...) are large and
+  unindexed (one goal-definition search took 450 ms because of it).
+
+- Ranking uses plain `lower()` on the name, not the folded text: folding
+  every matched row for every score term cost ~145 ms on a 1,070-hit word.
+
+End result on 10,830 real products (local, full search bar request including
+the count Odoo adds): 31-103 ms, dropdowns 33-73 ms. The broadest single word
+("staal", 1,070 hits) is the 103 ms case; standard Odoo search takes 39 ms for
+it.
 
 Sweep over every eligible model of a demo database with 20 apps (250 models
 as admin, 177 as a regular user): smart search works wherever standard search

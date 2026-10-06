@@ -16,6 +16,7 @@ See docs/SMART_SEARCH.md.
 """
 
 import logging
+import unicodedata
 
 from lxml import etree
 
@@ -37,6 +38,17 @@ FUZZY_MIN_LENGTH = 4
 # Shorter words only match the name: "62" inside a reference like R0000062,
 # or inside an email address, matches nearly at random.
 SHORT_WORD_LENGTH = 4
+# Words this long that occur nowhere as typed also try every variant with two
+# neighbouring letters swapped ("pijpbuegel" -> "pijpbeugel"), which trigram
+# similarity misses at a threshold that does not add noise.
+SWAP_MIN_LENGTH = 5
+# A trigram index only serves LIKE patterns of 3+ characters; shorter words
+# match the name literally, without accent folding (a seq scan otherwise).
+FOLD_MIN_LENGTH = 3
+# Usage (pan.smart.search.usage, 0..1) adds at most this much: enough to put
+# the product people actually sell first among equally good text matches, not
+# enough to beat a clearly better text match (each word adds up to 1).
+USAGE_WEIGHT = 0.5
 # An exact reference beats any similarity score.
 EXACT_CODE_BONUS = 10
 # Upper bound on searched field paths per model: every word is OR-ed over all
@@ -48,6 +60,37 @@ CODE_FIELDS = ("default_code", "ref", "code", "barcode")
 # out on purpose: long descriptions and mail bodies are noise and slow.
 MATCH_TYPES = ("char", "many2one", "many2many", "one2many")
 _MARK = "__pan_smart_search__"
+
+
+def _fold_table():
+    """Accented Latin letters (both cases) -> plain lower-case letters, for
+    PostgreSQL translate(). Both cases, because lower() only lowercases ASCII
+    in a database with LC_CTYPE C."""
+    extra = {"ł": "l", "Ł": "l", "đ": "d", "Đ": "d", "ø": "o", "Ø": "o", "ß": "s", "æ": "a", "Æ": "a",
+             "œ": "o", "Œ": "o", "ı": "i", "ħ": "h", "Ħ": "h", "þ": "t", "Þ": "t", "ð": "d", "Ð": "d"}
+    pairs = dict(extra)
+    for code in range(0xC0, 0x250):
+        char = chr(code)
+        base = unicodedata.normalize("NFKD", char)[0].lower()
+        if char not in pairs and base != char.lower() and base.isascii() and base.isalpha():
+            pairs[char] = base
+    return "".join(pairs), "".join(pairs.values())
+
+
+FOLD_FROM, FOLD_TO = _fold_table()
+
+
+_FOLD_PY = str.maketrans(FOLD_FROM, FOLD_TO)
+
+
+def fold(text):
+    """Lower case without accents: "SPÓŁKA" -> "spolka"."""
+    return (text or "").lower().translate(_FOLD_PY)
+
+
+def fold_sql(expression):
+    """SQL counterpart of fold(); the trigram index cron uses the same expression."""
+    return SQL("translate(lower(%s), %s, %s)", expression, FOLD_FROM, FOLD_TO)
 
 
 class Base(models.AbstractModel):
@@ -127,12 +170,29 @@ class Base(models.AbstractModel):
                 return False
             if field.relational and not self.env[field.comodel_name].has_access("read"):
                 return False
+            if not self._pan_smart_search_chain_readable(model, field):
+                return False
             if position < len(names) - 1:
                 if not field.relational:
                     return False
                 model = self.env[field.comodel_name]
             elif field.type not in MATCH_TYPES:
                 return False
+        return True
+
+    @api.model
+    def _pan_smart_search_chain_readable(self, model, field):
+        """A related or inherited field reads other models behind the scenes
+        (website.menu.url is page_id.url); the user needs read access on each."""
+        if field.inherited and not self.env[field.inherited_field.model_name].has_access("read"):
+            return False
+        if field.related:
+            current = model
+            for name in field.related.split(".")[:-1]:
+                link = current._fields.get(name)
+                if link is None or not link.relational or not self.env[link.comodel_name].has_access("read"):
+                    return False
+                current = self.env[link.comodel_name]
         return True
 
     @api.model
@@ -186,17 +246,37 @@ class Base(models.AbstractModel):
     @api.model
     def _pan_smart_search_usable(self, candidates):
         """Name field first, then the candidates this user can search, capped."""
+        return list(self._pan_smart_search_usable_cached(tuple(candidates)))
+
+    @api.model
+    @tools.ormcache("self.env.uid", "candidates")
+    def _pan_smart_search_usable_cached(self, candidates):
         name = self._pan_smart_search_name_field()
         paths = [name] if name else []
         # The link to an _inherits parent (product.product.product_tmpl_id)
         # repeats fields this model already has, at the cost of a second search.
         parent_links = set(self._inherits.values())
-        paths += [
-            path
-            for path in candidates
-            if path not in paths and path.split(".")[0] not in parent_links and self._pan_smart_search_valid_path(path)
-        ]
-        return paths[:MAX_PATHS]
+        for path in candidates:
+            if (
+                path not in paths
+                and path.split(".")[0] not in parent_links
+                and self._pan_smart_search_valid_path(path)
+                and self._pan_smart_search_path_works(path)
+            ):
+                paths.append(path)
+        return tuple(paths[:MAX_PATHS])
+
+    @api.model
+    def _pan_smart_search_path_works(self, path):
+        """Build (not run) an ilike search on `path` as this user. Catches what
+        the field definition does not show: website.menu.url has a search
+        method that reads website.page, which a normal user may not."""
+        try:
+            self._search([(path, "ilike", "x")])
+        except Exception:  # noqa: BLE001 - any failure means: not for this user
+            _logger.debug("Smart search: skipping %s.%s for user %s", self._name, path, self.env.uid)
+            return False
+        return True
 
     # ------------------------------------------------------------------
     # Matching
@@ -251,44 +331,101 @@ class Base(models.AbstractModel):
         for word in words:
             searched = paths if len(word) >= SHORT_WORD_LENGTH or not name else [name]
             options = [Domain(path, "ilike", word) for path in searched]
-            if name and self._pan_smart_search_fuzzy(word):
-                options.append(Domain("id", "in", self._pan_smart_search_fuzzy_query(word)))
-                # Typos also in the name of directly linked records: "gemini
+            if name and len(fold(word)) >= FOLD_MIN_LENGTH:
+                # The name, accent-insensitive ("muller" finds "Müller"), with
+                # typos for longer words.
+                options.append(Domain("id", "in", self._pan_smart_search_name_query(word)))
+            if name and self._pan_smart_search_fuzzy(word) and not self.env.context.get("pan_smart_search_own_name_only"):
+                # Also in the name of directly linked records: "gemini
                 # furnitre" finds the orders of Gemini Furniture.
                 for path in searched:
                     field = self._fields.get(path)
                     if field and field.type == "many2one":
                         comodel = self.env[field.comodel_name]
-                        if comodel._pan_smart_search_name_field():
-                            fuzzy = Domain("id", "in", comodel._pan_smart_search_fuzzy_query(word))
-                            options.append(Domain(path, "any", fuzzy))
+                        # Only models that take part themselves: technical
+                        # comodels (ir.model.fields, ...) are large and unindexed.
+                        if comodel._pan_smart_search_eligible():
+                            linked = Domain("id", "in", comodel._pan_smart_search_name_query(word))
+                            options.append(Domain(path, "any", linked))
             word_domains.append(Domain.OR(options))
         return Domain.AND(word_domains)
 
     @api.model
-    def _pan_smart_search_fuzzy_query(self, word):
-        """Records whose name contains `word`, typos allowed. Written so it can
-        use a trigram index."""
-        fname = self._pan_smart_search_name_field()
+    def _pan_smart_search_name_expression(self, column, fname):
+        """The accent-folded text smart search matches a name on. `column` is
+        the column as SQL (with or without table alias); the trigram index
+        cron builds its index on this same expression. For translated fields
+        it is the expression Odoo indexes: all languages at once."""
+        if self._fields[fname].translate:
+            column = SQL("jsonb_path_query_array(%s, '$.*')::text", column)
+        return fold_sql(column)
+
+    @api.model
+    def _pan_smart_search_name_text_sql(self, query, fname):
+        alias = query.table if isinstance(query.table, str) else query.table._alias
+        return self._pan_smart_search_name_expression(SQL.identifier(alias, fname), fname)
+
+    @api.model
+    def _pan_smart_search_name_query(self, word, fname=None):
+        """Records whose `fname` (default: the name field) contains `word`,
+        accent-insensitive, typos allowed for longer letter words. Written so
+        it can use the trigram index the cron builds on the same expression."""
+        fname = fname or self._pan_smart_search_name_field()
         field = self._fields[fname]
         if field.inherited:
-            # product.product's name lives on product.template: search there
-            # (with its index) and follow the _inherits link.
+            # product.product's name lives on product.template: search that
+            # exact field there (with its index) and follow the _inherits link.
+            # Not the parent's own name field: res.users.role inherits `name`
+            # from res.groups, whose _rec_name is not stored.
             parent = self.env[field.inherited_field.model_name]
             link = self._inherits[parent._name]
-            matches = Domain("id", "in", parent._pan_smart_search_fuzzy_query(word))
-            return self.with_context(active_test=False)._search([(link, "any", matches)])
+            own = self.with_context(active_test=False)
+            # Only the parent records of this model: website.page inherits its
+            # name from ir.ui.view, and folding every view's name is slow.
+            parent_query = parent._pan_smart_search_name_query(word, field.inherited_field.name)
+            parent_query.add_where(SQL("%s IN (%s)", parent._pan_smart_search_field_sql(parent_query, "id"), own._search([]).subselect(link)))
+            return own._search([(link, "any", Domain("id", "in", parent_query))])
+        folded = fold(word)
         query = self.with_context(active_test=False)._search([])
-        if field.translate:
-            # Same expression as Odoo's own trigram index on translated fields
-            # (index="trigram", e.g. the product name): all languages at once.
-            alias = query.table if isinstance(query.table, str) else query.table._alias
-            text = SQL("jsonb_path_query_array(%s, '$.*')::text", SQL.identifier(alias, fname))
+        text = self._pan_smart_search_name_text_sql(query, fname)
+        literal = SQL("%s LIKE %s", text, f"%{escape_psql(folded)}%")
+        if self._pan_smart_search_fuzzy(word) and not self._pan_smart_search_name_exists(fname, literal):
+            # Typos only for a word that occurs nowhere as typed, like Google's
+            # "did you mean": "lasbogt" gets typo matching, "staal" does not
+            # (that only added near-misses: 1,165 hits instead of 1,070, and
+            # three times the time).
+            options = [literal, SQL("%s <%% %s", folded, text)]
+            if len(folded) >= SWAP_MIN_LENGTH:
+                # One regular expression, not one LIKE per variant: separate
+                # ORs made PostgreSQL drop the index and fold every row a dozen
+                # times (3.4 s). Letters only (fuzzy words), so no escaping.
+                options.append(SQL("%s ~ %s", text, "|".join(self._pan_smart_search_swaps(folded))))
+            query.add_where(SQL("(%s)", SQL(" OR ").join(options)))
         else:
-            text = self._pan_smart_search_field_sql(query, fname)
-        # Parentheses: "word <% col->>'nl_NL'" would parse as "(word <% col)->>'nl_NL'".
-        query.add_where(SQL("%s <%% (%s)", word, text))
+            query.add_where(literal)
         return query
+
+    @api.model
+    def _pan_smart_search_swaps(self, word):
+        """`word` with each pair of neighbouring letters swapped."""
+        variants = {word[:i] + word[i + 1] + word[i] + word[i + 2:] for i in range(len(word) - 1)}
+        variants.discard(word)
+        return sorted(variants)
+
+    @api.model
+    def _pan_smart_search_name_exists(self, fname, literal):
+        """Does any record this user can see match `literal`? One indexed row,
+        remembered for the rest of the request: a search over several models
+        asks the same about res.partner for every partner_id."""
+        cache = self.env.cr.__dict__.setdefault("_pan_smart_search_exists", {})
+        key = (self._name, fname, self.env.uid, literal.code, tuple(literal.params))
+        if key not in cache:
+            probe = self._search([])
+            probe.add_where(literal)
+            probe.limit = 1
+            self.env.cr.execute(probe.select())
+            cache[key] = bool(self.env.cr.fetchone())
+        return cache[key]
 
     # ------------------------------------------------------------------
     # Ranking
@@ -308,17 +445,38 @@ class Base(models.AbstractModel):
 
     @api.model
     def _pan_smart_search_order_sql(self, query, term):
-        name = self._pan_smart_search_field_sql(query, self._pan_smart_search_name_field())
+        return SQL("%s DESC, %s", self._pan_smart_search_score_sql(query, term), self._pan_smart_search_field_sql(query, "id"))
+
+    @api.model
+    def _pan_smart_search_scored(self, domain, term, limit):
+        """[(id, score)] of the best matches, for comparing across models."""
+        query = self._search(domain, limit=limit)
+        if query.is_empty():
+            return []
+        score = self._pan_smart_search_score_sql(query, term)
+        query.order = SQL("%s DESC, %s", score, self._pan_smart_search_field_sql(query, "id"))
+        self.env.cr.execute(query.select(self._pan_smart_search_field_sql(query, "id"), score))
+        return self.env.cr.fetchall()
+
+    @api.model
+    def _pan_smart_search_score_sql(self, query, term):
+        # Plain lower(), not fold_sql(): folding every matched row for every
+        # score term cost ~145 ms on a 1,070-hit word; ranking does not need it.
+        name = SQL("lower(COALESCE(%s, ''))", self._pan_smart_search_field_sql(query, self._pan_smart_search_name_field()))
         code_field = self._pan_smart_search_code_field()
         code = SQL("COALESCE(%s, '')", self._pan_smart_search_field_sql(query, code_field)) if code_field else SQL("''")
         scores = [SQL("CASE WHEN %s ILIKE %s THEN %s ELSE 0 END", code, escape_psql(term), EXACT_CODE_BONUS)]
         if self.env.registry.has_trigram:
-            haystack = SQL("(COALESCE(%s, '') || ' ' || %s)", name, code)
-            scores += [SQL("word_similarity(%s, %s)", word, haystack) for word in self._pan_smart_search_words(term)]
+            haystack = SQL("(%s || ' ' || lower(%s))", name, code)
+            scores += [SQL("word_similarity(%s, %s)", fold(word), haystack) for word in self._pan_smart_search_words(term)]
             # Tie-breaker: the name closest to the whole term, so "Plaat 3mm"
             # comes before "Plaat 3mm RVS 304 1000x2000 geslepen".
-            scores.append(SQL("similarity(%s, COALESCE(%s, ''))", term, name))
-        return SQL("%s DESC, %s", SQL(" + ").join(scores), self._pan_smart_search_field_sql(query, "id"))
+            scores.append(SQL("similarity(%s, %s)", fold(term), name))
+        scores.append(SQL(
+            "%s * COALESCE((SELECT score FROM pan_smart_search_usage WHERE model = %s AND res_id = %s), 0)",
+            USAGE_WEIGHT, self._name, self._pan_smart_search_field_sql(query, "id"),
+        ))
+        return SQL("(%s)", SQL(" + ").join(scores))
 
     @api.model
     def _pan_smart_search_ranked(self, domain, term, offset=0, limit=None, field_names=None):
