@@ -6,6 +6,8 @@
   // Colors — accent (light mode: darker for WCAG AA on white)
   --pan-accent:           #5b58d8;
   --pan-accent-hover:     #4a47c4;
+  // The accent as "r, g, b" for tints: rgba(var(--pan-accent-rgb), 0.1).
+  --pan-accent-rgb:       91, 88, 216;
 
   // Colors — light theme (default)
   --pan-bg:               #ffffff;

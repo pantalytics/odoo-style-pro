@@ -81,9 +81,9 @@
 // ─── Warning dialog variant ───────────────────────────────────────────────────
 
 .o_dialog_warning .modal-content {
-  border-color: rgba(155, 153, 255, 0.3) !important;
+  border-color: rgba(var(--pan-accent-rgb), 0.3) !important;
 }
 
 .o_dialog_warning .modal-header {
-  border-bottom-color: rgba(155, 153, 255, 0.2) !important;
+  border-bottom-color: rgba(var(--pan-accent-rgb), 0.2) !important;
 }

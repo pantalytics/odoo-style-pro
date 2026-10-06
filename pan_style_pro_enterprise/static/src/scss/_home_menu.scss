@@ -54,7 +54,7 @@
 
 .o_home_menu {
   // Ensure scrollbar matches theme
-  scrollbar-color: rgba(155, 153, 255, 0.3) transparent !important;
+  scrollbar-color: rgba(var(--pan-accent-rgb), 0.3) transparent !important;
 
   .container {
     padding-top: var(--pan-space-5) !important;
@@ -102,7 +102,7 @@
 
     // Keyboard focus
     &.o_focused {
-      background: rgba(155, 153, 255, 0.08) !important;
+      background: rgba(var(--pan-accent-rgb), 0.08) !important;
       outline: 2px solid var(--pan-accent) !important;
       outline-offset: -2px;
       border-radius: var(--pan-radius-lg) !important;

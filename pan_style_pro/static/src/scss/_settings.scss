@@ -4,7 +4,7 @@
 
 .o_base_settings_view .o_form_renderer {
   --settings__tab-bg: transparent;
-  --settings__tab-bg--active: rgba(155, 153, 255, 0.08);
+  --settings__tab-bg--active: rgba(var(--pan-accent-rgb), 0.08);
   --settings__tab-color: var(--pan-text-secondary);
   --settings__title-bg: transparent;
 }
@@ -34,7 +34,7 @@
     }
 
     &:hover {
-      background-color: rgba(155, 153, 255, 0.06) !important;
+      background-color: rgba(var(--pan-accent-rgb), 0.06) !important;
       color: var(--pan-text) !important;
 
       .icon {
@@ -43,7 +43,7 @@
     }
 
     &.selected {
-      background-color: rgba(155, 153, 255, 0.08) !important;
+      background-color: rgba(var(--pan-accent-rgb), 0.08) !important;
       box-shadow: none !important;
       color: var(--pan-accent) !important;
       font-weight: 500 !important;
@@ -126,7 +126,7 @@
 // ─── Search highlight ───────────────────────────────────────────────────────
 
 .o_searchable_setting {
-  --SearchableSetting__highlight-background: rgba(155, 153, 255, 0.08);
+  --SearchableSetting__highlight-background: rgba(var(--pan-accent-rgb), 0.08);
   --SearchableSetting__highlight-border: var(--pan-accent);
   border-radius: var(--pan-radius-lg) !important;
 }
@@ -240,7 +240,7 @@
     &:focus {
       border-color: var(--pan-accent) !important;
       outline: none !important;
-      box-shadow: 0 0 0 3px rgba(155, 153, 255, 0.15) !important;
+      box-shadow: 0 0 0 3px rgba(var(--pan-accent-rgb), 0.15) !important;
     }
   }
 
