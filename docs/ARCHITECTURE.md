@@ -45,16 +45,17 @@ pan_style_pro/                          # Community + Enterprise base
 │       │   ├── _chatter.scss           # Mail chatter
 │       │   ├── _settings.scss          # Settings page
 │       │   ├── _stat_buttons.scss      # Stat buttons on forms
-│       │   ├── _list_column_order.scss # Dragged column header and drop slot
+│       │   ├── _list_columns.scss      # Dragged column header and drop slot
 │       │   ├── _navbar_search.scss     # Command palette search bar
 │       │   └── _login.scss             # Login page (assets_frontend)
 │       ├── js/
 │       │   └── patches/
 │       │       ├── navbar_search_patch.js  # Patches NavBar to add search
-│       │       └── list_column_order_patch.js # Drag list columns; order saved in favorites
+│       │       ├── list_columns_patch.js   # Columns part of pan.view: order (drag), visible, width
+│       │       └── search_view_patch.js    # filter, group_by and sort parts of pan.view
 │       └── xml/
 │           ├── navbar_search.xml       # Search bar template (extends web.NavBar)
-│           ├── list_column_order.xml   # "Reset column order" item (extends web.ListRenderer)
+│           ├── list_columns.xml        # "Reset columns" item (extends web.ListRenderer)
 │           └── apps_menu.xml           # App icons in dropdown (extends web.NavBar.AppsMenu)
 
 pan_style_pro_enterprise/               # Enterprise-only features
@@ -178,3 +179,7 @@ This is defined in `_typography.scss`.
 ## Personal views (`pan.view`)
 
 One Postgres table, `pan_view`: one row per user, model and view type (unique). A row is a user's view on a model in the Airtable sense: `columns` (ordered `{name, visible, width}`), `sort`, `filter` (the search bar as facets: a predefined filter by XML name, a typed value for a search field, or a custom domain) and `group_by` as JSON. Record rules keep users on their own rows; administrators see all. The web client gets every row of the user once at login (`session_info.pan_views`) and calls `pan.view.save(res_model, values, view_type)` on each change, `pan.view.reset` to drop one. Keyed on the model, not on an `ir.ui.view`, so a view follows the user into every list of that model. Only `list` is wired in the web client today; the table is ready for a name, several views per model and shared views.
+
+Web client (`js/pan_view_store.js` holds the session copy and writes through):
+- `list_columns_patch.js` on `ListRenderer`: order by dragging a header, visible via the optional-columns dropdown, width via the resize handle. Saved as one `columns` list; "Reset columns" in the dropdown clears it. x2many lists in forms are left alone.
+- `search_view_patch.js` on `SearchModel` and `DynamicList`: when an action opens, the stored `filter` facets and `group_by` are *added* to the action's own defaults (never replacing them, so two actions on one model keep their meaning); every search bar change is saved back. A column-header sort is saved as `sort` and applies below a favorite's order, above the action's default. Dialog lists are left alone.

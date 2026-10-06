@@ -16,6 +16,12 @@ msgstr ""
 
 #. module: pan_style_pro
 #. odoo-javascript
-#: code:addons/pan_style_pro/static/src/xml/list_column_order.xml:0
-msgid "Reset column order"
-msgstr "Kolomvolgorde herstellen"
+#: code:addons/pan_style_pro/static/src/xml/list_columns.xml:0
+msgid "Reset columns"
+msgstr "Kolommen herstellen"
+
+#. module: pan_style_pro
+#. odoo-javascript
+#: code:addons/pan_style_pro/static/src/js/pan_view_store.js:0
+msgid "Your view could not be saved."
+msgstr "Je weergave kon niet worden opgeslagen."

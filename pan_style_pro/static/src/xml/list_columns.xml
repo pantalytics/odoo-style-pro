@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+    <!-- "Reset columns" in the optional-columns dropdown, shown while the
+         user's view carries a columns part (order, visible or width). -->
+    <t t-name="pan_style_pro.ListRenderer.Columns" t-inherit="web.ListRenderer" t-inherit-mode="extension">
+        <xpath expr="//DropdownItem[@t-if='hasOptionalOpenFormViewColumn']" position="after">
+            <t t-if="panColumnsCustom">
+                <div t-if="optionalFieldGroups.length or hasOptionalOpenFormViewColumn" role="separator" class="dropdown-divider"/>
+                <DropdownItem class="'pan-reset-columns'" onSelected="() => this.panResetColumns()">
+                    <span class="d-flex align-items-center"><i class="fa fa-undo me-2"/><span class="text-truncate">Reset columns</span></span>
+                </DropdownItem>
+            </t>
+        </xpath>
+    </t>
+
+</templates>
