@@ -85,12 +85,20 @@ The term is split into words. **Every word must match**, in any order:
 
 | Word | Matches |
 |---|---|
-| 4+ characters | literally (`ilike`) in any searched path, or, if only letters, with typos in the name or in the name of a directly linked record (a many2one in the searched paths: customer, project, salesperson) |
-| 1-3 characters (`m5`, `70`, `rvs`) | literally in the name only. In a reference like `R0000062` or an email address, `62` matches nearly at random. |
+| 4+ characters | literally (`ilike`) in any searched path; in the name accent-insensitive; and, if only letters, with typos in the name or in the name of a directly linked record (a many2one in the searched paths: customer, project, salesperson) |
+| 3 characters | as above, without typos |
+| 1-2 characters (`m5`, `70`) | literally in the name only, accent-sensitive (a trigram index cannot serve patterns this short). In a reference like `R0000062` or an email address, `62` matches nearly at random. |
 | contains digits or punctuation (`3mm`, `M8x20`, `hp-rvs`) | literally only. pg_trgm splits `hp-rvs` into `hp` + `rvs` and would match every RVS product. |
 
-Typos use PostgreSQL `pg_trgm`: `word <% name` (word similarity, default
-threshold 0.5). Without `pg_trgm` in the database smart search still works,
+Names are matched **accent-insensitive**: "muller" finds "Müller", "spolka"
+finds "SPÓŁKA", "köhler" finds "Kohler". Both sides are folded the same way
+(PostgreSQL `translate()` with one table of accented Latin letters, both cases,
+mirrored in Python), so this works without the `unaccent` extension, which
+CloudPepper databases do not have, and it only affects smart search: standard
+Odoo search keeps its own behaviour.
+
+Typos use PostgreSQL `pg_trgm` on that folded name: `word <% name` (word
+similarity, default threshold 0.5). Without `pg_trgm` in the database smart search still works,
 literally only.
 
 Swapped letters (`pijpbuegel`) are not caught at 0.5; at 0.4 they are, but then
@@ -120,25 +128,31 @@ Measured server-side.
 | 500,000 contacts, no trigram index | 106 ms | 261 ms literal; typo match **563 ms per word** |
 | 500,000 contacts, trigram index on the name | 1 ms | typo match **7 ms** |
 
-Two things keep typo matching fast:
+Name matching (accents and typos) runs on one expression,
+`translate(lower(<name>), <accented>, <plain>)`, for translated names on the
+text Odoo indexes (`jsonb_path_query_array(name, '$.*')::text`). Folding every
+row is expensive (10,810 products: 700-950 ms per search), so that expression
+gets its own GIN trigram index:
 
-- **Translated names** (jsonb, e.g. the product name) are matched against the
-  same expression Odoo's own trigram index uses (`index="trigram"`:
-  `jsonb_path_query_array(name, '$.*')::text`), so that index is used.
-  10,810 products: 44 ms -> 1.4 ms per typo word.
-- **Other names on large tables** get a trigram index from the module: a daily
-  cron (**Smart search: trigram indexes on large tables**, also triggered when
-  the setting is switched on) adds a GIN trigram index on the name field of
-  every eligible table above 50,000 rows (`INDEX_MIN_ROWS`) that has none.
+- a daily cron (**Smart search: trigram indexes on large tables**, also
+  triggered when the setting is switched on, and run during the upgrade that
+  introduced it) indexes the name of every eligible table with 1,000 rows or
+  more (`INDEX_MIN_ROWS`); a table never analyzed yet is counted exactly;
+- with the index: 10,810 products 41-88 ms per search bar request.
 
-A name inherited from a parent table (`product.product` gets its name from
-`product.template`) is matched on the parent, with its index. The link to an
-`_inherits` parent (`product_tmpl_id`) is never searched as a separate path: it
-repeats fields the model already has.
+Two more rules keep it cheap:
+
+- A name inherited from a parent table (`product.product` gets its name from
+  `product.template`) is matched on the parent, restricted to the parent
+  records of this model (`website.page` inherits from `ir.ui.view`; folding
+  every view name took 300 ms). The link to an `_inherits` parent
+  (`product_tmpl_id`) is never a separate path.
+- Typos in linked records are only checked on models that take part in smart
+  search themselves; technical comodels (`ir.model.fields`, ...) are large and
+  unindexed (one goal-definition search took 450 ms because of it).
 
 End result on 10,810 real products (local, full search bar request including
-the count Odoo adds): `product.product` 207 -> 58 ms, `product.template`
-146 -> 83 ms.
+the count Odoo adds): 41-88 ms.
 
 Sweep over every eligible model of a demo database with 20 apps (250 models
 as admin, 177 as a regular user): smart search works wherever standard search
