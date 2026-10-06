@@ -1,6 +1,6 @@
 {
     "name": "Pantalytics Style Pro Search",
-    "version": "20.0.2.1.0",
+    "version": "20.0.2.1.1",
     "description": """
         Adds "Smart search" as the first option of every search bar, search
         dialog and dropdown. Every word must match, in any order; words of four
