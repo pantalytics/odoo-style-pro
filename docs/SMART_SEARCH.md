@@ -84,6 +84,24 @@ So **a field a customer adds to the search view, via Studio or custom code, is
 searched by smart search automatically.** That is also the way to add a field:
 put it in the search view. To keep a field out, keep it out of the search view.
 
+**Properties** (`product_properties` on products, `task_properties` on tasks,
+...) work the same way: put the properties field in the search view and every
+property defined on it (on the categories, projects, ...) becomes its own
+path, `product_properties.dikte_mm`. Odoo can only search a properties field
+per property; the definitions are read from the definition records on every
+search (one small query), because they change with a write on a category, not
+on a view. Per property type:
+
+| Property type | A word matches when |
+|---|---|
+| `char` | it occurs in the value (`ilike`), whatever its length: values like `M8` are short and specific |
+| `selection`, `tags` | it occurs in an option's label (`gesl` finds Geslepen); the record stores the key, the user types the label |
+| `integer`, `float` | the word is a number, optionally with a unit stuck to it (`3`, `3,5`, `3mm`, `250kg`), and equals the value. Not `ilike`: `%3%` would find 13, 30 and 300 |
+| `boolean`, `date`, `datetime`, `many2one`, `many2many` | never: a free search word means nothing there |
+
+The same key with another type in another category: the first definition
+wins. At most 15 property paths per model, on top of the 15 ordinary ones.
+
 A path is used only if the current user can search it:
 
 - every field on the path exists and is searchable (stored, or has a search
@@ -127,6 +145,7 @@ The term is split into words. **Every word must match**, in any order:
 | 3 characters (`rvs`) | literally in the name only, accent-insensitive |
 | 1-2 characters (`m5`, `70`) | literally in the name only, accent-sensitive (a trigram index cannot serve patterns this short). In a reference like `R0000062` or an email address, `62` matches nearly at random. |
 | contains digits or punctuation (`3mm`, `M8x20`, `hp-rvs`) | literally only. pg_trgm splits `hp-rvs` into `hp` + `rvs` and would match every RVS product. |
+| a number (`3`, `3,5`, `3mm`) | as above, and exactly equal to a numeric property in the searched paths |
 
 Names are matched **accent-insensitive**: "muller" finds "Müller", "spolka"
 finds "SPÓŁKA", "köhler" finds "Kohler". Both sides are folded the same way
