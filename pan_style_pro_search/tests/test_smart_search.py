@@ -124,3 +124,46 @@ class TestSmartSearch(TransactionCase):
         self._set_smart_search(True)
         arch = self.env["product.template"].get_views([(False, "search")])["views"]["search"]["arch"]
         self.assertIn("x_smart_search", arch)
+
+    def test_properties(self):
+        """A properties field in the search view stands for every property
+        defined on it: text ilike, a number exactly, a choice on its label."""
+        Template = self.env["product.template"]
+        if "product_properties" not in Template._fields:
+            self.skipTest("product.template has no properties field in this Odoo")
+        categ = self.env["product.category"].create({
+            "name": "Plaatmateriaal",
+            "product_properties_definition": [
+                {"name": "dikte_mm", "string": "Dikte (mm)", "type": "float"},
+                {"name": "lengte_mm", "string": "Lengte (mm)", "type": "integer"},
+                {"name": "maat", "string": "Maat", "type": "char"},
+                {"name": "afwerking", "string": "Afwerking", "type": "selection",
+                 "selection": [["gesl", "Geslepen"], ["wals", "Walshuid"]]},
+                {"name": "op_voorraad", "string": "Op voorraad", "type": "boolean"},
+            ],
+        })
+        steel, alu = Template.create([
+            {"name": "Plaat staal", "categ_id": categ.id,
+             "product_properties": {"dikte_mm": 3.0, "lengte_mm": 1000, "maat": "M8", "afwerking": "gesl", "op_voorraad": True}},
+            {"name": "Plaat aluminium", "categ_id": categ.id,
+             "product_properties": {"dikte_mm": 13.0, "lengte_mm": 2000, "maat": "M12", "afwerking": "wals"}},
+        ])
+        scope = [("id", "in", (steel | alu).ids)]
+        self.assertFalse(Template.search(scope + [("x_smart_search", "ilike", "1000")]), "not in the search view yet")
+        self.env["ir.ui.view"].create({
+            "name": "test: properties in product search",
+            "model": "product.template",
+            "inherit_id": self.env.ref("product.product_template_search_view").id,
+            "arch": '<xpath expr="//search" position="inside"><field name="product_properties"/></xpath>',
+        })
+        paths = Template._pan_smart_search_view_paths()
+        self.assertIn("product_properties.dikte_mm", paths)
+        self.assertIn("product_properties.afwerking", paths)
+        self.assertNotIn("product_properties.op_voorraad", paths, "a boolean has nothing to match a word on")
+        self.assertNotIn("product_properties", paths)
+        for term, expected in (
+            ("3", steel), ("3mm", steel), ("3,0", steel), ("1000", steel), ("2000", alu),
+            ("13", alu), ("m8", steel), ("geslepen", steel), ("wals", alu), ("plaat 3 m8", steel),
+            ("30", Template), ("3 2000", Template), ("gesl", steel),
+        ):
+            self.assertEqual(Template.search(scope + [("x_smart_search", "ilike", term)]), expected, term)

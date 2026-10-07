@@ -6,7 +6,10 @@ searchable:
 - search bar: the fields of its search view, including the field paths in
   their filter_domain (so linked fields such as partner_id or
   product_variant_ids.default_code come along). A field a customer adds to
-  the search view, via Studio or custom code, is searched automatically.
+  the search view, via Studio or custom code, is searched automatically. A
+  properties field in the search view (product_properties) stands for every
+  property defined on it: text properties match like any field, a number
+  matches a numeric property exactly, a choice matches on its label.
 - dropdowns: the fields Odoo itself uses there (_rec_names_search, else
   _rec_name), which keeps them fast.
 - typos and ranking: the name field (complete_name if the model has one,
@@ -16,6 +19,7 @@ See docs/SMART_SEARCH.md.
 """
 
 import logging
+import re
 import unicodedata
 
 from lxml import etree
@@ -59,6 +63,16 @@ CODE_FIELDS = ("default_code", "ref", "code", "barcode")
 # Field types a word can be matched against with ilike. Text and html are left
 # out on purpose: long descriptions and mail bodies are noise and slow.
 MATCH_TYPES = ("char", "many2one", "many2many", "one2many")
+# Property types smart search can match a typed word on. Boolean, date and
+# relational properties are left out: a free search word means nothing there.
+PROPERTY_TEXT_TYPES = ("char",)
+PROPERTY_CHOICE_TYPES = ("selection", "tags")
+PROPERTY_NUMBER_TYPES = ("integer", "float")
+PROPERTY_TYPES = PROPERTY_TEXT_TYPES + PROPERTY_CHOICE_TYPES + PROPERTY_NUMBER_TYPES
+# A word that is a number, with an optional unit stuck to it: "3", "3,5",
+# "3mm", "250kg". Only such a word is tried on numeric properties, and then
+# exactly: "%3%" would find 13, 30 and 300.
+_NUMBER_WORD = re.compile(r"(\d+(?:[.,]\d+)?)[a-z]{0,3}")
 _MARK = "__pan_smart_search__"
 
 
@@ -176,6 +190,9 @@ class Base(models.AbstractModel):
                 return False
             if not self._pan_smart_search_chain_readable(model, field):
                 return False
+            if field.type == "properties":
+                # product_properties.dikte_mm: the rest is the property name.
+                return position == len(names) - 2 and bool(field.definition_record)
             if position < len(names) - 1:
                 if not field.relational:
                     return False
@@ -241,7 +258,9 @@ class Base(models.AbstractModel):
 
     @api.model
     def _pan_smart_search_view_paths(self):
-        return self._pan_smart_search_usable(self._pan_smart_search_view_candidates())
+        candidates = self._pan_smart_search_view_candidates()
+        properties = tuple(self._pan_smart_search_properties(candidates))
+        return self._pan_smart_search_usable(candidates) + list(self._pan_smart_search_usable_properties_cached(properties))
 
     @api.model
     def _pan_smart_search_dropdown_paths(self):
@@ -281,6 +300,77 @@ class Base(models.AbstractModel):
             _logger.debug("Smart search: skipping %s.%s for user %s", self._name, path, self.env.uid)
             return False
         return True
+
+    # ------------------------------------------------------------------
+    # Properties: a properties field in the search view stands for every
+    # property defined on it (product_properties.dikte_mm, ...). Odoo can only
+    # search a properties field per property, so each one is its own path.
+    # ------------------------------------------------------------------
+
+    @api.model
+    @tools.ormcache("self.env.uid", "paths")
+    def _pan_smart_search_usable_properties_cached(self, paths):
+        return tuple(
+            path for path in paths if self._pan_smart_search_valid_path(path) and self._pan_smart_search_path_works(path)
+        )[:MAX_PATHS]
+
+    @api.model
+    def _pan_smart_search_properties(self, paths):
+        """{path: {"type", "options"}} of every property smart search can match,
+        for the properties fields among `paths` (a field name, or a path into
+        one). Read from the definition records every time: definitions change
+        with a write on the category, not on a view, so no cache knows when.
+        One small query per properties field."""
+        result = {}
+        for fname in dict.fromkeys(path.split(".")[0] for path in paths):
+            field = self._fields.get(fname)
+            if field is None or field.type != "properties" or not field.definition_record:
+                continue
+            container = self._fields.get(field.definition_record)
+            target = self.env[container.comodel_name] if container and container.relational else None
+            definition_field = target._fields.get(field.definition_record_field) if target is not None else None
+            if definition_field is None or not definition_field.store or not target._auto:
+                continue
+            target.flush_model([definition_field.name])
+            column = SQL.identifier(definition_field.name)
+            self.env.cr.execute(SQL(
+                "SELECT DISTINCT definition FROM %s, jsonb_array_elements(%s) definition WHERE %s IS NOT NULL",
+                SQL.identifier(target._table), column, column,
+            ))
+            for (definition,) in self.env.cr.fetchall():
+                name, ptype = definition.get("name"), definition.get("type")
+                if not name or ptype not in PROPERTY_TYPES:
+                    continue
+                entry = result.setdefault(f"{fname}.{name}", {"type": ptype, "options": {}})
+                if entry["type"] != ptype:
+                    # The same key with another type in another category: first wins.
+                    continue
+                # selection: [[key, label], ...]; tags: [[key, label, color], ...]
+                for option in definition.get(ptype) or ():
+                    if isinstance(option, (list, tuple)) and len(option) >= 2:
+                        entry["options"].setdefault(option[0], option[1])
+        return result
+
+    @api.model
+    def _pan_smart_search_number(self, word):
+        """The number in a word like "3", "3,5" or "3mm", else None."""
+        match = _NUMBER_WORD.fullmatch(word.lower())
+        return float(match.group(1).replace(",", ".")) if match else None
+
+    @api.model
+    def _pan_smart_search_property_options(self, path, definition, word):
+        """Domains matching `word` on one property, by its type."""
+        ptype = definition["type"]
+        if ptype in PROPERTY_NUMBER_TYPES:
+            number = self._pan_smart_search_number(word)
+            # jsonb compares numbers by value: 3 finds a float 3.0.
+            return [Domain(path, "=", number)] if number is not None else []
+        if ptype in PROPERTY_TEXT_TYPES:
+            # Property values are short and specific ("M8"), so no short-word rule here.
+            return [Domain(path, "ilike", word)]
+        folded = fold(word)
+        # The record stores the option key; the user types (part of) the label.
+        return [Domain(path, "in", [key]) for key, label in definition["options"].items() if folded in fold(str(label))]
 
     # ------------------------------------------------------------------
     # Matching
@@ -334,10 +424,15 @@ class Base(models.AbstractModel):
             self.env.cr.execute(
                 SQL("SELECT set_config('pg_trgm.word_similarity_threshold', %s, true)", str(self._pan_smart_search_threshold()))
             )
+        properties = self._pan_smart_search_properties(paths) if any("." in path for path in paths) else {}
+        properties = {path: definition for path, definition in properties.items() if path in paths}
+        paths = [path for path in paths if path not in properties]
         word_domains = []
         for word in words:
             searched = paths if len(word) >= SHORT_WORD_LENGTH or not name else [name]
             options = [Domain(path, "ilike", word) for path in searched]
+            for path, definition in properties.items():
+                options += self._pan_smart_search_property_options(path, definition, word)
             if name and len(fold(word)) >= FOLD_MIN_LENGTH:
                 # The name, accent-insensitive ("muller" finds "Müller"), with
                 # typos for longer words.
