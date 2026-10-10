@@ -14,6 +14,10 @@ import { panViews } from "@pan_style_pro/js/pan_view_store";
 // click on a column header to sort. The sort applies like a favorite's would,
 // below a favorite, above the action's default order.
 //
+// Favorites are not stored: Odoo applies a default favorite itself, and
+// storing it too added it a second time on every open. Same for the group by
+// a favorite carries. A favorite picked by hand is not restored.
+//
 // Lists in dialogs (choose a record) are left alone.
 
 /** The search bar as facets, in the shape pan.view stores. */
@@ -45,9 +49,6 @@ function serializeFacets(searchModel) {
                         facets.push(facet);
                     }
                     break;
-                case "favorite":
-                    facets.push({ type: "domain", domain: domainList(item.domain), label: item.description || "" });
-                    break;
             }
         }
     }
@@ -71,7 +72,21 @@ patch(SearchModel.prototype, {
     },
 
     panSearchParts() {
-        return { filter: serializeFacets(this), group_by: this._getGroupBy() };
+        return { filter: serializeFacets(this), group_by: this.panGroupBy() };
+    },
+
+    /** The group by of the search bar's group by items, not a favorite's. */
+    panGroupBy() {
+        const groupBy = [];
+        for (const { searchItemId, intervalId } of this.query) {
+            const item = this.searchItems[searchItemId];
+            if (item.type === "groupBy") {
+                groupBy.push(item.fieldName);
+            } else if (item.type === "dateGroupBy") {
+                groupBy.push(`${item.fieldName}:${intervalId}`);
+            }
+        }
+        return groupBy;
     },
 
     /** Add the stored filter and group by to whatever the action activated. */
