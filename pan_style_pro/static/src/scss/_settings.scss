@@ -26,7 +26,7 @@
     font-size: 0.8125rem !important;
     font-weight: 400 !important;
     color: var(--pan-text-secondary) !important;
-    transition: all 0.15s ease !important;
+    transition: background-color 0.15s ease, color 0.15s ease !important;
 
     .icon {
       opacity: 0.5;
@@ -168,21 +168,6 @@
     font-weight: 500 !important;
     color: var(--pan-text) !important;
     margin: 0 !important;
-  }
-
-  .o_field_color .o_color_pill {
-    width: 32px !important;
-    height: 32px !important;
-    border-radius: 50% !important;
-    border: 2px solid var(--pan-border-strong) !important;
-    box-shadow: var(--pan-shadow-sm) !important;
-    transition: transform 0.15s ease, box-shadow 0.15s ease !important;
-    cursor: pointer;
-
-    &:hover {
-      transform: scale(1.1);
-      box-shadow: var(--pan-shadow-md) !important;
-    }
   }
 
   &--header {

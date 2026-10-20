@@ -16,13 +16,13 @@
     color: var(--pan-text-secondary);
     cursor: grab;
     opacity: 0;
-    transition: opacity 0.12s;
+    transition: opacity 0.15s;
     z-index: 2;
   }
 
   // On hover the label moves aside for the grip instead of hiding under it.
   > .d-flex {
-    transition: transform 0.12s;
+    transition: transform 0.15s;
   }
 
   &:hover .pan-column-grip {

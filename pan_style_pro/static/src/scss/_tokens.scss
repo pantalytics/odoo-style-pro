@@ -17,6 +17,15 @@
   --pan-border:           rgba(0, 0, 0, 0.08);
   --pan-border-strong:    rgba(0, 0, 0, 0.15);
 
+  // Status (brand: green works, amber needs the user, red broken). The
+  // -rgb triplet is for tints; -text is the AA colour for words on a tint.
+  --pan-success-rgb:      34, 197, 94;
+  --pan-success-text:     #15803d;
+  --pan-warning-rgb:      245, 158, 11;
+  --pan-warning-text:     #a16207;
+  --pan-danger-rgb:       239, 68, 68;
+  --pan-danger-text:      #dc2626;
+
   // Typography
   --pan-font-heading:     "Murecho", sans-serif;
   --pan-font-body:        "Murecho", sans-serif;

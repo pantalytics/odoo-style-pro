@@ -93,13 +93,6 @@ select.form-select {
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
 
-// Discuss sidebar
-.o_discuss_sidebar .o_active {
-  background-color: rgba(var(--pan-accent-rgb), 0.1) !important;
-  color: var(--pan-accent) !important;
-  border-radius: var(--pan-radius-md) !important;
-}
-
 // Notebook tabs — Vercel stijl: alleen een clean 2px bottom underline
 .o_notebook .nav-tabs {
   border-bottom: 1px solid var(--pan-border) !important;

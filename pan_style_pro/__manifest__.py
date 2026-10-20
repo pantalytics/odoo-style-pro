@@ -1,6 +1,6 @@
 {
     "name": "Style Pro",
-    "version": "19.0.1.7.0",
+    "version": "19.0.1.8.0",
     "images": ["static/description/banner.png"],
     "summary": "Modern Pantalytics brand theme for Odoo backend",
     "description": """

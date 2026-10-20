@@ -21,6 +21,11 @@
   --pan-border:         rgba(255, 255, 255, 0.1);
   --pan-border-strong:  rgba(255, 255, 255, 0.2);
 
+  // Status text, lighter for the dark bg
+  --pan-success-text:   #4ade80;
+  --pan-warning-text:   #fcd34d;
+  --pan-danger-text:    #f87171;
+
   // Navbar
   --pan-navbar-bg:      #001d21;
   --pan-navbar-border:  rgba(255, 255, 255, 0.1);

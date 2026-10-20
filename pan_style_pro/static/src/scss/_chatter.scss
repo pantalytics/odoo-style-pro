@@ -39,7 +39,7 @@
     border-radius: 6px;
     background-color: var(--pan-bg, #ffffff);
     border: 1px solid var(--pan-border);
-    transition: border-color 0.2s, height 0.2s;
+    transition: border-color 0.15s;
   }
 
   &:hover,
@@ -104,13 +104,6 @@
   &:hover {
     color: var(--pan-accent);
   }
-}
-
-// ─── Smooth collapse/expand transition ────────────────────────────────────
-
-.o_xxl_form_view .o_form_sheet_bg,
-.o_xxl_form_view .o-mail-Form-chatter.o-aside {
-  transition: flex 0.25s ease;
 }
 
 // ─── Chatter topbar ─────────────────────────────────────────────────────────
