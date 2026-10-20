@@ -10,7 +10,8 @@ $pan-color-danger  : #ef4444;
 // ─── Toast notifications (.o_notification_manager) ────────────────────────────
 
 .o_notification_manager .o_notification {
-  border: 1px solid var(--pan-border) !important;
+  // No shadow, so a floating toast needs the stronger edge
+  border: 1px solid var(--pan-border-strong) !important;
   border-radius: var(--pan-radius-lg) !important;
   box-shadow: var(--pan-shadow-md) !important;
   font-family: var(--pan-font-body) !important;

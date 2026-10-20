@@ -1,6 +1,6 @@
 // Pantalytics login page overrides
 // web.assets_frontend loads on every website and portal page, so each rule
-// is scoped to the login card (.o_database_list) or body.o_home_menu_background.
+// is scoped to the login card (.o_database_list) or the body that holds it.
 
 :root {
   --pan-accent:       #5b58d8;
@@ -10,7 +10,7 @@
   --pan-radius-md:    0.375rem;
 }
 
-body.o_home_menu_background {
+body:has(.o_database_list) {
   font-family: var(--pan-font-body);
   background: linear-gradient(135deg, #f5f5f5 0%, #ededff 100%) !important;
 }

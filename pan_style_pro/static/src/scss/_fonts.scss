@@ -1,12 +1,12 @@
 // Self-hosted fonts, no Google CDN. Declaring a face loads nothing until a
 // rule uses it, so every bundle that needs the brand font can include this.
 
-// Murecho, the brand's one typeface: a variable font, 400-700 in one file.
+// Murecho, the brand's one typeface: a variable font, 100-900 in one file.
 // The same latin subset brand.pantalytics.com serves.
 @font-face {
   font-family: "Murecho";
   font-style: normal;
-  font-weight: 400 700;
+  font-weight: 100 900;
   font-display: swap;
   src: url("/pan_style_pro/static/src/fonts/murecho-latin.woff2") format("woff2");
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,

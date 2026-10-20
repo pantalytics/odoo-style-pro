@@ -236,7 +236,7 @@
     margin-top: var(--pan-space-3);
   }
 
-  .o_article .o_article_handle:focus-within {
+  .o_article .o_article_handle:has(:focus-visible) {
     outline: 2px solid var(--pan-accent);
     outline-offset: -2px;
   }
