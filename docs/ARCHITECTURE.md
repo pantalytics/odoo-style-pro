@@ -2,10 +2,11 @@
 
 ## Overview
 
-`odoo-style-pro` consists of three Odoo modules that override Odoo's default UI without modifying core files:
+`odoo-style-pro` consists of four Odoo modules that override Odoo's default UI without modifying core files:
 
 - **`pan_style_pro`** — Community-compatible base (depends only on `web`)
 - **`pan_style_pro_enterprise`** — Enterprise bridge (auto-installs when `web_enterprise` is present)
+- **`pan_style_pro_knowledge`** — Public Knowledge sidebar bridge (auto-installs with `website_knowledge`). Odoo draws the same hover caret on every row and its sidebar data carries no "has children", so `/pan_style_pro/knowledge/parents` answers it for the rows on screen, a patch on `KnowledgePublicSidebar` marks each row `pan-has-children` or `pan-leaf`, and the caret shows only on the first. Not installable in CI (Enterprise); checked against odoo.pantalytics.com with the bundle swapped in
 - **`pan_style_pro_search`** — Smart search in every search bar and dropdown, off by default (auto-installs with `pan_style_pro`). Works differently from the theme modules (Python on `base`, no styling); see [SMART_SEARCH.md](SMART_SEARCH.md)
 
 Three mechanisms are used:

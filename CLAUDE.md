@@ -4,7 +4,7 @@
 
 `odoo-style-pro` — Style Pro by Pantalytics for Odoo 19 and 20 (Community + Enterprise).
 
-Gives Odoo a modern, consumer-grade look and feel (think Linear/Vercel) using the Pantalytics brand. Three Odoo modules: `pan_style_pro` (Community-compatible base), `pan_style_pro_enterprise` (auto-install bridge for Enterprise features) and `pan_style_pro_search` (smart search in every model, off by default; see docs/SMART_SEARCH.md).
+Gives Odoo a modern, consumer-grade look and feel (think Linear/Vercel) using the Pantalytics brand. Four Odoo modules: `pan_style_pro` (Community-compatible base), `pan_style_pro_enterprise` (auto-install bridge for Enterprise features), `pan_style_pro_knowledge` (auto-install bridge for the public Knowledge sidebar) and `pan_style_pro_search` (smart search in every model, off by default; see docs/SMART_SEARCH.md).
 
 ## Brand tokens (source of truth: `pantalytics-brand/src/pages/kleuren.astro`)
 
@@ -35,6 +35,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for full details.
 |---|---|---|---|
 | `pan_style_pro` | `web` | No | All Community-compatible styling, navbar search bar, app icons |
 | `pan_style_pro_enterprise` | `pan_style_pro`, `web_enterprise` | **Yes** | Home menu patch, dark mode tokens |
+| `pan_style_pro_knowledge` | `pan_style_pro_enterprise`, `website_knowledge` | **Yes** | Public Knowledge sidebar: a caret only on pages with children. One JSON route, one OWL patch, one template extension |
 | `pan_style_pro_search` | `pan_style_pro` | **Yes** | Smart search in every model: words in any order, typos (pg_trgm), best match first. Fields come from each model's search view. Off until switched on in Settings > Style Pro. See [docs/SMART_SEARCH.md](docs/SMART_SEARCH.md) |
 
 ## Conventions
