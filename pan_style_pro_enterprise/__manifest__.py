@@ -1,6 +1,6 @@
 {
     "name": "Style Pro — Enterprise",
-    "version": "19.0.1.2.0",
+    "version": "19.0.1.3.0",
     "summary": "Enterprise extensions for Pantalytics Style Pro (home menu, dark mode, Knowledge)",
     "description": """
         Adds Enterprise-specific styling: home menu search bar, dark mode tokens,

@@ -12,34 +12,9 @@
 // before them in the bundle, so every rule starts from a root class plus the
 // view class.
 
-// ─── Emoji: one monochrome line set ───────────────────────────────────────
-// Knowledge titles carry an emoji each, and the OS colour set (Segoe on
-// Windows, Apple, Noto) is what made the tree read like a 2015 wiki. Noto
-// Emoji (OFL, google/fonts) draws them as line glyphs in the text colour.
-// Subset to the emoji blocks only, so digits, arrows and (c) stay in the text
-// font, and the file is only fetched by a page that shows an emoji.
-//
-// Built from NotoEmoji[wght].ttf: fontTools instancer wght=400, subset to the
-// unicode-range below, plus a cmap format 14 table mapping every glyph's
-// base+U+FE0F to the same glyph. Without that table Chrome sends ⚙️ and 🛠️
-// (a symbol plus the emoji selector) to the colour font after all.
-
-@font-face {
-  font-family: "Pan Emoji";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("/pan_style_pro_enterprise/static/src/fonts/noto-emoji-400.woff2") format("woff2");
-  unicode-range: U+200D, U+2300-23FF, U+25A0-27BF, U+2B00-2BFF, U+3030, U+303D,
-    U+3297, U+3299, U+FE0F, U+1F000-1FAFF, U+E0020-E007F;
-}
-
 .o_knowledge_form_view,
 .o_knowledge_public_view {
-  --pan-font-body:    "Instrument Sans", "Pan Emoji", sans-serif;
-  --pan-font-heading: "Lexend", "Pan Emoji", sans-serif;
   font-family: var(--pan-font-body);
-  font-variant-emoji: text;
 }
 
 // ─── Prose: the article body ──────────────────────────────────────────────
@@ -243,24 +218,10 @@
     background-color: transparent !important;
   }
 
-  // Text-only rows, as in a docs nav. The emoji column becomes a caret that
-  // shows on hover, so a tree can still be unfolded by hand.
-  .o_article_emoji {
-    display: none;
-  }
-
+  // Emoji and caret stay as Odoo draws them: the caret is what tells a page
+  // with children from one without.
   .o_article_icon {
-    width: 1.5rem;
-    flex: 0 0 1.5rem;
     color: var(--pan-text-secondary);
-
-    .o_article_caret {
-      opacity: 0;
-    }
-  }
-
-  .o_article_handle:hover .o_article_icon .o_article_caret {
-    opacity: 1;
   }
 
   // Section titles (Favorites, Workspace, Private): eyebrow, not a heading
@@ -389,12 +350,6 @@
     border-bottom-color: var(--pan-accent) !important;
   }
 
-  // The page icon: an emoji at 5em is clip art. A docs page wears it small.
-  .o_knowledge_body .o_knowledge_icon {
-    font-size: 2.75rem;
-    margin-top: var(--pan-space-6);
-  }
-
   .o_knowledge_cover img {
     height: 22vh;
   }
@@ -458,12 +413,6 @@ html body .o_knowledge_public_view {
       border-color: var(--pan-accent);
       color: var(--pan-accent);
     }
-  }
-
-  // The page emoji above the title is what dates the page most; the
-  // breadcrumb still carries it
-  .o_knowledge_icon {
-    display: none !important;
   }
 
   .o_knowledge_article {
