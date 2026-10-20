@@ -5,7 +5,7 @@
 # the version bump.
 #
 #   tools/ci_lint.sh                  # everything that needs no base ref
-#   BASE_REF=origin/19.0 tools/ci_lint.sh   # + the version-bump check
+#   BASE_REF=origin/main tools/ci_lint.sh   # + the version-bump check
 #
 # .github/workflows/ci.yml calls this file rather than repeating the checks, so
 # a runner, a laptop and a Claude cloud session cannot disagree about what

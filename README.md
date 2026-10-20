@@ -144,8 +144,9 @@ tools/ci.sh upgrade     # install the last release, then upgrade to HEAD
 tools/ci.sh             # all of it
 ```
 
-A merge to `19.0` with a bumped `pan_style_pro` version is tagged and released
-automatically.
+Every PR goes to `main`. A release is a merge from `main` into `19.0` (and
+`20.0`), which Cloudpepper and Odoo.sh deploy from; a merge to `19.0` with a
+bumped `pan_style_pro` version is tagged and released automatically.
 
 ---
 
