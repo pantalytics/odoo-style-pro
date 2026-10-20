@@ -31,7 +31,7 @@
   }
 
   h1 { font-size: 2rem;     margin: 2.5rem 0 1rem; }
-  h2 { font-size: 1.5rem;   margin: 2.25rem 0 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--pan-border); }
+  h2 { font-size: 1.5rem;   margin: 2.25rem 0 0.75rem; }
   h3 { font-size: 1.25rem;  margin: 1.75rem 0 0.5rem; }
   h4 { font-size: 1.0625rem; margin: 1.5rem 0 0.5rem; }
 
@@ -39,9 +39,78 @@
     margin-top: 0;
   }
 
-  // Brand: headings are never bold, even when the editor wrapped them in it
-  :is(h1, h2, h3, h4, h5, h6) :is(b, strong, span) {
+  h1 {
+    font-size: 2.25rem;
+    letter-spacing: -0.02em;
+  }
+
+  // Brand: headings are never bold and never a theme colour, even when the
+  // editor wrapped them in one
+  :is(h1, h2, h3, h4, h5, h6) :is(b, strong, span, font) {
     font-weight: inherit !important;
+    color: inherit !important;
+  }
+
+  // The article index embed: cards, not a bulleted list
+  .o_embedded_articles_index_label {
+    font-family: var(--pan-font-body) !important;
+    font-size: 0.75rem;
+    font-weight: 500 !important;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--pan-text-secondary);
+    padding: 0 !important;
+    margin: var(--pan-space-5) 0 var(--pan-space-3);
+  }
+
+  .o_embedded_articles_index_content > ul {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+    gap: var(--pan-space-3);
+    list-style: none;
+    padding: 0 !important;
+
+    > li {
+      margin: 0;
+
+      // Cards show one level; the sidebar carries the rest of the tree
+      > ul {
+        display: none;
+      }
+
+      > a {
+        height: 100%;
+        align-items: center;
+        padding: var(--pan-space-4) !important;
+        border: 1px solid var(--pan-border-strong);
+        border-radius: var(--pan-radius-lg);
+        font-weight: 500;
+        color: var(--pan-text) !important;
+        text-decoration: none;
+        transition: border-color 0.15s, color 0.15s;
+
+        .text-truncate {
+          white-space: normal;
+        }
+
+        &::after {
+          content: "\2192";
+          margin-left: var(--pan-space-2);
+          color: var(--pan-text-secondary);
+          transition: transform 0.15s, color 0.15s;
+        }
+
+        &:hover {
+          border-color: var(--pan-accent);
+          color: var(--pan-accent) !important;
+
+          &::after {
+            color: var(--pan-accent);
+            transform: translateX(2px);
+          }
+        }
+      }
+    }
   }
 
   ul,
@@ -135,9 +204,34 @@
 // ─── Sidebar: the page tree ───────────────────────────────────────────────
 
 @mixin pan-knowledge-sidebar {
-  background-color: var(--pan-bg-secondary) !important;
+  background-color: var(--pan-bg) !important;
   border-right: 1px solid var(--pan-border) !important;
   font-size: 0.875rem;
+
+  // Odoo paints the inner panels bg-100
+  .bg-100 {
+    background-color: transparent !important;
+  }
+
+  // Text-only rows, as in a docs nav. The emoji column becomes a caret that
+  // shows on hover, so a tree can still be unfolded by hand.
+  .o_article_emoji {
+    display: none;
+  }
+
+  .o_article_icon {
+    width: 1.5rem;
+    flex: 0 0 1.5rem;
+    color: var(--pan-text-secondary);
+
+    .o_article_caret {
+      opacity: 0;
+    }
+  }
+
+  .o_article_handle:hover .o_article_icon .o_article_caret {
+    opacity: 1;
+  }
 
   // Section titles (Favorites, Workspace, Private): eyebrow, not a heading
   .o_section_header_label,
@@ -156,12 +250,14 @@
 
   .o_article .o_article_handle {
     border-radius: var(--pan-radius-md);
-    color: var(--pan-text);
+    color: var(--pan-text-secondary);
     margin: 1px var(--pan-space-2);
+    padding: 0.2rem 0;
     transition: background-color 0.12s, color 0.12s;
 
     &:hover {
-      background-color: var(--pan-border);
+      background-color: var(--pan-bg-secondary);
+      color: var(--pan-text);
     }
 
     .o_article_icon:hover {
@@ -192,6 +288,9 @@
   .o_article_name {
     color: inherit !important;
     font-weight: inherit !important;
+    // Wrap long titles instead of cutting them off
+    white-space: normal;
+    line-height: 1.4;
   }
 
   // Child pages hang off a thin guide line, like a docs nav
@@ -205,6 +304,12 @@
   }
 
   // Search and New buttons at the top of the tree
+  .o_public_search {
+    background-color: var(--pan-bg) !important;
+    border: 1px solid var(--pan-border-strong) !important;
+    height: 2.25rem;
+  }
+
   .o_knowledge_search,
   .o_public_search,
   .o_knowledge_create_article {
@@ -325,18 +430,18 @@ html body .o_knowledge_public_view {
     }
   }
 
+  // The page emoji above the title is what dates the page most; the
+  // breadcrumb still carries it
   .o_knowledge_icon {
-    font-size: 2.75rem;
+    display: none !important;
+  }
+
+  .o_knowledge_article {
     padding-top: var(--pan-space-6);
   }
 
   .o_knowledge_cover img {
     height: 22vh;
-  }
-
-  .o_knowledge_cover + .o_knowledge_icon {
-    margin-top: -1.5rem;
-    padding-top: 0;
   }
 
   .o_knowledge_icon:not(.o_full_width),
