@@ -1,0 +1,358 @@
+// Pantalytics Knowledge — a docs site, not a 2010 wiki
+// One partial for both faces of the app: the backend article form
+// (.o_knowledge_form_view) and the public article page
+// (.o_knowledge_public_view, website_knowledge). Selectors that are not on a
+// page do nothing, so the same rules serve both bundles.
+//
+// Look: GitBook-like. A quiet grey sidebar, the active page as an accent tint,
+// one readable column of prose, code and quotes as bordered blocks. Brand rule:
+// no shadows, elevation is a 1px border.
+//
+// Knowledge's own rules go up to five classes deep and our partial can load
+// before them in the bundle, so every rule starts from a root class plus the
+// view class.
+
+// ─── Prose: the article body ──────────────────────────────────────────────
+
+@mixin pan-knowledge-prose {
+  color: var(--pan-text);
+  font-size: 1rem;
+  line-height: 1.7;
+
+  p,
+  li {
+    line-height: 1.7;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--pan-text);
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+  }
+
+  h1 { font-size: 2rem;     margin: 2.5rem 0 1rem; }
+  h2 { font-size: 1.5rem;   margin: 2.25rem 0 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--pan-border); }
+  h3 { font-size: 1.25rem;  margin: 1.75rem 0 0.5rem; }
+  h4 { font-size: 1.0625rem; margin: 1.5rem 0 0.5rem; }
+
+  > :first-child {
+    margin-top: 0;
+  }
+
+  // Brand: headings are never bold, even when the editor wrapped them in it
+  :is(h1, h2, h3, h4, h5, h6) :is(b, strong, span) {
+    font-weight: inherit !important;
+  }
+
+  ul,
+  ol {
+    padding-left: 1.5rem;
+  }
+
+  // Inline links only: the article index renders its rows as d-flex links
+  a:not(.btn):not(.d-flex) {
+    color: var(--pan-accent);
+    text-decoration: underline;
+    text-decoration-color: rgba(var(--pan-accent-rgb), 0.35);
+    text-underline-offset: 0.2em;
+    transition: text-decoration-color 0.15s;
+
+    &:hover {
+      text-decoration-color: var(--pan-accent);
+    }
+  }
+
+  // Inline code
+  code {
+    font-size: 0.875em;
+    color: var(--pan-text);
+    background-color: var(--pan-bg-secondary);
+    border: 1px solid var(--pan-border);
+    border-radius: var(--pan-radius-sm);
+    padding: 0.1em 0.35em;
+  }
+
+  // Code blocks
+  pre {
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--pan-text);
+    background-color: var(--pan-bg-secondary) !important;
+    border: 1px solid var(--pan-border) !important;
+    border-radius: var(--pan-radius-lg);
+    padding: var(--pan-space-4) var(--pan-space-5);
+
+    code {
+      background: none;
+      border: 0;
+      padding: 0;
+    }
+  }
+
+  blockquote {
+    color: var(--pan-text-secondary);
+    border-left: 3px solid var(--pan-accent);
+    background: none;
+    padding: var(--pan-space-1) 0 var(--pan-space-1) var(--pan-space-4);
+    margin: var(--pan-space-5) 0;
+  }
+
+  hr {
+    border: 0;
+    border-top: 1px solid var(--pan-border);
+    opacity: 1;
+    margin: var(--pan-space-6) 0;
+  }
+
+  img {
+    border-radius: var(--pan-radius-lg);
+  }
+
+  table.table,
+  table {
+    border-color: var(--pan-border);
+
+    th {
+      font-weight: 500;
+      background-color: var(--pan-bg-secondary);
+    }
+
+    td,
+    th {
+      border-color: var(--pan-border) !important;
+      padding: var(--pan-space-2) var(--pan-space-3);
+    }
+  }
+
+  // Odoo's alert / banner blocks read as callouts
+  .alert,
+  .o_editor_banner {
+    border-radius: var(--pan-radius-lg);
+    box-shadow: none;
+  }
+}
+
+// ─── Sidebar: the page tree ───────────────────────────────────────────────
+
+@mixin pan-knowledge-sidebar {
+  background-color: var(--pan-bg-secondary) !important;
+  border-right: 1px solid var(--pan-border) !important;
+  font-size: 0.875rem;
+
+  // Section titles (Favorites, Workspace, Private): eyebrow, not a heading
+  .o_section_header_label,
+  .o_section_title {
+    font-family: var(--pan-font-body) !important;
+    font-size: 0.6875rem;
+    font-weight: 500 !important;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--pan-text-secondary);
+  }
+
+  .o_section .o_section_header {
+    margin-top: var(--pan-space-3);
+  }
+
+  .o_article .o_article_handle {
+    border-radius: var(--pan-radius-md);
+    color: var(--pan-text);
+    margin: 1px var(--pan-space-2);
+    transition: background-color 0.12s, color 0.12s;
+
+    &:hover {
+      background-color: var(--pan-border);
+    }
+
+    .o_article_icon:hover {
+      background-color: var(--pan-border);
+    }
+
+    &.o_article_active {
+      background-color: rgba(var(--pan-accent-rgb), 0.1);
+      color: var(--pan-accent);
+      font-weight: 500;
+
+      &:hover {
+        background-color: rgba(var(--pan-accent-rgb), 0.14);
+      }
+
+      .o_article_name,
+      a {
+        color: var(--pan-accent);
+      }
+
+      .o_article_icon:hover {
+        background-color: rgba(var(--pan-accent-rgb), 0.18);
+      }
+    }
+  }
+
+  // Odoo marks the names text-black fw-bold, which is !important
+  .o_article_name {
+    color: inherit !important;
+    font-weight: inherit !important;
+  }
+
+  // Child pages hang off a thin guide line, like a docs nav
+  li > ul {
+    margin-left: var(--pan-space-4);
+    border-left: 1px solid var(--pan-border);
+  }
+
+  li > ul > li {
+    padding-left: var(--pan-space-1) !important;
+  }
+
+  // Search and New buttons at the top of the tree
+  .o_knowledge_search,
+  .o_public_search,
+  .o_knowledge_create_article {
+    border-radius: var(--pan-radius-md);
+    color: var(--pan-text-secondary);
+
+    &:hover {
+      background-color: var(--pan-border) !important;
+      color: var(--pan-text);
+    }
+  }
+
+  .o_resizable_panel_handle:hover,
+  .o_resizable_panel_handle.o_knowledge_sidebar_active_handle {
+    background-color: var(--pan-accent);
+  }
+}
+
+// ─── Header line: breadcrumb and actions above the article ───────────────
+
+@mixin pan-knowledge-header {
+  border-bottom: 1px solid var(--pan-border);
+  background-color: var(--pan-bg);
+
+  .o_knowledge_article_display_name,
+  .o_hierarchy_article_name {
+    font-size: 0.875rem;
+    color: var(--pan-text-secondary);
+  }
+}
+
+// ─── Backend: the article form ───────────────────────────────────────────
+
+.o_web_client .o_knowledge_form_view {
+  --knowledge-view-bg: var(--pan-bg);
+
+  .o_knowledge_sidebar {
+    @include pan-knowledge-sidebar;
+  }
+
+  .o_knowledge_header {
+    @include pan-knowledge-header;
+  }
+
+  .o_knowledge_header .o_hierarchy_article_name input:hover,
+  .o_knowledge_header .o_hierarchy_article_name input:focus {
+    border-bottom-color: var(--pan-accent) !important;
+  }
+
+  // The page icon: an emoji at 5em is clip art. A docs page wears it small.
+  .o_knowledge_body .o_knowledge_icon {
+    font-size: 2.75rem;
+    margin-top: var(--pan-space-6);
+  }
+
+  .o_knowledge_cover img {
+    height: 22vh;
+  }
+
+  .o_knowledge_editor .o_field_html .note-editable,
+  .o_knowledge_editor .o_readonly {
+    @include pan-knowledge-prose;
+  }
+
+  .o_widget_knowledge_chatter_panel,
+  .o_widget_knowledge_comments_panel,
+  .o_widget_knowledge_properties_panel {
+    border-left-color: var(--pan-border);
+  }
+
+  .o_knowledge_article_form_resizer span:hover,
+  .o_knowledge_article_form_resizer span.o_resizer_bg {
+    background-color: var(--pan-accent);
+  }
+}
+
+// ─── Public: website_knowledge's article page ────────────────────────────
+
+html body .o_knowledge_public_view {
+  background-color: var(--pan-bg);
+  color: var(--pan-text);
+
+  .o_knowledge_sidebar_container {
+    @include pan-knowledge-sidebar;
+  }
+
+  .o_knowledge_sidebar {
+    background-color: transparent;
+  }
+
+  .o_knowledge_header_line {
+    @include pan-knowledge-header;
+    min-height: 56px;
+  }
+
+  .o_toggle_public_sidebar {
+    border-radius: var(--pan-radius-md);
+    color: var(--pan-text-secondary);
+
+    &:hover {
+      background-color: var(--pan-bg-secondary);
+      color: var(--pan-text);
+    }
+  }
+
+  // "Log in" reads as an outline button, not a bold nav link
+  .o_knowledge_article_log_in {
+    font-weight: 500 !important;
+    font-size: 0.875rem;
+    color: var(--pan-text);
+    border: 1px solid var(--pan-border-strong);
+    border-radius: var(--pan-radius-md);
+    padding: var(--pan-space-1) var(--pan-space-3);
+
+    &:hover {
+      border-color: var(--pan-accent);
+      color: var(--pan-accent);
+    }
+  }
+
+  .o_knowledge_icon {
+    font-size: 2.75rem;
+    padding-top: var(--pan-space-6);
+  }
+
+  .o_knowledge_cover img {
+    height: 22vh;
+  }
+
+  .o_knowledge_cover + .o_knowledge_icon {
+    margin-top: -1.5rem;
+    padding-top: 0;
+  }
+
+  .o_knowledge_icon:not(.o_full_width),
+  .o_knowledge_article:not(.o_full_width) {
+    max-width: 46rem;
+  }
+
+  .o_knowledge_article {
+    padding-bottom: 6rem;
+
+    .o_readonly {
+      @include pan-knowledge-prose;
+    }
+  }
+
+  .o_embedded_toc_header_highlight {
+    background-color: rgba(var(--pan-accent-rgb), 0.12);
+  }
+}
