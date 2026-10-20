@@ -11,7 +11,6 @@ $pan-color-danger  : #ef4444;
 
 .o_notification_manager .o_notification {
   border: 1px solid var(--pan-border) !important;
-  border-left: 4px solid var(--pan-accent) !important; // default / info
   border-radius: var(--pan-radius-lg) !important;
   box-shadow: var(--pan-shadow-md) !important;
   font-family: var(--pan-font-body) !important;
@@ -19,24 +18,6 @@ $pan-color-danger  : #ef4444;
   min-width: 280px !important;
   max-width: 400px !important;
   transition: opacity 0.2s ease, transform 0.2s ease !important;
-
-  // ── Type variants ────────────────────────────────────────────────────────
-
-  &.o_notification_info {
-    border-left-color: var(--pan-accent) !important;
-  }
-
-  &.o_notification_success {
-    border-left-color: $pan-color-success !important;
-  }
-
-  &.o_notification_warning {
-    border-left-color: $pan-color-warning !important;
-  }
-
-  &.o_notification_danger {
-    border-left-color: $pan-color-danger !important;
-  }
 
   // ── Inner elements ───────────────────────────────────────────────────────
 

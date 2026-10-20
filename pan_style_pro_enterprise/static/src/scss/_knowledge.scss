@@ -61,8 +61,6 @@
     font-family: var(--pan-font-body) !important;
     font-size: 0.75rem;
     font-weight: 500 !important;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
     color: var(--pan-text-secondary);
     padding: 0 !important;
     margin: var(--pan-space-5) 0 var(--pan-space-3);
@@ -105,7 +103,8 @@
           transition: transform 0.15s, color 0.15s;
         }
 
-        &:hover {
+        &:hover,
+        &:focus-visible {
           border-color: var(--pan-accent);
           color: var(--pan-accent) !important;
 
@@ -228,15 +227,18 @@
   .o_section_header_label,
   .o_section_title {
     font-family: var(--pan-font-body) !important;
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
     font-weight: 500 !important;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
     color: var(--pan-text-secondary);
   }
 
   .o_section .o_section_header {
     margin-top: var(--pan-space-3);
+  }
+
+  .o_article .o_article_handle:focus-within {
+    outline: 2px solid var(--pan-accent);
+    outline-offset: -2px;
   }
 
   .o_article .o_article_handle {

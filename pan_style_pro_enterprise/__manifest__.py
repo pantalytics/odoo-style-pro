@@ -24,6 +24,7 @@
         # bundle that does not exist on this database is never built.
         "website_knowledge.assets_public_knowledge": [
             "pan_style_pro/static/src/scss/_tokens.scss",
+            "pan_style_pro/static/src/scss/_fonts.scss",
             "pan_style_pro/static/src/scss/_typography.scss",
             "pan_style_pro_enterprise/static/src/scss/_knowledge.scss",
         ],

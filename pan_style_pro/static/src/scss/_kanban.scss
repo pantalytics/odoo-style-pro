@@ -123,7 +123,7 @@
     padding: 0 0.3rem !important;
     background-color: var(--pan-border) !important;
     border-radius: var(--pan-radius-sm) !important;
-    font-size: 0.6875rem !important;
+    font-size: 0.75rem !important;
     font-weight: 600 !important;
     color: var(--pan-text-secondary) !important;
     flex-shrink: 0 !important;
@@ -165,12 +165,8 @@
     overflow: hidden !important;
   }
 
-  .o_progress_bar,
-  .progress-bar {
-    background-color: var(--pan-accent) !important;
-    border-radius: 99px !important;
-    transition: width 0.3s ease !important;
-  }
+  // The segments keep Odoo's bg-success / bg-warning / bg-danger: on time,
+  // almost late, late. Colour is status, never the accent.
 }
 
 // ─── Load more ────────────────────────────────────────────────────────────────
@@ -238,7 +234,7 @@
   .o_kanban_add {
     background-color: var(--pan-accent) !important;
     border-color: var(--pan-accent) !important;
-    color: #ffffff !important;
+    color: var(--pan-accent-foreground) !important;
 
     &:hover {
       background-color: var(--pan-accent-hover) !important;

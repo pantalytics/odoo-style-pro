@@ -36,7 +36,7 @@
 .o_statusbar_status button.o_arrow_button.btn-primary {
   background-color: var(--pan-accent) !important;
   border-color: var(--pan-accent) !important;
-  color: #ffffff !important;
+  color: var(--pan-accent-foreground) !important;
   font-weight: 600 !important;
 
   &::before,
@@ -57,7 +57,7 @@
 .o_statusbar_status button.o_arrow_button.btn-primary:hover {
   background-color: var(--pan-accent-hover) !important;
   border-color: var(--pan-accent-hover) !important;
-  color: #ffffff !important;
+  color: var(--pan-accent-foreground) !important;
 }
 
 // ─── Past / disabled stages ───────────────────────────────────────────────────
@@ -67,7 +67,7 @@
   background-color: transparent !important;
   border-color: transparent !important;
   color: var(--pan-text-secondary) !important;
-  opacity: 0.6 !important;
+  opacity: 1 !important;
   cursor: default !important;
   pointer-events: none !important;
 }

@@ -73,16 +73,13 @@
     // App icons — elevated on tinted bg
     .o_app_icon {
       border-radius: var(--pan-radius-lg) !important;
-      box-shadow:
-        0 1px 3px rgba(0, 0, 0, 0.1),
-        0 4px 8px rgba(0, 0, 0, 0.06) !important;
-      transition: box-shadow 0.2s ease, transform 0.2s ease !important;
+      box-shadow: none !important;
+      border: 1px solid var(--pan-border) !important;
+      transition: transform 0.2s ease !important;
     }
 
     &:hover .o_app_icon {
-      box-shadow:
-        0 4px 12px rgba(0, 0, 0, 0.12),
-        0 8px 24px rgba(0, 0, 0, 0.08) !important;
+      border-color: var(--pan-border-strong) !important;
       transform: translateY(-3px) !important;
     }
 

@@ -1,6 +1,6 @@
 {
     "name": "Style Pro",
-    "version": "19.0.1.6.4",
+    "version": "19.0.1.7.0",
     "images": ["static/description/banner.png"],
     "summary": "Modern Pantalytics brand theme for Odoo backend",
     "description": """
@@ -19,10 +19,12 @@
     ],
     "assets": {
         "web.assets_frontend": [
+            "pan_style_pro/static/src/scss/_fonts.scss",
             "pan_style_pro/static/src/scss/_login.scss",
         ],
         "web.assets_backend": [
             "pan_style_pro/static/src/scss/_tokens.scss",
+            "pan_style_pro/static/src/scss/_fonts.scss",
             "pan_style_pro/static/src/scss/_typography.scss",
             "pan_style_pro/static/src/scss/_components.scss",
             "pan_style_pro/static/src/scss/_tags.scss",

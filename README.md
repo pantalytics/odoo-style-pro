@@ -18,7 +18,7 @@ No third-party CSS framework. No overrides that break on update. Just tokens and
 
 | Area | What changed |
 |---|---|
-| **Typography** | Lexend (headings) + Instrument Sans (body), self-hosted |
+| **Typography** | Murecho, the brand's one typeface, self-hosted |
 | **Colors** | Full `--pan-*` token system for light and dark mode |
 | **Dark mode** | Proper dark tokens via `web.assets_web_dark` — uses Odoo's built-in toggle (Enterprise) |
 | **Navbar** | Clean white navbar with accent highlights, command palette search bar |
@@ -28,10 +28,10 @@ No third-party CSS framework. No overrides that break on update. Just tokens and
 | **Kanban** | Styled columns, hover lift on cards, full-height drop zones |
 | **List view** | Uppercase column headers, subtle row hover, cleaner borders |
 | **Personal views** | Move columns by dragging them in the table or in the column list (grip, drop line, show/hide switches, after Airtable), resize, sort, filter and group: all remembered per user and model (`pan.view`), on every device |
-| **Form view** | Card layout with shadow, clean section separators |
+| **Form view** | Card layout with a 1px border, clean section separators |
 | **Control panel** | Aligned search bar, styled filter pills, view switcher |
-| **Dropdowns** | Rounded, shadowed panels with proper dark mode support |
-| **Modals** | Rounded corners, consistent shadow |
+| **Dropdowns** | Rounded, bordered panels with proper dark mode support |
+| **Modals** | Rounded corners, a 1px border, no shadow |
 | **Notifications** | Left-border style (no heavy colored backgrounds) |
 | **Status bar** | Pill-shaped stage buttons |
 | **Tags** | Full pill border-radius, semi-transparent overlays |
@@ -103,14 +103,15 @@ All values are CSS custom properties on `:root`. Override them in your own parti
 
 | Token | Light | Dark |
 |---|---|---|
-| `--pan-accent` | `#9b99ff` | `#9b99ff` |
-| `--pan-accent-hover` | `#7370ff` | `#b3b1ff` |
-| `--pan-bg` | `#ffffff` | _(Odoo-controlled)_ |
-| `--pan-text` | `#001d21` | `rgba(255,255,255,0.9)` |
-| `--pan-text-secondary` | `rgba(0,29,33,0.55)` | `rgba(255,255,255,0.42)` |
-| `--pan-border` | `rgba(0,0,0,0.08)` | `rgba(255,255,255,0.09)` |
-| Heading font | Lexend 500 | Lexend 500 |
-| Body font | Instrument Sans 400–700 | Instrument Sans 400–700 |
+| `--pan-accent` | `#5b58d8` | `#9b99ff` |
+| `--pan-accent-hover` | `#4a47c4` | `#7370ff` |
+| `--pan-accent-foreground` | `#ffffff` | `#001d21` |
+| `--pan-bg` | `#ffffff` | `#001d21` |
+| `--pan-bg-secondary` | `#f4f5f7` | `#002328` |
+| `--pan-text` | `#001d21` | `#ffffff` |
+| `--pan-text-secondary` | `rgba(0,29,33,0.6)` | `rgba(255,255,255,0.6)` |
+| `--pan-border` | `rgba(0,0,0,0.08)` | `rgba(255,255,255,0.1)` |
+| Font | Murecho 400–700 | Murecho 400–700 |
 
 ---
 

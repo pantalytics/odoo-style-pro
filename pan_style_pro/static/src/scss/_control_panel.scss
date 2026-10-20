@@ -67,7 +67,7 @@
   .btn-primary {
     background-color: var(--pan-accent) !important;
     border-color: var(--pan-accent) !important;
-    color: #fff !important;
+    color: var(--pan-accent-foreground) !important;
 
     &:hover,
     &:focus {

@@ -14,8 +14,9 @@ Gives Odoo a modern, consumer-grade look and feel (think Linear/Vercel) using th
 - **Dark bg:** `#001d21` / secondary `#002328`
 - **Text dark-on-light:** `#001d21` / secondary `rgba(0,29,33,0.6)`
 - **Text light-on-dark:** `#ffffff` / secondary `rgba(255,255,255,0.6)`
-- **Heading font:** Lexend 500
-- **Body font:** Instrument Sans 400–700
+- **Font:** Murecho, one typeface: 500 headings, labels and buttons, 400 body (brand.pantalytics.com/en/typography)
+- **No shadows:** elevation is a 1px border; `--pan-shadow-*` are `none`
+- **Text on accent:** `--pan-accent-foreground` (white light, `#001d21` dark)
 - **Prefix all tokens with:** `--pan-`
 
 ## Architecture

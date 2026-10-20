@@ -2,7 +2,7 @@
 
 ## Overview
 
-`odoo-style-pro` consists of two Odoo modules that override Odoo's default UI without modifying core files:
+`odoo-style-pro` consists of three Odoo modules that override Odoo's default UI without modifying core files:
 
 - **`pan_style_pro`** — Community-compatible base (depends only on `web`)
 - **`pan_style_pro_enterprise`** — Enterprise bridge (auto-installs when `web_enterprise` is present)
@@ -18,61 +18,90 @@ Three mechanisms are used:
 
 ## Module Structure
 
+Assets are registered per bundle in each `__manifest__.py`; that list is the source for load order. `pan_style_pro_search` is described in [SMART_SEARCH.md](SMART_SEARCH.md).
+
 ```
-pan_style_pro/                          # Community + Enterprise base
+pan_style_pro/
 ├── __init__.py
-├── __manifest__.py                     # Assets registered here (no assets.xml)
+├── __manifest__.py
+├── models/
+│   ├── __init__.py
+│   ├── ir_http.py
+│   ├── pan_view.py
+│   ├── res_config_settings.py
+│   └── res_users_settings.py
+├── security/
+│   ├── ir.model.access.csv
+│   └── pan_view_rules.xml
 ├── static/
 │   ├── description/
+│   │   ├── banner.png
 │   │   └── icon.png
 │   └── src/
 │       ├── fonts/
-│       │   ├── instrument-sans-400-latin.woff2
-│       │   ├── instrument-sans-700-latin.woff2
-│       │   └── lexend-500-latin.woff2
-│       ├── scss/
-│       │   ├── _tokens.scss            # Design tokens (:root)
-│       │   ├── _typography.scss        # Font faces, body/heading rules, icon font fixes
-│       │   ├── _layout.scss            # Navbar, list/form views
-│       │   ├── _components.scss        # Buttons, inputs, cards
-│       │   ├── _control_panel.scss     # Search bar, filter pills, view switcher
-│       │   ├── _dropdowns.scss         # Dropdown panels and items
-│       │   ├── _kanban.scss            # Kanban columns and cards
-│       │   ├── _tags.scss              # Tags and badges
-│       │   ├── _modals.scss            # Modal dialogs
-│       │   ├── _notifications.scss     # Toast notifications
-│       │   ├── _statusbar.scss         # Status bar stages
-│       │   ├── _pager.scss             # Pager controls
-│       │   ├── _chatter.scss           # Mail chatter
-│       │   ├── _settings.scss          # Settings page
-│       │   ├── _stat_buttons.scss      # Stat buttons on forms
-│       │   ├── _list_columns.scss      # Column drag (grip, faded column, drop line, label) and the column list
-│       │   ├── _navbar_search.scss     # Command palette search bar
-│       │   └── _login.scss             # Login page (assets_frontend)
+│       │   ├── OFL-Murecho.txt
+│       │   └── murecho-latin.woff2
 │       ├── js/
+│       │   ├── chatter_resizer.js
+│       │   ├── home_menu_community.js
+│       │   ├── home_menu_service.js
+│       │   ├── pan_field_list.js
+│       │   ├── pan_style_service.js
+│       │   ├── pan_view_store.js
 │       │   └── patches/
-│       │       ├── navbar_search_patch.js  # Patches NavBar to add search
-│       │       ├── list_columns_patch.js   # Columns part of pan.view: order (drag), visible, width
-│       │   ├── pan_field_list.js       # Column list in the ⚙ dropdown: grip, switch, lock
-│       │       └── search_view_patch.js    # filter, group_by and sort parts of pan.view
+│       │       ├── home_menu_community_patch.js
+│       │       ├── kanban_mobile_sortable_patch.js
+│       │       ├── list_columns_patch.js
+│       │       └── search_view_patch.js
+│       ├── scss/
+│       │   ├── _chatter.scss
+│       │   ├── _components.scss
+│       │   ├── _control_panel.scss
+│       │   ├── _dropdowns.scss
+│       │   ├── _fonts.scss
+│       │   ├── _hidden_apps.scss
+│       │   ├── _home_menu_community.scss
+│       │   ├── _kanban.scss
+│       │   ├── _layout.scss
+│       │   ├── _list_columns.scss
+│       │   ├── _login.scss
+│       │   ├── _modals.scss
+│       │   ├── _notifications.scss
+│       │   ├── _pager.scss
+│       │   ├── _settings.scss
+│       │   ├── _stat_buttons.scss
+│       │   ├── _statusbar.scss
+│       │   ├── _tags.scss
+│       │   ├── _tokens.scss
+│       │   └── _typography.scss
 │       └── xml/
-│           ├── navbar_search.xml       # Search bar template (extends web.NavBar)
-│           ├── list_columns.xml        # Header grip, view scope and column list (extends web.ListRenderer)
-│           └── apps_menu.xml           # App icons in dropdown (extends web.NavBar.AppsMenu)
+│           ├── home_menu_community.xml
+│           └── list_columns.xml
+├── tests/
+│   ├── __init__.py
+│   └── test_pan_view.py
+└── views/
+    └── res_config_settings_views.xml
 
-pan_style_pro_enterprise/               # Enterprise-only features
+pan_style_pro_enterprise/
 ├── __init__.py
-├── __manifest__.py                     # auto_install: True
+├── __manifest__.py
 └── static/
+    ├── description/
+    │   └── icon.png
     └── src/
-        ├── scss/
-        │   ├── _home_menu.scss         # Home menu styling
-        │   └── _tokens.dark.scss       # Dark mode token overrides
         ├── js/
         │   └── patches/
-        │       └── home_menu_patch.js  # Patches HomeMenu with search bar
+        │       └── home_menu_patch.js
+        ├── scss/
+        │   ├── _components.dark.scss
+        │   ├── _home_menu.scss
+        │   ├── _knowledge.scss
+        │   ├── _studio.scss
+        │   ├── _tags.dark.scss
+        │   └── _tokens.dark.scss
         └── xml/
-            └── home_menu.xml           # Home menu search template
+            └── home_menu.xml
 ```
 
 ---
@@ -83,16 +112,17 @@ All visual values are CSS custom properties on `:root`. Dark mode overrides are 
 
 ```scss
 :root {
-  --pan-accent:        #9b99ff;
-  --pan-accent-hover:  #7370ff;
-  --pan-bg:            #ffffff;
-  --pan-bg-secondary:  #fafafa;
-  --pan-text:          #001d21;
-  --pan-text-secondary: rgba(0, 29, 33, 0.55);
-  --pan-border:        rgba(0, 0, 0, 0.08);
-  --pan-font-heading:  "Lexend", sans-serif;
-  --pan-font-body:     "Instrument Sans", sans-serif;
-  --pan-navbar-bg:     #ffffff;
+  --pan-accent:            #5b58d8;   // dark: #9b99ff
+  --pan-accent-hover:      #4a47c4;   // dark: #7370ff
+  --pan-accent-foreground: #ffffff;   // dark: #001d21
+  --pan-bg:                #ffffff;   // dark: #001d21
+  --pan-bg-secondary:      #f4f5f7;   // dark: #002328
+  --pan-text:              #001d21;   // dark: #ffffff
+  --pan-text-secondary:    rgba(0, 29, 33, 0.6);
+  --pan-border:            rgba(0, 0, 0, 0.08);
+  --pan-font-heading:      "Murecho", sans-serif;
+  --pan-font-body:         "Murecho", sans-serif;
+  --pan-shadow-*:          none;      // brand: elevation is a 1px border
 }
 ```
 
@@ -104,9 +134,13 @@ Assets are registered in `__manifest__.py` using the `assets` dict — no separa
 
 ```python
 "assets": {
-    "web.assets_frontend": ["pan_style_pro/static/src/scss/_login.scss"],
+    "web.assets_frontend": [
+        "pan_style_pro/static/src/scss/_fonts.scss",
+        "pan_style_pro/static/src/scss/_login.scss",
+    ],
     "web.assets_backend": [
         "pan_style_pro/static/src/scss/_tokens.scss",
+        "pan_style_pro/static/src/scss/_fonts.scss",
         "pan_style_pro/static/src/scss/_typography.scss",
         # ... all other partials, JS patches, and XML templates
     ],
@@ -176,7 +210,7 @@ This is defined in `_typography.scss`.
 | Self-hosted fonts | No Google CDN dependency |
 | Bridge module over conditional loading | JS `import` and XML `t-inherit` can't be made conditional |
 | No `main.scss` entry point | Odoo's asset pipeline handles ordering; individual registration is more explicit |
-| Navbar search bar opens command palette | Vercel/Linear pattern — makes ⌘K discoverable |
+| No shadows, a 1px border | Brand rule (brand.pantalytics.com/en/product-ui) |
 
 ## Personal views (`pan.view`)
 

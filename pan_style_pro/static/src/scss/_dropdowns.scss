@@ -31,6 +31,7 @@
 // Hover / focus state
 .dropdown-item:hover,
 .dropdown-item:focus,
+.dropdown-item.focus,
 .o_dropdown_menu .o_dropdown_item:hover,
 .o_dropdown_menu .o_dropdown_item:focus {
   background-color: var(--pan-border) !important;
@@ -70,10 +71,8 @@
 .dropdown-header,
 .o_dropdown_menu .dropdown-header {
   padding: var(--pan-space-1) var(--pan-space-2) !important;
-  font-size: 0.6875rem !important;
-  font-weight: 600 !important;
-  letter-spacing: 0.06em !important;
-  text-transform: uppercase !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
   color: var(--pan-text-secondary) !important;
   line-height: 1.5 !important;
 }
