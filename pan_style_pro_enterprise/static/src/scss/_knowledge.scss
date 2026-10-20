@@ -183,6 +183,11 @@
 
   table.table,
   table {
+    // A table pasted from markdown has no class: give it the full column, a
+    // line under each row and room before the next paragraph
+    width: 100%;
+    border-collapse: collapse;
+    margin: var(--pan-space-4) 0 var(--pan-space-5);
     border-color: var(--pan-border);
     // Bootstrap paints cells from its own table vars; tie them to ours so a
     // table never ends up light-on-light or dark-on-dark
@@ -197,8 +202,10 @@
 
     td,
     th {
+      border-bottom: 1px solid var(--pan-border);
       border-color: var(--pan-border) !important;
       padding: var(--pan-space-2) var(--pan-space-3);
+      vertical-align: top;
     }
   }
 
