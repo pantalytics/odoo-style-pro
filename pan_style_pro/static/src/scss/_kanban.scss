@@ -83,13 +83,12 @@
 
 // ─── Column header ────────────────────────────────────────────────────────────
 
+// Odoo stacks two rows in the header: the title, and under it the counter
+// (progress bar and total). A flex row here squeezed the counter to the
+// width of its total and the progress bar to nothing.
 .o_kanban_header {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
   padding: var(--pan-space-3) var(--pan-space-3) var(--pan-space-2) !important;
   border-bottom: 1px solid var(--pan-border) !important;
-  gap: var(--pan-space-2) !important;
 }
 
 .o_kanban_header_title {
@@ -109,23 +108,6 @@
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
-  }
-
-  // Record count badge
-  .o_kanban_counter,
-  .o_record_selector {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    min-width: 1.25rem !important;
-    height: 1.25rem !important;
-    padding: 0 0.3rem !important;
-    background-color: var(--pan-border) !important;
-    border-radius: var(--pan-radius-sm) !important;
-    font-size: 0.75rem !important;
-    font-weight: 600 !important;
-    color: var(--pan-text-secondary) !important;
-    flex-shrink: 0 !important;
   }
 }
 

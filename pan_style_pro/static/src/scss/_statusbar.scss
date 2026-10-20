@@ -2,9 +2,10 @@
 
 // ─── Workflow status bar ───────────────────────────────────────────────────────
 
+// No vertical padding: Odoo folds the stages into a dropdown as soon as this
+// row is taller than one stage button (StatusBarField.areItemsWrapping).
 .o_statusbar_status {
   gap: var(--pan-space-1) !important;
-  padding: var(--pan-space-1) 0 !important;
   flex-wrap: wrap !important;
   align-items: center !important;
 }
