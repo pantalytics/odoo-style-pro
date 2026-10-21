@@ -166,6 +166,20 @@
   }
 }
 
+// In een smal paneel (Documenten, split view) krijgt elke helft zo weinig
+// ruimte dat het veld naast een label van 150px op bijna 0 uitkomt en een
+// datum letter voor letter afbreekt. Onder 40rem staan de kolommen onder
+// elkaar. Gemeten op de groep zelf, niet op het venster.
+.o_form_view .o_group.grid:not(.o_inner_group) {
+  container-type: inline-size;
+}
+
+@container (max-width: 40rem) {
+  .o_form_view .o_group.grid:not(.o_inner_group) > * {
+    grid-column: 1 / -1 !important;
+  }
+}
+
 .o_form_view .o_inner_group > .o_cell {
   min-width: 0 !important;
   overflow-wrap: break-word;
