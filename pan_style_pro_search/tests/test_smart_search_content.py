@@ -136,6 +136,9 @@ class TestSmartSearchContent(TransactionCase):
         self.assertLessEqual(len(snippets[self.valve.id]), 130)
         # The name already explains the match: no snippet.
         self.assertEqual(self.env["product.template"].pan_smart_search_snippets(self.valve.ids, "afsluiter"), {})
+        # A facet "lekkende or afsluiter": the name explains one of them, that is enough.
+        self.assertEqual(self.env["product.template"].pan_smart_search_snippets(self.valve.ids, ["lekkende", "afsluiter"]), {})
+        self.assertIn("lekkende", self.env["product.template"].pan_smart_search_snippets(self.valve.ids, ["lekkende", "pomp rvs"])[self.valve.id])
 
     def test_unlinked_message_is_forgotten(self):
         message = self._post(self.pump, "<p>Retourzending aangemeld</p>")

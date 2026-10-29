@@ -206,9 +206,40 @@ plurals). Kept fresh without a delay:
   triggered when the setting is switched on, and by the upgrade that
   introduced it) fills the gaps, newest first, in batches: the first build,
   records changed while smart search was off or written through SQL. It also
-  drops rows of deleted records and messages.
+  drops rows of deleted records and messages, and refreshes the table's
+  statistics after a build.
 
 Nothing is indexed while smart search is off.
+
+### Performance
+
+Measured on a synthetic worst case: 5,000 products with a description each,
+100,000 emails and notes, every text built from the same 35 words, so a word
+occurs in almost every record. Index: 105,000 rows, 86 MB (`mail_message`
+itself: 88 MB); first build 20 s.
+
+| Term | Without content | With content |
+|---|---|---|
+| a word that occurs nowhere (`zwanenburgwal`) | 0 hits, 20 ms | 0 hits, 18 ms |
+| 1 word in 86% of the messages (`lekkage`) | 153 hits, 65 ms | 5,000 hits, 223 ms |
+| 3 such words | 0 hits, 44 ms | 5,000 hits, 541 ms |
+| snippets for 80 cards | | 139 ms (a separate call after the cards render) |
+
+The cost is in ranking and counting thousands of hits, not in the index: one
+full-text lookup takes 0.02 ms for a rare word and 47 ms for one in 86,000
+messages. Real text is far less uniform than this test set.
+
+Three things keep it there, each measured:
+
+- the content match is `id IN (subquery)`, hashed once. `= ANY(ARRAY(...))`
+  compared every record with every id: 400 ms per word;
+- the cron runs `ANALYZE` after a build. With stale statistics PostgreSQL
+  walked the unique index instead of the full-text index: 123 ms for a word
+  that occurs nowhere, instead of 0.02;
+- smart search turns PostgreSQL's JIT off for its transaction. A smart search
+  query passes `jit_above_cost` on a few thousand products and compiling it
+  took 60-90 ms for a query that runs in 10. This also helps searches without
+  content ("persleiding monteur": 152 -> 48 ms).
 
 Code: `models/content.py`, `static/src/js/kanban_snippet_patch.js`.
 

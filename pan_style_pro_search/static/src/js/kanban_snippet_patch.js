@@ -10,16 +10,18 @@ import { KanbanRecord } from "@web/views/kanban/kanban_record";
 const snippets = reactive({});
 const pending = new Map();
 
-function smartSearchTerm(domain) {
-    const values = (domain || [])
+// Every smart search value in the domain: one per term, several for a facet
+// like "koppeling or persleiding".
+function smartSearchTerms(domain) {
+    return (domain || [])
         .filter((leaf) => Array.isArray(leaf) && leaf[0] === "x_smart_search" && typeof leaf[2] === "string")
-        .map((leaf) => leaf[2]);
-    return values.join(" ").trim();
+        .map((leaf) => leaf[2].trim())
+        .filter(Boolean);
 }
 
-// One call per model and term for all cards rendered in the same tick.
-function requestSnippet(orm, resModel, term, resId) {
-    const key = `${resModel}\u0000${term}`;
+// One call per model and terms for all cards rendered in the same tick.
+function requestSnippet(orm, resModel, terms, resId) {
+    const key = JSON.stringify([resModel, terms]);
     snippets[key] ??= {};
     if (resId in snippets[key]) {
         return key;
@@ -31,7 +33,7 @@ function requestSnippet(orm, resModel, term, resId) {
         pending.set(key, batch);
         Promise.resolve().then(async () => {
             pending.delete(key);
-            const found = await orm.silent.call(resModel, "pan_smart_search_snippets", [[...batch], term]);
+            const found = await orm.silent.call(resModel, "pan_smart_search_snippets", [[...batch], terms]);
             Object.assign(snippets[key], found);
         });
     }
@@ -47,18 +49,13 @@ patch(KanbanRecord.prototype, {
         this.panSnippetKey = null;
         onWillRender(() => {
             const { record } = this.props;
-            const term = smartSearchTerm(record.model.config.domain);
+            const terms = smartSearchTerms(record.model.config.domain);
             this.panSnippetKey =
-                term && record.resId ? requestSnippet(this.panOrm, record.resModel, term, record.resId) : null;
+                terms.length && record.resId ? requestSnippet(this.panOrm, record.resModel, terms, record.resId) : null;
         });
     },
 
     get panSnippet() {
         return (this.panSnippetKey && this.panSnippets[this.panSnippetKey]?.[this.props.record.resId]) || "";
-    },
-
-    getRecordClasses() {
-        const classes = super.getRecordClasses();
-        return this.panSnippet ? `${classes} flex-wrap` : classes;
     },
 });

@@ -216,6 +216,8 @@ class PanSmartSearchContent(models.Model):
         message_ids = [row[0] for row in cr.fetchall()]
         remaining = sum(len(ids) for _model, ids in todo) + len(message_ids)
         _logger.info("Smart search: %d descriptions and messages to index", remaining)
+        if not remaining:
+            return
         for model_name, ids in todo:
             for start in range(0, len(ids), BATCH):
                 done = self._pan_smart_search_index_records(model_name, ids[start:start + BATCH])
@@ -230,6 +232,10 @@ class PanSmartSearchContent(models.Model):
             remaining -= len(batch)
             if not self._pan_smart_search_progress(len(batch), remaining):
                 return
+        # Statistics right after a bulk load, not whenever autovacuum gets to
+        # it: with stale ones PostgreSQL took "model = x" for rare and walked
+        # the unique index instead of the full-text index (123 ms instead of 0.1).
+        cr.execute(SQL("ANALYZE %s", table))
 
     @api.model
     def _pan_smart_search_progress(self, done, remaining):
@@ -290,19 +296,27 @@ class Base(models.AbstractModel):
         if not query or not sources:
             return None
         table = SQL.identifier(self.env["pan.smart.search.content"]._table)
+        # IN (subquery): PostgreSQL runs it once and hashes the ids. Not
+        # = ANY(ARRAY(...)), which compared every record with every id
+        # (5,000 products x 86,000 messages: 400 ms per word).
         subquery = SQL(
-            "SELECT res_id FROM %s WHERE model = %s AND source = ANY(%s) AND tsv @@ to_tsquery('simple', %s)",
-            table, self._name, list(sources), query,
+            "SELECT res_id FROM %s WHERE tsv @@ to_tsquery('simple', %s) AND model = %s AND source = ANY(%s)",
+            table, query, self._name, list(sources),
         )
         return Domain.custom(to_sql=lambda model, alias, _query: SQL("%s IN (%s)", SQL.identifier(alias, "id"), subquery))
 
     @api.model
-    def pan_smart_search_snippets(self, ids, term):
-        """{id: one line of text} showing where `term` matched, for records
-        whose name does not explain the match. Read as the user, through the
-        ORM: only records they can read, only text they can read."""
+    def pan_smart_search_snippets(self, ids, terms):
+        """{id: one line of text} showing where `terms` matched, for records
+        whose name does not explain the match. `terms`: one search term, or
+        the values of one facet ("koppeling or persleiding"). Read as the
+        user, through the ORM: only records they can read, only text they can
+        read."""
+        terms = [terms] if isinstance(terms, str) else list(terms)
+        # Per term: its content words, folded.
+        alternatives = [[fold(w) for w in self._pan_smart_search_words(term) if content_word(w)] for term in terms]
+        words = list(dict.fromkeys(word for alternative in alternatives for word in alternative))
         sources = self._pan_smart_search_content_sources()
-        words = [fold(word) for word in self._pan_smart_search_words(term) if content_word(word)]
         if not sources or not words or not ids:
             return {}
         records = self.with_context(active_test=False).search([("id", "in", [int(i) for i in ids])])
@@ -331,9 +345,11 @@ class Base(models.AbstractModel):
         result = {}
         for record in records:
             name = fold(record.display_name)
-            missing = [word for word in words if word not in name]
-            if not missing:
+            missing = [[word for word in alternative if word not in name] for alternative in alternatives]
+            if not all(missing):
+                # One term is all in the name: that explains the match.
                 continue
+            missing = list(dict.fromkeys(word for alternative in missing for word in alternative))
             for text in texts[record.id]:
                 snippet = self._pan_smart_search_snippet(text, missing)
                 if snippet:

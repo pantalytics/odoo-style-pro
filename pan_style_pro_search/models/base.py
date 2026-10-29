@@ -426,6 +426,13 @@ class Base(models.AbstractModel):
             self.env.cr.execute(
                 SQL("SELECT set_config('pg_trgm.word_similarity_threshold', %s, true)", str(self._pan_smart_search_threshold()))
             )
+        if not cr_state.get("_pan_smart_search_jit_off"):
+            cr_state["_pan_smart_search_jit_off"] = True
+            # A smart search is one query with many OR-ed subqueries; its cost
+            # estimate passes PostgreSQL's jit_above_cost (100,000) on a few
+            # thousand products, and compiling it then takes 60-90 ms for a
+            # query that runs in 10. For this transaction only.
+            self.env.cr.execute(SQL("SELECT set_config('jit', 'off', true)"))
         properties = self._pan_smart_search_properties(paths) if any("." in path for path in paths) else {}
         properties = {path: definition for path, definition in properties.items() if path in paths}
         paths = [path for path in paths if path not in properties]
