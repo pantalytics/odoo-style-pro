@@ -14,7 +14,7 @@ import re
 
 from lxml import etree, html
 
-from odoo import api, fields, models
+from odoo import api, fields, models, tools
 from odoo.fields import Domain
 from odoo.tools import SQL
 
@@ -104,9 +104,13 @@ class PanSmartSearchContent(models.Model):
         ))
 
     @api.model
+    @tools.ormcache(cache="groups")
     def _pan_smart_search_active(self):
+        """The setting, for everyone: asked on every new message, so cached
+        until a group's implied groups change (which is what the setting
+        does). Uncached it cost 1 ms per message, more than the indexing."""
         group = self.env.ref(GROUP, raise_if_not_found=False)
-        return bool(group) and group in self.env.ref("base.group_user").all_implied_ids
+        return bool(group) and group in self.env.ref("base.group_user").sudo().all_implied_ids
 
     @api.model
     def _pan_smart_search_models(self):
@@ -114,7 +118,9 @@ class PanSmartSearchContent(models.Model):
 
     @api.model
     def _pan_smart_search_store(self, rows):
-        """Upsert [(model, res_id, source, message_id, text)]."""
+        """Upsert [(model, res_id, source, message_id, text)]. strip(): only
+        the words, not their positions; smart search never ranks or matches
+        phrases on them, and without positions the index is a third smaller."""
         for start in range(0, len(rows), BATCH):
             chunk = rows[start:start + BATCH]
             self.env.cr.execute(SQL(
@@ -123,7 +129,7 @@ class PanSmartSearchContent(models.Model):
                    DO UPDATE SET tsv = EXCLUDED.tsv, indexed_at = EXCLUDED.indexed_at""",
                 SQL.identifier(self._table),
                 SQL(", ").join(
-                    SQL("(%s, %s, %s, %s, to_tsvector('simple', %s), now() AT TIME ZONE 'UTC')", model, res_id, source, message_id, fold(text))
+                    SQL("(%s, %s, %s, %s, strip(to_tsvector('simple', %s)), now() AT TIME ZONE 'UTC')", model, res_id, source, message_id, fold(text))
                     for model, res_id, source, message_id, text in chunk
                 ),
             ))
