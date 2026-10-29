@@ -215,8 +215,7 @@ Nothing is indexed while smart search is off.
 
 Measured on a synthetic worst case: 5,000 products with a description each,
 100,000 emails and notes, every text built from the same 35 words, so a word
-occurs in almost every record. Index: 105,000 rows, 86 MB (`mail_message`
-itself: 88 MB); first build 20 s.
+occurs in almost every record. First build 20 s.
 
 | Term | Without content | With content |
 |---|---|---|
@@ -229,7 +228,17 @@ The cost is in ranking and counting thousands of hits, not in the index: one
 full-text lookup takes 0.02 ms for a rare word and 47 ms for one in 86,000
 messages. Real text is far less uniform than this test set.
 
-Three things keep it there, each measured:
+**What it costs the database**, measured on 50,000 emails of 60 words:
+
+| | |
+|---|---|
+| Disk | 35 MB for the index, next to 39 MB for `mail_message` itself. Words only, no positions (`strip()`): a third smaller, and smart search never uses positions |
+| Posting a message | 1-2 ms extra on ~10 ms: one upsert. The setting check is cached (`groups` cache); uncached it cost 1 ms per message on its own |
+| Nightly cron, nothing to do | 87 ms |
+| First build | 10 s per 50,000 messages, in batches the cron commits |
+| Smart search off | nothing: no hooks run, nothing is indexed |
+
+Three things keep searching fast, each measured:
 
 - the content match is `id IN (subquery)`, hashed once. `= ANY(ARRAY(...))`
   compared every record with every id: 400 ms per word;
