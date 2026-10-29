@@ -61,7 +61,8 @@ MAX_PATHS = 15
 NAME_FIELDS = ("complete_name",)
 CODE_FIELDS = ("default_code", "ref", "code", "barcode")
 # Field types a word can be matched against with ilike. Text and html are left
-# out on purpose: long descriptions and mail bodies are noise and slow.
+# out on purpose: an ilike on long descriptions and mail bodies is noise and
+# slow. Those go through a full-text index instead (content.py).
 MATCH_TYPES = ("char", "many2one", "many2many", "one2many")
 # Property types smart search can match a typed word on. Boolean, date and
 # relational properties are left out: a free search word means nothing there.
@@ -130,7 +131,7 @@ class Base(models.AbstractModel):
         # the dropdown fields are fewer and cheaper than the search view's.
         if self.env.context.get("pan_smart_search_dropdown_paths"):
             return self._pan_smart_search_domain(value, self._pan_smart_search_dropdown_paths())
-        return self._pan_smart_search_domain(value, self._pan_smart_search_view_paths())
+        return self._pan_smart_search_domain(value, self._pan_smart_search_view_paths(), content=True)
 
     # ------------------------------------------------------------------
     # Which models, which fields
@@ -409,8 +410,9 @@ class Base(models.AbstractModel):
         return query.table[field]
 
     @api.model
-    def _pan_smart_search_domain(self, term, paths):
-        """Every word must match one of `paths` (ilike), or the name with typos."""
+    def _pan_smart_search_domain(self, term, paths, content=False):
+        """Every word must match one of `paths` (ilike), or the name with typos,
+        or, with `content`, the description or chatter (see content.py)."""
         words = self._pan_smart_search_words(term)
         if not words:
             return Domain.TRUE
@@ -427,6 +429,7 @@ class Base(models.AbstractModel):
         properties = self._pan_smart_search_properties(paths) if any("." in path for path in paths) else {}
         properties = {path: definition for path, definition in properties.items() if path in paths}
         paths = [path for path in paths if path not in properties]
+        sources = self._pan_smart_search_content_sources() if content else ()
         word_domains = []
         for word in words:
             searched = paths if len(word) >= SHORT_WORD_LENGTH or not name else [name]
@@ -449,6 +452,8 @@ class Base(models.AbstractModel):
                         if comodel._pan_smart_search_eligible():
                             linked = Domain("id", "in", comodel._pan_smart_search_name_query(word))
                             options.append(Domain(path, "any", linked))
+            if (written := self._pan_smart_search_content_domain(word, sources)) is not None:
+                options.append(written)
             word_domains.append(Domain.OR(options))
         return Domain.AND(word_domains)
 

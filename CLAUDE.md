@@ -36,7 +36,7 @@ See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for full details.
 | `pan_style_pro` | `web` | No | All Community-compatible styling, navbar search bar, app icons |
 | `pan_style_pro_enterprise` | `pan_style_pro`, `web_enterprise` | **Yes** | Home menu patch, dark mode tokens |
 | `pan_style_pro_knowledge` | `pan_style_pro_enterprise`, `website_knowledge` | **Yes** | Public Knowledge sidebar: a caret only on pages with children. One JSON route, one OWL patch, one template extension |
-| `pan_style_pro_search` | `pan_style_pro` | **Yes** | Smart search in every model: words in any order, typos (pg_trgm), best match first. Fields come from each model's search view. Off until switched on in Settings > Style Pro. See [docs/SMART_SEARCH.md](docs/SMART_SEARCH.md) |
+| `pan_style_pro_search` | `pan_style_pro`, `mail` | **Yes** | Smart search in every model: words in any order, typos (pg_trgm), best match first. Fields come from each model's search view; descriptions and chatter through a full-text index. Off until switched on in Settings > Style Pro. See [docs/SMART_SEARCH.md](docs/SMART_SEARCH.md) |
 
 ## Conventions
 
