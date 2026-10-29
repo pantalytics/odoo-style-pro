@@ -108,7 +108,9 @@ A path is used only if the current user can search it:
   method; Odoo's own `searchable` flag),
 - the user may read the field (`groups`) and the linked models,
 - the last field is `char`, `many2one`, `many2many` or `one2many`. Text and
-  html fields (descriptions, mail bodies) are left out: noise, and slow.
+  html fields are left out here: an `ilike` on them is noise, and slow. The
+  description and the chatter go through their own index instead, see
+  [Descriptions and chatter](#descriptions-and-chatter).
 
 - the user may read the models behind related and inherited fields too,
 - and building an `ilike` search on the path actually works for this user.
@@ -134,6 +136,112 @@ keeps a dropdown fast on every keystroke.
 
 **Which models:** every model with a name field, except abstract, transient
 and technical `ir.*` models.
+
+## Descriptions and chatter
+
+Like a mail inbox: the search bar also finds a record by what was written on
+it. `lekkende koppeling` on products finds the one where a customer mailed
+about a leaking coupling, even if neither word is in its name.
+
+```
+"gietijzer"            -> Afsluiter DN50     (its description)
+"lekkende koppeling"   -> Afsluiter DN50     (an incoming email in its chatter)
+"dn50 koppeling"       -> Afsluiter DN50     (the name and the chatter: every word still has to match)
+```
+
+**What is searched:** on every model with a chatter, the `description` field
+(html or text, Odoo's convention for what was written on a card: tasks, leads,
+tickets, products) and every email and note in the chatter, from anyone:
+colleagues and customers. Other text fields are left out: terms and
+conditions, website descriptions and the like repeat the same text on every
+record.
+
+**Access.** The index holds everything; access is checked at search time:
+
+- content is one more option inside the normal `_search`, so record rules and
+  ACLs apply as for any other field. A record the user cannot open is not
+  found and not counted;
+- the description only for users who may read that field (`groups`);
+- the chatter only for internal users. Portal users never match it: they may
+  not read internal notes;
+- the index (`pan.smart.search.content`) has no rights for any group, so it
+  cannot be read over RPC, and it stores a `tsvector`, no text;
+- the snippet under a card is read again through the ORM, as the user.
+
+**Noise.** At index time only what a person wrote goes in: messages of type
+`email` or `comment` (notes included), no tracking or system notifications.
+HTML is stripped; quoted history and signatures as Odoo marks them
+(`data-o-mail-quote`, `blockquote`) are dropped, so our own signature's city
+does not match every mailed record; at most 10,000 characters per message. At
+search time only words of 4+ characters that are letters and digits match
+content, as a prefix (`pomp` finds "pompen"), without typo tolerance. Shorter
+words and codes with punctuation (`m5`, `hp-rvs`) stay on the name and the
+search view fields.
+
+**Ranking** is unchanged: the score is the similarity with the name and the
+reference, so a record that only matches in its content comes after every
+record that matches in its name.
+
+**Snippet.** A kanban card found through its content gets one line of the text
+around the match, unless its name already contains every word. One call per
+model and term for all cards (`pan_smart_search_snippets`). Not in the list
+view.
+
+**Not in:** dropdowns (they search by name on every keystroke), the Ctrl+K
+"search everything" palette, attachment content (PDFs), and the content of
+linked records (a customer's chatter when searching orders).
+
+### The index
+
+`pan_smart_search_content`: one row per description and per message, with a
+GIN-indexed `tsvector` of the cleaned, accent-folded text (`simple` text
+configuration: no stemming, no stop words; mixed Dutch and English content
+makes per-language stemming wrong half the time, and prefix matching covers
+plurals). Kept fresh without a delay:
+
+- a new or edited message, and a description written through the ORM, are
+  indexed in the same transaction (`mail.message` create/write/unlink,
+  `mail.thread` create/write);
+- a daily cron (**Smart search: index descriptions and chatter**, also
+  triggered when the setting is switched on, and by the upgrade that
+  introduced it) fills the gaps, newest first, in batches: the first build,
+  records changed while smart search was off or written through SQL. It also
+  drops rows of deleted records and messages, and refreshes the table's
+  statistics after a build.
+
+Nothing is indexed while smart search is off.
+
+### Performance
+
+Measured on a synthetic worst case: 5,000 products with a description each,
+100,000 emails and notes, every text built from the same 35 words, so a word
+occurs in almost every record. Index: 105,000 rows, 86 MB (`mail_message`
+itself: 88 MB); first build 20 s.
+
+| Term | Without content | With content |
+|---|---|---|
+| a word that occurs nowhere (`zwanenburgwal`) | 0 hits, 20 ms | 0 hits, 18 ms |
+| 1 word in 86% of the messages (`lekkage`) | 153 hits, 65 ms | 5,000 hits, 223 ms |
+| 3 such words | 0 hits, 44 ms | 5,000 hits, 541 ms |
+| snippets for 80 cards | | 139 ms (a separate call after the cards render) |
+
+The cost is in ranking and counting thousands of hits, not in the index: one
+full-text lookup takes 0.02 ms for a rare word and 47 ms for one in 86,000
+messages. Real text is far less uniform than this test set.
+
+Three things keep it there, each measured:
+
+- the content match is `id IN (subquery)`, hashed once. `= ANY(ARRAY(...))`
+  compared every record with every id: 400 ms per word;
+- the cron runs `ANALYZE` after a build. With stale statistics PostgreSQL
+  walked the unique index instead of the full-text index: 123 ms for a word
+  that occurs nowhere, instead of 0.02;
+- smart search turns PostgreSQL's JIT off for its transaction. A smart search
+  query passes `jit_above_cost` on a few thousand products and compiling it
+  took 60-90 ms for a query that runs in 10. This also helps searches without
+  content ("persleiding monteur": 152 -> 48 ms).
+
+Code: `models/content.py`, `static/src/js/kanban_snippet_patch.js`.
 
 ## How a search term matches
 
@@ -273,9 +381,10 @@ the IAP server.
 |---|---|
 | `models/base.py` | Everything above, on `base`: the `x_smart_search` field and its search method, field discovery, matching, ranking, the search view injection (`_get_view`), `web_search_read`, `web_name_search` |
 | `models/ir_model.py` | Trigram index cron |
+| `models/content.py` | Descriptions and chatter: the full-text index, its hooks and cron, the content match and the snippets |
 | `models/res_config_settings.py` | The setting |
 | `security/pan_style_pro_search_groups.xml` | The group the setting implies |
-| `tests/` | Products, contacts, generic (a model without configuration, a field added to a search view, setting off, index) |
+| `tests/` | Products, contacts, generic (a model without configuration, a field added to a search view, setting off, index), content (descriptions, chatter, access, noise) |
 
 Field discovery (`_pan_smart_search_view_candidates`) is cached per model in
 the `templates` cache, which Odoo clears whenever a view changes.
