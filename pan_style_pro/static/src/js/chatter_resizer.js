@@ -5,123 +5,162 @@ import { _t } from "@web/core/l10n/translation";
 import { patch } from "@web/core/utils/patch";
 import { FormRenderer } from "@web/views/form/form_renderer";
 
-const STORAGE_KEY = "pan_chatter_ratio";
-const COLLAPSED_KEY = "pan_chatter_collapsed";
 const MIN_RATIO = 0.2;
 const MAX_RATIO = 0.8;
-const DEFAULT_RATIO = 0.6;
 
-function installResizer() {
+// Right-hand panels of an XXL form: the side chatter, or the attachment
+// preview (vendor bills with a PDF). Each remembers its own width and state.
+const PANELS = [
+    {
+        selector: ".o-mail-Form-chatter.o-aside",
+        ratioKey: "pan_chatter_ratio",
+        collapsedKey: "pan_chatter_collapsed",
+        defaultRatio: 0.6,
+        title: _t("Toggle chatter"),
+    },
+    {
+        selector: ".o_attachment_preview",
+        ratioKey: "pan_preview_ratio",
+        collapsedKey: "pan_preview_collapsed",
+        defaultRatio: 0.5,
+        title: _t("Toggle preview"),
+    },
+];
+
+function resetStyles(handle) {
+    for (const el of [handle._panSheet, handle._panPanel]) {
+        el.style.flex = "";
+        el.style.maxWidth = "";
+    }
+    handle._panPanel.classList.remove("pan-panel-collapsed");
+}
+
+function installResizers() {
+    // Drop handles that no longer sit right before their panel: the panel
+    // left (bill switched to the PDF layout once its attachments loaded),
+    // changed role (chatter moved under the form), or the screen got narrow.
+    for (const handle of document.querySelectorAll(".pan-chatter-resize-handle")) {
+        const panel = handle._panPanel;
+        const stillValid =
+            panel.isConnected &&
+            handle.nextElementSibling === panel &&
+            panel.matches(handle._panSelector) &&
+            panel.closest(".o_form_view.o_xxl_form_view");
+        if (!stillValid) {
+            handle.remove();
+            resetStyles(handle);
+        }
+    }
+
     const formView = document.querySelector(".o_form_view.o_xxl_form_view");
-    if (!formView) return;
+    const sheet = formView?.querySelector(".o_form_sheet_bg");
+    if (!sheet) return;
+    for (const config of PANELS) {
+        const panel = sheet.parentNode.querySelector(`:scope > ${config.selector}`);
+        if (panel) installResizer(formView, sheet, panel, config);
+    }
+}
 
-    const chatter = formView.querySelector(".o-mail-Form-chatter.o-aside");
-    const sheet = formView.querySelector(".o_form_sheet_bg");
-    if (!chatter || !sheet) return;
-    if (formView.querySelector(".pan-chatter-resize-handle")) return;
+function installResizer(formView, sheet, panel, config) {
+    if (panel.previousElementSibling?._panPanel === panel) return;
 
     // ── Resize handle with toggle button ───────────────────────────────────
     const handle = document.createElement("div");
     handle.className = "pan-chatter-resize-handle";
+    handle._panPanel = panel;
+    handle._panSheet = sheet;
+    handle._panSelector = config.selector;
 
     const toggle = document.createElement("button");
     toggle.className = "pan-chatter-toggle";
     toggle.type = "button";
-    toggle.title = _t("Toggle chatter");
+    toggle.title = config.title;
     toggle.setAttribute("aria-label", toggle.title);
     toggle.innerHTML = '<i class="oi oi-panel-right"></i>';
     handle.appendChild(toggle);
 
-    chatter.parentNode.insertBefore(handle, chatter);
+    panel.parentNode.insertBefore(handle, panel);
 
     // ── State ──────────────────────────────────────────────────────────────
-    let collapsed = localStorage.getItem(COLLAPSED_KEY) === "true";
+    const savedRatio = () => parseFloat(localStorage.getItem(config.ratioKey)) || config.defaultRatio;
 
-    if (collapsed) {
-        collapseChatter(sheet, chatter, handle);
-    } else {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) applyRatio(sheet, chatter, parseFloat(saved));
-    }
+    const applyRatio = (ratio) => {
+        // The sheet gets exactly `ratio` of the row, so the handle stays under
+        // the mouse; it may still shrink if the panel needs its min-width.
+        // Odoo caps the sheet at 1400px, which would break that on wide screens.
+        sheet.style.flex = `0 1 ${ratio * 100}%`;
+        sheet.style.maxWidth = "none";
+        panel.style.flex = "1 1 0px";
+    };
 
-    function doToggle() {
-        collapsed = !collapsed;
+    const setCollapsed = (value) => {
+        collapsed = value;
         if (collapsed) {
-            collapseChatter(sheet, chatter, handle);
+            sheet.style.flex = "";
+            sheet.style.maxWidth = "";
+            panel.style.flex = "";
         } else {
-            expandChatter(sheet, chatter, handle);
+            applyRatio(savedRatio());
         }
-    }
+        handle.classList.toggle("pan-chatter-collapsed", collapsed);
+        panel.classList.toggle("pan-panel-collapsed", collapsed);
+        localStorage.setItem(config.collapsedKey, String(collapsed));
+    };
+
+    let collapsed = localStorage.getItem(config.collapsedKey) === "true";
+    let openedAt = -Infinity;
+    setCollapsed(collapsed);
 
     // ── Events ─────────────────────────────────────────────────────────────
     toggle.addEventListener("click", (e) => {
         e.stopPropagation();
         e.preventDefault();
-        doToggle();
+        setCollapsed(!collapsed);
     });
 
     handle.addEventListener("dblclick", (e) => {
         e.preventDefault();
-        doToggle();
+        // The first press of a double-click on the collapsed strip opened it
+        if (e.timeStamp - openedAt < 600) return;
+        setCollapsed(!collapsed);
     });
 
     handle.addEventListener("mousedown", (e) => {
-        if (e.target === toggle || toggle.contains(e.target)) return;
+        if (toggle.contains(e.target)) return;
         if (collapsed) {
-            collapsed = false;
-            expandChatter(sheet, chatter, handle);
+            setCollapsed(false);
+            openedAt = e.timeStamp;
             return;
         }
         e.preventDefault();
-        const containerRect = formView.getBoundingClientRect();
+        const rowRect = formView.getBoundingClientRect();
+        const half = handle.offsetWidth / 2;
+        let ratio = savedRatio();
 
         const onMouseMove = (ev) => {
-            let ratio = (ev.clientX - containerRect.left) / containerRect.width;
+            ratio = (ev.clientX - half - rowRect.left) / rowRect.width;
             ratio = Math.max(MIN_RATIO, Math.min(MAX_RATIO, ratio));
-            applyRatio(sheet, chatter, ratio);
+            applyRatio(ratio);
         };
 
         const onMouseUp = () => {
             document.removeEventListener("mousemove", onMouseMove);
             document.removeEventListener("mouseup", onMouseUp);
-            document.body.style.cursor = "";
-            document.body.style.userSelect = "";
+            document.body.classList.remove("pan-resizing");
+            localStorage.setItem(config.ratioKey, ratio.toString());
         };
 
-        document.body.style.cursor = "col-resize";
-        document.body.style.userSelect = "none";
+        // pan-resizing keeps the PDF iframe from swallowing mouse events
+        document.body.classList.add("pan-resizing");
         document.addEventListener("mousemove", onMouseMove);
         document.addEventListener("mouseup", onMouseUp);
     });
 }
 
-function applyRatio(sheet, chatter, ratio) {
-    sheet.style.flex = `${ratio} 0 0px`;
-    chatter.style.flex = `${1 - ratio} 0 0px`;
-    chatter.style.display = "";
-    localStorage.setItem(STORAGE_KEY, ratio.toString());
-}
-
-function collapseChatter(sheet, chatter, handle) {
-    sheet.style.flex = "1 0 0px";
-    // display:none, not flex 0: Odoo gives the aside chatter a min-width
-    chatter.style.display = "none";
-    handle.classList.add("pan-chatter-collapsed");
-    localStorage.setItem(COLLAPSED_KEY, "true");
-}
-
-function expandChatter(sheet, chatter, handle) {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    const ratio = saved ? parseFloat(saved) : DEFAULT_RATIO;
-    applyRatio(sheet, chatter, ratio);
-    handle.classList.remove("pan-chatter-collapsed");
-    localStorage.setItem(COLLAPSED_KEY, "false");
-}
-
 patch(FormRenderer.prototype, {
     setup() {
         super.setup();
-        const tryInstall = () => setTimeout(installResizer, 100);
+        const tryInstall = () => setTimeout(installResizers, 100);
         onMounted(tryInstall);
         onPatched(tryInstall);
     },
