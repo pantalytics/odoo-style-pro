@@ -1,5 +1,6 @@
 // Pantalytics chatter overrides
 // Styles the mail chatter: topbar, messages, composer, followers, resize handle
+// (the handle also sits before the attachment preview on vendor bills)
 
 // ─── Chatter resize handle ─────────────────────────────────────────────────
 
@@ -65,6 +66,18 @@
     &::after {
       display: none;
     }
+  }
+}
+
+// While dragging: keep the cursor, no text selection, and stop the PDF
+// preview iframe from swallowing mouse events
+
+body.pan-resizing {
+  cursor: col-resize;
+  user-select: none;
+
+  iframe {
+    pointer-events: none;
   }
 }
 
