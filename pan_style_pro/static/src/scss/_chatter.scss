@@ -69,6 +69,19 @@
   }
 }
 
+// Collapsed panel: zero width, not display:none. The PDF viewer needs a
+// layout box or it logs errors; !important beats Odoo's min-width.
+
+.pan-panel-collapsed {
+  flex: 0 0 0 !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  overflow: hidden !important;
+  visibility: hidden;
+}
+
 // While dragging: keep the cursor, no text selection, and stop the PDF
 // preview iframe from swallowing mouse events
 

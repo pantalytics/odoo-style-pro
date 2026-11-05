@@ -27,19 +27,34 @@ const PANELS = [
     },
 ];
 
-function installResizers() {
-    const formView = document.querySelector(".o_form_view.o_xxl_form_view");
-    if (!formView) return;
-    const sheet = formView.querySelector(".o_form_sheet_bg");
-    if (!sheet) return;
+function resetStyles(handle) {
+    for (const el of [handle._panSheet, handle._panPanel]) {
+        el.style.flex = "";
+        el.style.maxWidth = "";
+    }
+    handle._panPanel.classList.remove("pan-panel-collapsed");
+}
 
-    // Drop handles whose panel is gone (pager to a record without a preview)
-    for (const handle of formView.querySelectorAll(".pan-chatter-resize-handle")) {
-        if (!handle._panPanel || !handle._panPanel.isConnected) {
+function installResizers() {
+    // Drop handles that no longer sit right before their panel: the panel
+    // left (bill switched to the PDF layout once its attachments loaded),
+    // changed role (chatter moved under the form), or the screen got narrow.
+    for (const handle of document.querySelectorAll(".pan-chatter-resize-handle")) {
+        const panel = handle._panPanel;
+        const stillValid =
+            panel.isConnected &&
+            handle.nextElementSibling === panel &&
+            panel.matches(handle._panSelector) &&
+            panel.closest(".o_form_view.o_xxl_form_view");
+        if (!stillValid) {
             handle.remove();
-            sheet.style.flex = "";
+            resetStyles(handle);
         }
     }
+
+    const formView = document.querySelector(".o_form_view.o_xxl_form_view");
+    const sheet = formView?.querySelector(".o_form_sheet_bg");
+    if (!sheet) return;
     for (const config of PANELS) {
         const panel = sheet.parentNode.querySelector(`:scope > ${config.selector}`);
         if (panel) installResizer(formView, sheet, panel, config);
@@ -47,12 +62,14 @@ function installResizers() {
 }
 
 function installResizer(formView, sheet, panel, config) {
-    if (panel.previousElementSibling?.classList.contains("pan-chatter-resize-handle")) return;
+    if (panel.previousElementSibling?._panPanel === panel) return;
 
     // ── Resize handle with toggle button ───────────────────────────────────
     const handle = document.createElement("div");
     handle.className = "pan-chatter-resize-handle";
     handle._panPanel = panel;
+    handle._panSheet = sheet;
+    handle._panSelector = config.selector;
 
     const toggle = document.createElement("button");
     toggle.className = "pan-chatter-toggle";
@@ -68,25 +85,30 @@ function installResizer(formView, sheet, panel, config) {
     const savedRatio = () => parseFloat(localStorage.getItem(config.ratioKey)) || config.defaultRatio;
 
     const applyRatio = (ratio) => {
-        sheet.style.flex = `${ratio} 0 0px`;
-        panel.style.flex = `${1 - ratio} 0 0px`;
-        panel.style.display = "";
+        // The sheet gets exactly `ratio` of the row, so the handle stays under
+        // the mouse; it may still shrink if the panel needs its min-width.
+        // Odoo caps the sheet at 1400px, which would break that on wide screens.
+        sheet.style.flex = `0 1 ${ratio * 100}%`;
+        sheet.style.maxWidth = "none";
+        panel.style.flex = "1 1 0px";
     };
 
     const setCollapsed = (value) => {
         collapsed = value;
         if (collapsed) {
-            sheet.style.flex = "1 0 0px";
-            // display:none, not flex 0: Odoo gives both panels a min-width
-            panel.style.display = "none";
+            sheet.style.flex = "";
+            sheet.style.maxWidth = "";
+            panel.style.flex = "";
         } else {
             applyRatio(savedRatio());
         }
         handle.classList.toggle("pan-chatter-collapsed", collapsed);
+        panel.classList.toggle("pan-panel-collapsed", collapsed);
         localStorage.setItem(config.collapsedKey, String(collapsed));
     };
 
     let collapsed = localStorage.getItem(config.collapsedKey) === "true";
+    let openedAt = -Infinity;
     setCollapsed(collapsed);
 
     // ── Events ─────────────────────────────────────────────────────────────
@@ -98,6 +120,8 @@ function installResizer(formView, sheet, panel, config) {
 
     handle.addEventListener("dblclick", (e) => {
         e.preventDefault();
+        // The first press of a double-click on the collapsed strip opened it
+        if (e.timeStamp - openedAt < 600) return;
         setCollapsed(!collapsed);
     });
 
@@ -105,14 +129,16 @@ function installResizer(formView, sheet, panel, config) {
         if (toggle.contains(e.target)) return;
         if (collapsed) {
             setCollapsed(false);
+            openedAt = e.timeStamp;
             return;
         }
         e.preventDefault();
-        const containerRect = formView.getBoundingClientRect();
+        const rowRect = formView.getBoundingClientRect();
+        const half = handle.offsetWidth / 2;
         let ratio = savedRatio();
 
         const onMouseMove = (ev) => {
-            ratio = (ev.clientX - containerRect.left) / containerRect.width;
+            ratio = (ev.clientX - half - rowRect.left) / rowRect.width;
             ratio = Math.max(MIN_RATIO, Math.min(MAX_RATIO, ratio));
             applyRatio(ratio);
         };

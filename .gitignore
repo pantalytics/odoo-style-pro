@@ -26,3 +26,4 @@ pan_style_pro_enterprise/static/src/css/
 # Environment
 .env
 *.env.local
+shots/
