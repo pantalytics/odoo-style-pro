@@ -54,13 +54,13 @@
     }
   }
 
-  // ── Collapsed state: narrow column on the right, like Odoo's chatter ──
+  // ── Collapsed state: a button right next to the form ──
+  // Odoo caps the form at 1400px and pushes everything after it to the far
+  // right; there the button got lost in empty space, so it hugs the form.
 
   &.pan-chatter-collapsed {
-    width: 40px;
+    width: 48px;
     cursor: pointer;
-    background-color: var(--pan-bg);
-    border-left: 1px solid var(--pan-border);
 
     &::before,
     &::after {
@@ -69,10 +69,25 @@
   }
 }
 
+// Chatter hidden: the button hugs the form
+.pan-chatter-collapsed:not(.pan-handle-left) {
+  margin-right: auto;
+}
+
+.o_form_sheet_bg:has(+ .pan-chatter-resize-handle.pan-chatter-collapsed:not(.pan-handle-left)) {
+  margin-right: 0 !important;
+  padding-right: 0 !important;
+}
+
+// Next to a PDF the handle hides the form, on its left: mirror the icon
+.pan-handle-left .pan-chatter-toggle .oi {
+  transform: scaleX(-1);
+}
+
 // Collapsed panel: zero width, not display:none. The PDF viewer needs a
 // layout box or it logs errors; !important beats Odoo's min-width.
 
-.pan-panel-collapsed {
+.o_form_view .pan-panel-collapsed {
   flex: 0 0 0 !important;
   width: 0 !important;
   min-width: 0 !important;
@@ -122,13 +137,24 @@ body.pan-resizing {
     opacity: 1;
   }
 
-  // Always visible when collapsed
-  .pan-chatter-collapsed & {
-    opacity: 1;
-  }
-
   &:hover {
     color: var(--pan-accent);
+  }
+
+  // Collapsed: an outline button, the only way back to the panel
+  .pan-chatter-collapsed & {
+    top: var(--pan-space-3);
+    width: 32px;
+    height: 32px;
+    opacity: 1;
+    border: 1px solid var(--pan-border-strong);
+    background-color: var(--pan-bg);
+    color: var(--pan-text);
+
+    &:hover {
+      color: var(--pan-text);
+      background-color: var(--pan-bg-secondary);
+    }
   }
 }
 
