@@ -10,20 +10,25 @@ const MAX_RATIO = 0.8;
 
 // Right-hand panels of an XXL form: the side chatter, or the attachment
 // preview (vendor bills with a PDF). Each remembers its own width and state.
+// The toggle hides the chatter, but next to a PDF it hides the form instead:
+// that is when you want the document full width.
 const PANELS = [
     {
         selector: ".o-mail-Form-chatter.o-aside",
         ratioKey: "pan_chatter_ratio",
         collapsedKey: "pan_chatter_collapsed",
         defaultRatio: 0.6,
-        title: _t("Toggle chatter"),
+        showTitle: _t("Show chatter"),
+        hideTitle: _t("Hide chatter"),
     },
     {
         selector: ".o_attachment_preview",
         ratioKey: "pan_preview_ratio",
-        collapsedKey: "pan_preview_collapsed",
+        collapsedKey: "pan_preview_form_collapsed",
         defaultRatio: 0.5,
-        title: _t("Toggle preview"),
+        hidesForm: true,
+        showTitle: _t("Show form"),
+        hideTitle: _t("Hide form"),
     },
 ];
 
@@ -32,6 +37,7 @@ function resetStyles(handle) {
         el.style.flex = "";
         el.style.maxWidth = "";
     }
+    handle._panSheet.classList.remove("pan-panel-collapsed");
     handle._panPanel.classList.remove("pan-panel-collapsed");
 }
 
@@ -67,6 +73,7 @@ function installResizer(formView, sheet, panel, config) {
     // ── Resize handle with toggle button ───────────────────────────────────
     const handle = document.createElement("div");
     handle.className = "pan-chatter-resize-handle";
+    handle.classList.toggle("pan-handle-left", !!config.hidesForm);
     handle._panPanel = panel;
     handle._panSheet = sheet;
     handle._panSelector = config.selector;
@@ -74,8 +81,6 @@ function installResizer(formView, sheet, panel, config) {
     const toggle = document.createElement("button");
     toggle.className = "pan-chatter-toggle";
     toggle.type = "button";
-    toggle.title = config.title;
-    toggle.setAttribute("aria-label", toggle.title);
     toggle.innerHTML = '<i class="oi oi-panel-right"></i>';
     handle.appendChild(toggle);
 
@@ -93,17 +98,21 @@ function installResizer(formView, sheet, panel, config) {
         panel.style.flex = "1 1 0px";
     };
 
+    const hidden = config.hidesForm ? sheet : panel;
     const setCollapsed = (value) => {
         collapsed = value;
         if (collapsed) {
             sheet.style.flex = "";
             sheet.style.maxWidth = "";
-            panel.style.flex = "";
+            panel.style.flex = config.hidesForm ? "1 1 0px" : "";
         } else {
             applyRatio(savedRatio());
         }
         handle.classList.toggle("pan-chatter-collapsed", collapsed);
-        panel.classList.toggle("pan-panel-collapsed", collapsed);
+        toggle.title = collapsed ? config.showTitle : config.hideTitle;
+        toggle.setAttribute("aria-label", toggle.title);
+        toggle.setAttribute("aria-expanded", String(!collapsed));
+        hidden.classList.toggle("pan-panel-collapsed", collapsed);
         localStorage.setItem(config.collapsedKey, String(collapsed));
     };
 
