@@ -45,22 +45,32 @@ for(const [W,H] of SIZES){
     await open(1); sh=await box('.o_form_sheet_bg'); ok(Math.abs(sh.w/fv.w-0.8)<0.03,`width kept after reload: ${(sh.w/fv.w).toFixed(2)}`);
     // form inputs still usable
     ok((await box('.o_field_widget[name=partner_id]'))?.w>100,'partner field has room');
-    // collapse via toggle
-    await p.hover('.pan-chatter-resize-handle'); await p.click('.pan-chatter-toggle');
-    pv=await box('.o_attachment_preview'); sh=await box('.o_form_sheet_bg');
-    ok(!pv.vis,'toggle hides preview'); ok(Math.abs(sh.w-Math.min(1400,fv.w-40))<4,`form back to Odoo width, max 1400 (${sh.w}/${fv.w})`);
-    await p.screenshot({path:`shots/${W}x${H}-3-collapsed.png`});
-    await open(1); ok(!(await box('.o_attachment_preview')).vis,'stays collapsed after reload');
+    // collapse via toggle: next to a PDF it hides the FORM, button on the left
+    const formVis=async()=>(await box('.o_form_sheet_bg')).vis;
+    const btn=()=>p.evaluate(()=>{const b=document.querySelector('.pan-chatter-toggle');const r=b.getBoundingClientRect();const v=document.querySelector('.o_form_view').getBoundingClientRect();
+      return {left:Math.round(r.x-v.x),op:getComputedStyle(b).opacity,inView:r.right<=innerWidth&&r.left>=0&&r.top>=0&&r.bottom<=innerHeight,title:b.title,w:Math.round(r.width)}});
+    ok((await btn()).title==='Hide form','open: tooltip says Hide form');
+    await p.hover('.pan-chatter-resize-handle'); await p.click('.pan-chatter-toggle'); await p.waitForTimeout(100);
+    pv=await box('.o_attachment_preview');
+    ok(!(await formVis()),'toggle hides the form');
+    ok(pv.vis&&pv.w>fv.w-60,`PDF takes the full width (${pv.w}/${fv.w})`);
+    {const t=await btn(); ok(t.left>=0&&t.left<60,`reopen button on the left edge (${t.left}px)`); ok(t.op==='1'&&t.inView&&t.w>=30,`reopen button visible (${JSON.stringify(t)})`); ok(t.title==='Show form','tooltip says Show form');}
+    await p.screenshot({path:`shots/${W}x${H}-3-form-collapsed.png`});
+    await open(1); ok(!(await formVis()),'stays collapsed after reload');
+    await p.click('.pan-chatter-toggle'); await p.waitForTimeout(100);
+    ok(await formVis(),'reopen button brings the form back');
+    {sh=await box('.o_form_sheet_bg'); ok(Math.abs(sh.w/fv.w-0.8)<0.03,`back at the saved width ${(sh.w/fv.w).toFixed(2)}`);}
+    await p.click('.pan-chatter-toggle'); await p.waitForTimeout(100);
     // click collapsed strip expands
     const hb3=await (await p.$('.pan-chatter-resize-handle')).boundingBox();
     await p.mouse.click(hb3.x+hb3.width/2,hb3.y+hb3.height-30);
-    ok((await box('.o_attachment_preview')).vis,'clicking the collapsed strip opens it');
+    ok(await formVis(),'clicking the collapsed strip opens it');
     // dblclick toggles (handle moves when collapsed, so re-measure each time)
     const hcenter=async()=>{const h=await (await p.$('.pan-chatter-resize-handle')).boundingBox();return [h.x+h.width/2,h.y+h.height-30];};
     await p.waitForTimeout(700); let [cx,cy]=await hcenter(); await p.mouse.dblclick(cx,cy); await p.waitForTimeout(100);
-    ok(!(await box('.o_attachment_preview')).vis,'double-click on the line closes');
+    ok(!(await formVis()),'double-click on the line closes');
     [cx,cy]=await hcenter(); await p.mouse.dblclick(cx,cy); await p.waitForTimeout(100);
-    ok((await box('.o_attachment_preview')).vis,'double-click on the collapsed strip opens (and stays open)');
+    ok(await formVis(),'double-click on the collapsed strip opens (and stays open)');
     // pager to bill without PDF: chatter on the side, its own handle
     await p.goto('http://localhost:8069/odoo/action-account.action_move_in_invoice_type'); await p.waitForSelector('.o_data_row');
     const rows=await p.$$('.o_data_row'); await rows[1].click(); await p.waitForSelector('.pan-chatter-resize-handle'); await p.waitForTimeout(800);
@@ -73,6 +83,14 @@ for(const [W,H] of SIZES){
      await p.mouse.move(h.x+h.width/2,H/2);await p.mouse.down();await p.mouse.move(want,H/2,{steps:10});await p.mouse.up();
      const h2=await box('.pan-chatter-resize-handle'); ok(Math.abs(h2.x+h2.w/2-want)<4,`chatter handle follows the mouse (${Math.round(h2.x+h2.w/2)} vs ${Math.round(want)})`);}
     await p.screenshot({path:`shots/${W}x${H}-4-nopdf-chatter.png`});
+    // chatter: the toggle hides the chatter, button hugs the form
+    await p.hover('.pan-chatter-resize-handle'); await p.click('.pan-chatter-toggle'); await p.waitForTimeout(100);
+    {const c=await box('.o-mail-Form-chatter.o-aside'); ok(!c.vis,'chatter toggle hides the chatter');
+     const t=await p.evaluate(()=>{const b=document.querySelector('.pan-chatter-toggle');const r=b.getBoundingClientRect();const s=document.querySelector('.o_form_sheet_bg').getBoundingClientRect();return {gap:Math.round(r.x-(s.x+s.width)),title:b.title,op:getComputedStyle(b).opacity}});
+     ok(t.gap>=0&&t.gap<30&&t.op==='1',`chatter reopen button next to the form (gap ${t.gap}px)`); ok(t.title==='Show chatter','tooltip says Show chatter');}
+    await p.screenshot({path:`shots/${W}x${H}-4b-chatter-collapsed.png`});
+    await p.click('.pan-chatter-toggle'); await p.waitForTimeout(100);
+    ok((await box('.o-mail-Form-chatter.o-aside')).vis,'chatter comes back');
     await p.click('.o_pager_previous'); await p.waitForTimeout(1000);
     const hs3=await handles(); ok(hs3.length===1&&hs3[0].includes('o_attachment_preview'),'back: only the preview handle '+JSON.stringify(hs3));
     sh=await box('.o_form_sheet_bg'); pv=await box('.o_attachment_preview');

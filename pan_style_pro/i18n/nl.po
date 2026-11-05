@@ -91,3 +91,27 @@ msgstr "Kolom verbergen"
 #: code:addons/pan_style_pro/static/src/js/pan_field_list.js:0
 msgid "Show this column"
 msgstr "Kolom tonen"
+
+#. module: pan_style_pro
+#. odoo-javascript
+#: code:addons/pan_style_pro/static/src/js/chatter_resizer.js:0
+msgid "Show chatter"
+msgstr "Chatter tonen"
+
+#. module: pan_style_pro
+#. odoo-javascript
+#: code:addons/pan_style_pro/static/src/js/chatter_resizer.js:0
+msgid "Hide chatter"
+msgstr "Chatter verbergen"
+
+#. module: pan_style_pro
+#. odoo-javascript
+#: code:addons/pan_style_pro/static/src/js/chatter_resizer.js:0
+msgid "Show form"
+msgstr "Formulier tonen"
+
+#. module: pan_style_pro
+#. odoo-javascript
+#: code:addons/pan_style_pro/static/src/js/chatter_resizer.js:0
+msgid "Hide form"
+msgstr "Formulier verbergen"
