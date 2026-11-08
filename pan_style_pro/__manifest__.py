@@ -12,6 +12,7 @@
     "category": "Themes/Backend",
     "license": "LGPL-3",
     "depends": ["web"],
+    "excludes": ["web_responsive"],
     "data": [
         "security/ir.model.access.csv",
         "security/pan_view_rules.xml",
