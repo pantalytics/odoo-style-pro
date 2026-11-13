@@ -31,10 +31,13 @@ import { panViews } from "@pan_style_pro/js/pan_view_store";
 const DRAG_THRESHOLD = 4;
 
 export function applyColumnOrder(columns, order) {
+    // A list can hold the same field twice, under different invisible
+    // conditions (the vendor bill list has partner_id and invoice_date
+    // twice). Such a field moves with all its columns, in arch order.
     const byName = new Map();
     for (const column of columns) {
-        if (column.type === "field" && !byName.has(column.name)) {
-            byName.set(column.name, column);
+        if (column.type === "field") {
+            byName.set(column.name, [...(byName.get(column.name) || []), column]);
         }
     }
     const known = [...new Set(order)].filter((name) => byName.has(name));
@@ -42,9 +45,10 @@ export function applyColumnOrder(columns, order) {
         return columns;
     }
     const knownSet = new Set(known);
+    const ordered = known.flatMap((name) => byName.get(name));
     let next = 0;
     return columns.map((column) =>
-        column.type === "field" && knownSet.has(column.name) ? byName.get(known[next++]) : column
+        column.type === "field" && knownSet.has(column.name) ? ordered[next++] : column
     );
 }
 
@@ -220,7 +224,7 @@ patch(ListRenderer.prototype, {
                 widths.set(th.dataset.name, Math.round(th.getBoundingClientRect().width));
             }
         }
-        const names = order || this.allColumns.filter((c) => c.type === "field").map((c) => c.name);
+        const names = [...new Set(order || this.allColumns.filter((c) => c.type === "field").map((c) => c.name))];
         const byName = new Map(this.allColumns.filter((c) => c.type === "field").map((c) => [c.name, c]));
         const columns = names.map((name) => {
             const column = { name };
