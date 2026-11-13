@@ -1,5 +1,11 @@
+import logging
+
+import psycopg2
+
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
+
+_logger = logging.getLogger(__name__)
 
 # What a view may carry, and the shape each part must have. Keys outside this
 # set are refused, so the web client cannot smuggle state into the row.
@@ -179,6 +185,22 @@ class PanView(models.Model):
             )
             side["shared" if not record.user_id else "mine"] = record._to_dict()
         return result
+
+    @api.model
+    def _session_views(self):
+        """get_user_views() for session_info, which must never fail the page
+        load. Hosting pulls new code before the module upgrade runs, and a
+        restart in between serves it: the code then knows a column the
+        database does not have yet (as `detail` in 19.0.1.11), and reading
+        any view fails. Until the upgrade has run the web client gets no
+        views."""
+        try:
+            with self.env.cr.savepoint():
+                return self.get_user_views()
+        except psycopg2.Error:
+            self.env.invalidate_all(flush=False)
+            _logger.warning("pan.view cannot be read until pan_style_pro is upgraded; the web client gets no views.")
+            return {}
 
     @api.model
     def save(self, res_model, values, view_type="list", shared=False):
