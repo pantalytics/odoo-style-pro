@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
 
-    <!-- The detail button, directly left of the view switcher. -->
+    <!-- The detail levels, directly left of the view switcher. -->
     <t t-name="pan_style_pro.ControlPanel.Detail" t-inherit="web.ControlPanel" t-inherit-mode="extension">
         <xpath expr="//t[@t-if='env.config.viewSwitcherEntries?.length &gt; 1']" position="before">
             <t t-if="panDetailLevel" t-component="panDetailLevel"/>
         </xpath>
     </t>
 
+    <!-- Three buttons, one per level, the one in use pressed: one click to any
+         level. On a phone, where the bar has no room for three, one button that
+         steps to the next level. -->
     <t t-name="pan_style_pro.DetailLevel">
         <div class="pan-detail d-print-none" t-ref="root" t-att-data-level="level">
-            <Dropdown menuClass="'pan-detail-menu'" position="'bottom-end'">
-                <button class="btn btn-secondary pan-detail-toggle" t-att-title="title" t-att-aria-label="title">
-                    <t t-call="pan_style_pro.DetailGlyph"><t t-set="glyph" t-value="level"/></t>
+            <button t-if="env.isSmall" type="button" class="btn btn-secondary pan-detail-cycle"
+                    t-att-title="title" t-att-aria-label="title" t-on-click="() => this.cycle()">
+                <t t-call="pan_style_pro.DetailGlyph"><t t-set="glyph" t-value="level"/></t>
+            </button>
+            <nav t-else="" class="pan-detail-levels btn-group" role="group" aria-label="Detail">
+                <button t-foreach="items" t-as="item" t-key="item.level" type="button"
+                        class="btn btn-secondary pan-detail-level"
+                        t-att-class="{ active: item.level === level, 'pan-detail-off': !!item.reason }"
+                        t-att-data-level="item.level"
+                        t-att-aria-pressed="item.level === level ? 'true' : 'false'"
+                        t-att-aria-disabled="item.reason ? 'true' : 'false'"
+                        t-att-title="item.reason ? item.label + ': ' + item.reason : item.label"
+                        t-att-aria-label="item.label"
+                        t-on-click="() => this.select(item)">
+                    <t t-call="pan_style_pro.DetailGlyph"><t t-set="glyph" t-value="item.level"/></t>
                 </button>
-                <t t-set-slot="content">
-                    <div class="px-3 py-1 small text-muted text-uppercase">Detail</div>
-                    <CheckboxItem t-foreach="items" t-as="item" t-key="item.level"
-                                  class="{ 'pan-detail-item': true, selected: item.level === level, disabled: !!item.reason }"
-                                  checked="item.level === level"
-                                  onSelected="() => this.select(item)">
-                        <span class="d-flex align-items-center gap-2">
-                            <t t-call="pan_style_pro.DetailGlyph"><t t-set="glyph" t-value="item.level"/></t>
-                            <span>
-                                <span class="pan-detail-label" t-esc="item.label"/>
-                                <span t-if="item.reason" class="pan-detail-reason" t-esc="item.reason"/>
-                            </span>
-                        </span>
-                    </CheckboxItem>
-                </t>
-            </Dropdown>
+            </nav>
         </div>
     </t>
 
