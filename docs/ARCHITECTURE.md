@@ -27,6 +27,7 @@ pan_style_pro/
 ├── __manifest__.py
 ├── models/
 │   ├── __init__.py
+│   ├── base.py
 │   ├── ir_http.py
 │   ├── pan_view.py
 │   ├── res_config_settings.py
@@ -48,6 +49,7 @@ pan_style_pro/
 │       │   ├── home_menu_service.js
 │       │   ├── pan_field_list.js
 │       │   ├── pan_style_service.js
+│       │   ├── pan_detail.js
 │       │   ├── pan_view_store.js
 │       │   └── patches/
 │       │       ├── home_menu_community_patch.js
@@ -64,6 +66,7 @@ pan_style_pro/
 │       │   ├── _home_menu_community.scss
 │       │   ├── _kanban.scss
 │       │   ├── _layout.scss
+│       │   ├── _detail.scss
 │       │   ├── _list_columns.scss
 │       │   ├── _login.scss
 │       │   ├── _modals.scss
@@ -77,9 +80,11 @@ pan_style_pro/
 │       │   └── _typography.scss
 │       └── xml/
 │           ├── home_menu_community.xml
+│           ├── detail.xml
 │           └── list_columns.xml
 ├── tests/
 │   ├── __init__.py
+│   ├── test_detail.py
 │   └── test_pan_view.py
 └── views/
     └── res_config_settings_views.xml
@@ -243,3 +248,15 @@ Two places, one result: the table and the column list stay in sync.
 - The column list is reached through a prototype getter (`t-component="panFieldList"`), not `ListRenderer.components`: subclasses copy those at load time.
 - An open dropdown is not re-rendered with fresh data when the list behind it is, so the column list applies a move or a switch from its own state and drops that state when new props differ.
 - `search_view_patch.js` on `SearchModel` and `DynamicList`: when an action opens, the stored `filter` facets and `group_by` are *added* to the action's own defaults (never replacing them, so two actions on one model keep their meaning); every search bar change is saved back. A column-header sort is saved as `sort` and applies below a favorite's order, above the action's default. Dialog lists are left alone.
+
+## Detail level
+
+How much a card shows: 1 its title, 2 its title and text, 3 everything (the model's own card, the default). One button directly left of the view switcher (`js/pan_detail.js`, `xml/detail.xml`); its icon is a card that grows with the level, so it shows the level without a click. After Airtable's row height and Gmail's density: named levels, one click, no slider.
+
+- **Stored** as the `detail` part of the user's view on the model (`pan.view`, on the kanban view), so it follows the user to every device. Cards of one model share one level, whatever view shows them.
+- **Applied in CSS** (`scss/_detail.scss`). The button writes the level on the view's root as `data-pan-detail`. A card says what its title and its text are with the classes `pan-card-title` and `pan-card-text`; at levels 1 and 2 everything that is not one of those, not inside one and not around one is hidden (`:has()`).
+- **The title of Odoo's own cards** is marked on the server (`models/base.py`, `_get_view`): the first bold element (`fw-bold`, `fw-bolder`) of the kanban's `card` template, which is how Odoo writes a card's title (143 of the 164 cards of Odoo 19 Community). A card without one gets no button. A card that marks its own title is left alone.
+- **Text**: Odoo's cards have no text line, so "Titles and text" is off for them, with the reason in the menu. A module gives its card one with `pan-card-text` in the arch.
+- **Other view types**: the button shows in the view types of the registry `pan_detail_views` (kanban is in it). A module adds its own, `registry.category("pan_detail_views").add("my_view", { isAvailable(env), hasText(env) })`, both optional, and reads `data-pan-detail` on its view root. Nothing here knows such a module, and it works without Style Pro.
+- **Tables** have no detail level: columns are the personal view above.
+- `detail.xml` is inserted right after `web/static/src/search/control_panel/control_panel.xml`, for the same reason as `list_columns.xml`. The button is a `t-component` from a getter on `ControlPanel.prototype`, not an entry in `ControlPanel.components`: a subclass that copied the components before this module loaded would otherwise not know it.

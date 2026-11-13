@@ -3,7 +3,11 @@ from odoo.exceptions import ValidationError
 
 # What a view may carry, and the shape each part must have. Keys outside this
 # set are refused, so the web client cannot smuggle state into the row.
-VIEW_PARTS = ("columns", "sort", "filter", "group_by")
+VIEW_PARTS = ("columns", "sort", "filter", "group_by", "detail")
+
+# How much a card shows (the detail level, on the kanban view of a model):
+# 1 its title, 2 its title and text, 3 everything, the model's own card.
+DETAIL_LEVELS = (1, 2, 3)
 
 # A search facet, as the search bar shows it. Three kinds:
 #   filter  a predefined filter of the model's search view, by its XML name;
@@ -65,6 +69,10 @@ class PanView(models.Model):
         "{type: field, name, value, label, operator} or {type: domain, domain, label}."
     )
     group_by = fields.Json(help="List of field names to group by, outer group first.")
+    detail = fields.Integer(
+        help="How much a card of this model shows: 1 its title, 2 its title and text, "
+        "3 everything. Empty: everything. Stored on the kanban view."
+    )
 
     _unique_user_model_type = models.Constraint(
         "unique(user_id, res_model, view_type)",
@@ -78,7 +86,8 @@ class PanView(models.Model):
     def _part(self, name):
         """The stored value of one part, or None: an empty Json field reads as False."""
         value = self[name]
-        return None if value is False else value
+        # An empty Json reads as False, an empty Integer as 0.
+        return None if value is False or (name == "detail" and not value) else value
 
     @staticmethod
     def _facet_ok(facet):
@@ -103,10 +112,12 @@ class PanView(models.Model):
             )
         return isinstance(facet["domain"], list) and isinstance(facet.get("label", ""), str)
 
-    @api.constrains("columns", "sort", "filter", "group_by")
+    @api.constrains("columns", "sort", "filter", "group_by", "detail")
     def _check_shape(self):
         for record in self:
-            columns, sort, filter_, group_by = (record._part(part) for part in VIEW_PARTS)
+            columns, sort, filter_, group_by, detail = (record._part(part) for part in VIEW_PARTS)
+            if detail is not None and detail not in DETAIL_LEVELS:
+                raise ValidationError(self.env._("detail must be 1 (titles), 2 (titles and text) or 3 (everything)."))
             if columns is not None and not (
                 isinstance(columns, list)
                 and all(
@@ -174,7 +185,7 @@ class PanView(models.Model):
         """Create or update a view on a model: the current user's own, or with
         ``shared`` everyone's (administrators only, by record rule).
 
-        ``values`` holds any subset of columns, sort, filter and group_by; parts
+        ``values`` holds any subset of columns, sort, filter, group_by and detail; parts
         left out keep their stored value, a part set to None is cleared.
         Returns the view as get_views() would.
         """

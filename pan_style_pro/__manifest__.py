@@ -1,6 +1,6 @@
 {
     "name": "Style Pro",
-    "version": "19.0.1.10.2",
+    "version": "19.0.1.11.0",
     "images": ["static/description/banner.png"],
     "summary": "Modern Pantalytics brand theme for Odoo backend",
     "description": """
@@ -42,6 +42,7 @@
             "pan_style_pro/static/src/scss/_home_menu_community.scss",
             "pan_style_pro/static/src/scss/_hidden_apps.scss",
             "pan_style_pro/static/src/scss/_list_columns.scss",
+            "pan_style_pro/static/src/scss/_detail.scss",
             "pan_style_pro/static/src/js/pan_style_service.js",
             "pan_style_pro/static/src/js/chatter_resizer.js",
             "pan_style_pro/static/src/js/patches/home_menu_community_patch.js",
@@ -50,6 +51,7 @@
             "pan_style_pro/static/src/js/pan_field_list.js",
             "pan_style_pro/static/src/js/patches/list_columns_patch.js",
             "pan_style_pro/static/src/js/patches/search_view_patch.js",
+            "pan_style_pro/static/src/js/pan_detail.js",
             "pan_style_pro/static/src/js/home_menu_community.js",
             "pan_style_pro/static/src/js/home_menu_service.js",
             "pan_style_pro/static/src/xml/home_menu_community.xml",
@@ -58,6 +60,9 @@
             # list for sales orders and invoices, ...) only take the extensions
             # loaded before their copy.
             ("after", "web/static/src/views/list/list_renderer.xml", "pan_style_pro/static/src/xml/list_columns.xml"),
+            # The same for the control panel: a module that copies web.ControlPanel
+            # takes the detail button along.
+            ("after", "web/static/src/search/control_panel/control_panel.xml", "pan_style_pro/static/src/xml/detail.xml"),
         ],
     },
     "post_init_hook": "_cleanup_stale_fields",
