@@ -27,6 +27,7 @@ No third-party CSS framework. No overrides that break on update. Just tokens and
 | **Home menu** | Styled app launcher with search bar (Enterprise only) |
 | **Kanban** | Styled columns, hover lift on cards, full-height drop zones |
 | **List view** | Uppercase column headers, subtle row hover, cleaner borders |
+| **Detail level** | One button left of the view switcher sets how much a kanban card shows: its title, its title and text, or everything. The icon is a card that grows with the level. Remembered per user and model (`pan.view`), on every device |
 | **Personal views** | Move columns by dragging them in the table or in the column list (grip, drop line, show/hide switches, after Airtable), resize, sort, filter and group: all remembered per user and model (`pan.view`), on every device |
 | **Form view** | Card layout with a 1px border, clean section separators |
 | **Control panel** | Aligned search bar, styled filter pills, view switcher |

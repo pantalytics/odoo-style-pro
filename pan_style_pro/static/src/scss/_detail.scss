@@ -1,0 +1,76 @@
+// ─── Detail level ────────────────────────────────────────────────────────────
+// One button left of the view switcher (js/pan_detail.js): how much a card
+// shows. The button writes the level on the view's root as data-pan-detail;
+// a card names its title and its text with pan-card-title and pan-card-text.
+
+.pan-detail {
+  display: inline-flex;
+}
+
+// The button looks like a view switcher button; it shows a state, not an action.
+.pan-detail-toggle {
+  display: inline-flex !important;
+  align-items: center;
+  border: 1px solid var(--pan-border) !important;
+  border-radius: var(--pan-radius-md) !important;
+  background: transparent !important;
+  color: var(--pan-text-secondary) !important;
+  padding: var(--pan-space-1) var(--pan-space-2) !important;
+  line-height: 1 !important;
+  box-shadow: none !important;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease !important;
+
+  &:hover,
+  &[aria-expanded="true"] {
+    background-color: var(--pan-border) !important;
+    color: var(--pan-text) !important;
+    border-color: var(--pan-border-strong) !important;
+  }
+}
+
+.pan-detail-glyph {
+  display: block;
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+}
+
+.pan-detail-reason {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--pan-text-secondary);
+}
+
+// Titles: of a card with a known title, only the title. Everything that is
+// not the title, not inside it and not around it goes.
+.o_kanban_view[data-pan-detail="1"] .o_kanban_record:not(.o_kanban_ghost):has(.pan-card-title)
+  *:not(.pan-card-title):not(.pan-card-title *):not(:has(.pan-card-title)) {
+  display: none !important;
+}
+
+// Titles and text: the same, and the text stays, three lines at most. A
+// module may hide the text of its card by default (an extra line, for this
+// level only); here it shows.
+.o_kanban_view[data-pan-detail="2"] .o_kanban_record:not(.o_kanban_ghost):has(.pan-card-title)
+  *:not(.pan-card-title):not(.pan-card-title *):not(:has(.pan-card-title)):not(.pan-card-text):not(.pan-card-text *):not(:has(.pan-card-text)) {
+  display: none !important;
+}
+
+.o_kanban_view[data-pan-detail="2"] .o_kanban_record:not(.o_kanban_ghost) .pan-card-text:not(:empty) {
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  margin-top: var(--pan-space-1);
+  font-size: 0.85em;
+  line-height: 1.4;
+  color: var(--pan-text-secondary);
+}
+
+// A card of titles needs no room for what it hides.
+.o_kanban_view[data-pan-detail="1"],
+.o_kanban_view[data-pan-detail="2"] {
+  .o_kanban_record:not(.o_kanban_ghost):has(.pan-card-title) {
+    min-height: 0 !important;
+  }
+}
