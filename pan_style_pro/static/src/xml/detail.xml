@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+    <!-- The detail button, directly left of the view switcher. -->
+    <t t-name="pan_style_pro.ControlPanel.Detail" t-inherit="web.ControlPanel" t-inherit-mode="extension">
+        <xpath expr="//t[@t-if='env.config.viewSwitcherEntries?.length &gt; 1']" position="before">
+            <t t-if="panDetailLevel" t-component="panDetailLevel"/>
+        </xpath>
+    </t>
+
+    <t t-name="pan_style_pro.DetailLevel">
+        <div class="pan-detail d-print-none" t-ref="root" t-att-data-level="level">
+            <Dropdown menuClass="'pan-detail-menu'" position="'bottom-end'">
+                <button class="btn btn-secondary pan-detail-toggle" t-att-title="title" t-att-aria-label="title">
+                    <t t-call="pan_style_pro.DetailGlyph"><t t-set="glyph" t-value="level"/></t>
+                </button>
+                <t t-set-slot="content">
+                    <div class="px-3 py-1 small text-muted text-uppercase">Detail</div>
+                    <CheckboxItem t-foreach="items" t-as="item" t-key="item.level"
+                                  class="{ 'pan-detail-item': true, selected: item.level === level, disabled: !!item.reason }"
+                                  checked="item.level === level"
+                                  onSelected="() => this.select(item)">
+                        <span class="d-flex align-items-center gap-2">
+                            <t t-call="pan_style_pro.DetailGlyph"><t t-set="glyph" t-value="item.level"/></t>
+                            <span>
+                                <span class="pan-detail-label" t-esc="item.label"/>
+                                <span t-if="item.reason" class="pan-detail-reason" t-esc="item.reason"/>
+                            </span>
+                        </span>
+                    </CheckboxItem>
+                </t>
+            </Dropdown>
+        </div>
+    </t>
+
+    <!-- A card that grows with the level: one line per thing it shows. -->
+    <t t-name="pan_style_pro.DetailGlyph">
+        <svg class="pan-detail-glyph" viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false">
+            <t t-if="glyph === 1">
+                <rect x="1.5" y="5" width="13" height="6" rx="2" stroke="currentColor" stroke-width="1.2"/>
+                <path d="M4 8H12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+            </t>
+            <t t-elif="glyph === 2">
+                <rect x="1.5" y="3.5" width="13" height="9" rx="2" stroke="currentColor" stroke-width="1.2"/>
+                <path d="M4 6.6H12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                <path d="M4 9.6H10" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+            </t>
+            <t t-else="">
+                <rect x="1.5" y="2" width="13" height="12" rx="2" stroke="currentColor" stroke-width="1.2"/>
+                <path d="M4 5.2H12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                <path d="M4 8H12M4 10.8H9" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+            </t>
+        </svg>
+    </t>
+
+</templates>

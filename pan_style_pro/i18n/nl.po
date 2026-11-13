@@ -115,3 +115,39 @@ msgstr "Formulier tonen"
 #: code:addons/pan_style_pro/static/src/js/chatter_resizer.js:0
 msgid "Hide form"
 msgstr "Formulier verbergen"
+
+#. module: pan_style_pro
+#. odoo-javascript
+#: code:addons/pan_style_pro/static/src/xml/detail.xml:0
+msgid "Detail"
+msgstr "Detail"
+
+#. module: pan_style_pro
+#. odoo-javascript
+#: code:addons/pan_style_pro/static/src/js/pan_detail.js:0
+msgid "Titles"
+msgstr "Titels"
+
+#. module: pan_style_pro
+#. odoo-javascript
+#: code:addons/pan_style_pro/static/src/js/pan_detail.js:0
+msgid "Titles and text"
+msgstr "Titels en tekst"
+
+#. module: pan_style_pro
+#. odoo-javascript
+#: code:addons/pan_style_pro/static/src/js/pan_detail.js:0
+msgid "Everything"
+msgstr "Alles"
+
+#. module: pan_style_pro
+#. odoo-javascript
+#: code:addons/pan_style_pro/static/src/js/pan_detail.js:0
+msgid "These cards have no text"
+msgstr "Deze kaarten hebben geen tekst"
+
+#. module: pan_style_pro
+#. odoo-javascript
+#: code:addons/pan_style_pro/static/src/js/pan_detail.js:0
+msgid "Detail: %s"
+msgstr "Detail: %s"
