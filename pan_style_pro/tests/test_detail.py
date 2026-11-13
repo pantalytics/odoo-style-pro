@@ -2,6 +2,7 @@ from lxml import etree
 
 from odoo.exceptions import ValidationError
 from odoo.tests import HttpCase, TransactionCase, tagged
+from odoo.tools import mute_logger
 
 from ..models.base import mark_card_title
 
@@ -52,6 +53,24 @@ class TestDetail(TransactionCase):
         for wrong in (4, -1):
             with self.assertRaises(ValidationError), self.cr.savepoint():
                 Views.save("res.partner", {"detail": wrong}, view_type="kanban")
+
+    def test_page_loads_when_the_database_is_older_than_the_code(self):
+        """Hosting can serve new code before the module upgrade has run: a column
+        the code knows is then missing. The page load gets no views and does not
+        fail, and the transaction stays usable."""
+        Views = self.env["pan.view"]
+        Views.save("res.partner", {"detail": 1}, view_type="kanban")
+        self.assertEqual(Views._session_views()["res.partner"]["kanban"]["mine"], {"detail": 1})
+        self.env.flush_all()
+        self.env.cr.execute("ALTER TABLE pan_view DROP COLUMN detail")
+        self.env.invalidate_all()
+        # The failed read is the point of the test: keep the database's own error out of the log.
+        with (
+            mute_logger("odoo.sql_db"),
+            self.assertLogs("odoo.addons.pan_style_pro.models.pan_view", level="WARNING"),
+        ):
+            self.assertEqual(Views._session_views(), {})
+        self.assertTrue(self.env["res.users"].search_count([]), "The transaction is still usable.")
 
     def test_card_title_is_marked(self):
         """A kanban card says what its title is: the first bold element, unless the
