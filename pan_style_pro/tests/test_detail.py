@@ -53,6 +53,20 @@ class TestDetail(TransactionCase):
             with self.assertRaises(ValidationError), self.cr.savepoint():
                 Views.save("res.partner", {"detail": wrong}, view_type="kanban")
 
+    def test_page_loads_when_the_database_is_older_than_the_code(self):
+        """Hosting can serve new code before the module upgrade has run: a column
+        the code knows is then missing. The page load gets no views and does not
+        fail, and the transaction stays usable."""
+        Views = self.env["pan.view"]
+        Views.save("res.partner", {"detail": 1}, view_type="kanban")
+        self.assertEqual(Views._session_views()["res.partner"]["kanban"]["mine"], {"detail": 1})
+        self.env.flush_all()
+        self.env.cr.execute("ALTER TABLE pan_view DROP COLUMN detail")
+        self.env.invalidate_all()
+        with self.assertLogs("odoo.addons.pan_style_pro.models.pan_view", level="WARNING"):
+            self.assertEqual(Views._session_views(), {})
+        self.assertTrue(self.env["res.users"].search_count([]), "The transaction is still usable.")
+
     def test_card_title_is_marked(self):
         """A kanban card says what its title is: the first bold element, unless the
         card marks one itself. A card without either gets no mark."""
