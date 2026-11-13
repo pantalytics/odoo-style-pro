@@ -251,7 +251,7 @@ Two places, one result: the table and the column list stay in sync.
 
 ## Detail level
 
-How much a card shows: 1 its title, 2 its title and text, 3 everything (the model's own card, the default). One button directly left of the view switcher (`js/pan_detail.js`, `xml/detail.xml`); its icon is a card that grows with the level, so it shows the level without a click. After Airtable's row height and Gmail's density: named levels, one click, no slider.
+How much a card shows: 1 its title, 2 its title and text, 3 everything (the model's own card, the default). Three buttons directly left of the view switcher (`js/pan_detail.js`, `xml/detail.xml`), one per level and the one in use pressed; each icon is a card that grows with the level. Any level is one click (19.0.1.11 had one button with a menu: two clicks, which the owner found one too many). On a phone the bar has no room for three: one button there, which steps to the next level. After Airtable's row height and Gmail's density: named levels, no slider.
 
 - **Stored** as the `detail` part of the user's view on the model (`pan.view`, on the kanban view), so it follows the user to every device. Cards of one model share one level, whatever view shows them.
 - **Applied in CSS** (`scss/_detail.scss`). The button writes the level on the view's root as `data-pan-detail`. A card says what its title and its text are with the classes `pan-card-title` and `pan-card-text`; at levels 1 and 2 everything that is not one of those, not inside one and not around one is hidden (`:has()`).

@@ -104,9 +104,10 @@ class TestDetail(TransactionCase):
 @tagged("post_install", "-at_install")
 class TestDetailUi(HttpCase):
     def test_detail_button(self):
-        """One button left of the view switcher sets how much a card shows. Titles
-        leaves the title; the choice is the user's view, so it is still there on
-        the next page load; Everything is the model's own card again."""
+        """Three buttons left of the view switcher set how much a card shows, one
+        click per level. Titles leaves the title; the choice is the user's view,
+        so it is still there on the next page load; Everything is the model's own
+        card again."""
         self.env["pan.view"].search([]).unlink()
         self.env["res.partner"].create(
             {"name": "Detail contact", "email": "detail@example.com", "phone": "+31 20 000 00 00"}
@@ -115,37 +116,38 @@ class TestDetailUi(HttpCase):
             WAIT_JS
             + """
 (async () => {
-    // Contacts open as a list: no cards, so no button.
+    // Contacts open as a list: no cards, so no detail levels.
     const toKanban = await waitFor(() => one(".o_list_view") && one(".o_switch_view.o_kanban"), "the contacts list");
-    expect(!one(".pan-detail-toggle"), "the list shows the detail button");
+    expect(!one(".pan-detail"), "the list shows the detail levels");
     toKanban.click();
-    await waitFor(() => contact() && one(".pan-detail-toggle"), "the contacts kanban with the detail button");
+    await waitFor(() => contact() && one(".pan-detail-levels"), "the contacts kanban with the detail levels");
     expect(level() === "3", "a card starts on everything: " + level());
-    const button = one(".pan-detail-toggle").getBoundingClientRect();
+    const buttons = one(".pan-detail-levels").getBoundingClientRect();
     const switcher = one(".o_cp_switch_buttons").getBoundingClientRect();
-    expect(button.right <= switcher.left + 1 && switcher.left - button.right < 40, "the button is not directly left of the view switcher");
+    expect(buttons.right <= switcher.left + 1 && switcher.left - buttons.right < 40, "the detail levels are not directly left of the view switcher");
     const card = contact();
     const whole = card.getBoundingClientRect().height;
     expect(extra(card).length > 0, "the whole card shows only its title");
 
-    // The menu: three levels, the one in use ticked; these cards have no text, so that level is off.
-    one(".pan-detail-toggle").click();
-    await waitFor(() => one(".pan-detail-menu"), "the menu");
-    const items = all(".pan-detail-menu .pan-detail-item");
-    const labels = items.map((el) => text(el.querySelector(".pan-detail-label"))).join("|");
-    expect(labels === "Titles|Titles and text|Everything", "levels: " + labels);
-    expect(text(items[1].querySelector(".pan-detail-reason")) === "These cards have no text", "no reason on the level these cards do not have");
-    expect(items.map((el) => el.getAttribute("aria-checked")).join() === "false,false,true", "the level in use is not ticked");
+    // Three buttons, the level in use pressed; these cards have no text, so that level is off, with its reason.
+    const items = all(".pan-detail-level");
+    const labels = items.map((el) => el.title).join("|");
+    expect(labels === "Titles|Titles and text: These cards have no text|Everything", "levels: " + labels);
+    expect(items.map((el) => el.getAttribute("aria-pressed")).join() === "false,false,true", "the level in use is not pressed");
+    expect(items[1].getAttribute("aria-disabled") === "true", "the level these cards do not have is not off");
+    items[1].click(); // off: nothing happens
+    expect(level() === "3", "a level that is off was taken");
+    // One click per level.
     items[0].click();
-    await waitFor(() => level() === "1", "Titles");
+    await waitFor(() => level() === "1" && all(".pan-detail-level")[0].getAttribute("aria-pressed") === "true", "Titles");
     expect(shows(contact().querySelector(".pan-card-title")) && extra(contact()).length === 0, "Titles shows more than the title: " + extra(contact()).map((el) => el.className).join(" | "));
     expect(contact().getBoundingClientRect().height < whole, "a card of titles is not lower");
     const saved = await odoo.__WOWL_DEBUG__.root.env.services.orm.call("pan.view", "get_user_views", []);
     expect(saved["res.partner"].kanban.mine.detail === 1, "the level is not saved in the user's view");
 
-    // Back in the list the button is gone again.
+    // Back in the list the levels are gone again.
     one(".o_switch_view.o_list").click();
-    await waitFor(() => one(".o_list_view") && !one(".pan-detail-toggle"), "the list without the button");
+    await waitFor(() => one(".o_list_view") && !one(".pan-detail"), "the list without the detail levels");
     console.log("test successful");
 })().catch((error) => console.error(error.message));
 """
@@ -156,12 +158,10 @@ class TestDetailUi(HttpCase):
             + """
 (async () => {
     (await waitFor(() => one(".o_switch_view.o_kanban"), "the contacts list again")).click();
-    await waitFor(() => contact() && one(".pan-detail-toggle"), "the contacts kanban again");
+    await waitFor(() => contact() && one(".pan-detail-levels"), "the contacts kanban again");
     expect(level() === "1", "the level did not come back with the user's view: " + level());
     expect(extra(contact()).length === 0, "Titles after a reload shows more than the title");
-    one(".pan-detail-toggle").click();
-    const everything = await waitFor(() => all(".pan-detail-menu .pan-detail-item").find((el) => text(el) === "Everything"), "the menu's Everything");
-    everything.click();
+    all(".pan-detail-level")[2].click();
     await waitFor(() => level() === "3" && extra(contact()).length > 0, "Everything");
     console.log("test successful");
 })().catch((error) => console.error(error.message));
