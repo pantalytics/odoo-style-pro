@@ -14,6 +14,9 @@
 .o_statusbar_status button,
 .o_statusbar_status button.o_arrow_button {
   clip-path: none !important;
+  // Odoo pulls each stage under the next one's arrow (a negative margin); a
+  // pill has no arrow, so it stands on its own and the gap above spaces them.
+  margin: 0 !important;
   border-radius: var(--pan-radius-lg) !important;
   font-size: 0.75rem !important;
   font-weight: 500 !important;
