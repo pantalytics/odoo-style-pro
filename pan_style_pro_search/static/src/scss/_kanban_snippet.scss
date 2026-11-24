@@ -1,0 +1,19 @@
+// Where a card's description or chatter matched the smart search term. The
+// card is a flex row (main + aside): wrap so the line sits inside the card,
+// under its content, at full width. Odoo gives main height: 100%, which would
+// fill the whole card and push the line out of it.
+.o_kanban_record:has(> .pan-smart-snippet) {
+  flex-wrap: wrap;
+
+  > main {
+    height: auto;
+  }
+}
+
+.pan-smart-snippet {
+  order: 99;
+  padding-top: var(--pan-space-1);
+  color: var(--pan-text-secondary);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
