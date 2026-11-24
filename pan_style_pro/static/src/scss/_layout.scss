@@ -88,8 +88,6 @@
     border-bottom: 1px solid var(--pan-border-strong) !important;
     font-weight: 600 !important;
     font-size: 0.75rem !important;
-    letter-spacing: 0.04em !important;
-    text-transform: uppercase !important;
     color: var(--pan-text-secondary) !important;
     padding-top: var(--pan-space-2) !important;
     padding-bottom: var(--pan-space-2) !important;
@@ -144,8 +142,6 @@
   color: var(--pan-text-secondary) !important;
   font-size: 0.75rem !important;
   font-weight: 600 !important;
-  letter-spacing: 0.04em !important;
-  text-transform: uppercase !important;
   border-bottom: 1px solid var(--pan-border) !important;
   padding-bottom: var(--pan-space-2) !important;
   margin-bottom: var(--pan-space-3) !important;
@@ -167,6 +163,20 @@
   // anders puilt het item alsnog buiten zijn track uit.
   > * {
     min-width: 0 !important;
+  }
+}
+
+// In een smal paneel (Documenten, split view) krijgt elke helft zo weinig
+// ruimte dat het veld naast een label van 150px op bijna 0 uitkomt en een
+// datum letter voor letter afbreekt. Onder 40rem staan de kolommen onder
+// elkaar. Gemeten op de groep zelf, niet op het venster.
+.o_form_view .o_group.grid:not(.o_inner_group) {
+  container-type: inline-size;
+}
+
+@container (max-width: 40rem) {
+  .o_form_view .o_group.grid:not(.o_inner_group) > * {
+    grid-column: 1 / -1 !important;
   }
 }
 

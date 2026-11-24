@@ -100,7 +100,7 @@
 .badge {
   border-radius: 9999px !important;
   padding: 0.2em 0.6em !important;
-  font-size: 0.7rem !important;
+  font-size: 0.75rem !important;
   font-weight: 600 !important;
   letter-spacing: 0.02em !important;
   line-height: 1 !important;
@@ -108,33 +108,20 @@
 }
 
 // ─── Semantic badge variants ──────────────────────────────────────────────────
+// Colour is status only; primary is not a status, so it is neutral.
 
-// Primary — accent color family
 .badge.text-bg-primary {
-  background-color: rgba(var(--pan-accent-rgb), 0.15) !important;
-  color: var(--pan-accent) !important;
-  border: 1px solid rgba(var(--pan-accent-rgb), 0.3) !important;
+  background-color: var(--pan-bg-secondary) !important;
+  color: var(--pan-text) !important;
+  border: 1px solid var(--pan-border-strong) !important;
 }
 
-// Success — keep hue, reduce opacity
-.badge.text-bg-success {
-  background-color: rgba(34, 197, 94, 0.12) !important;
-  color: #16a34a !important;
-  border: 1px solid rgba(34, 197, 94, 0.25) !important;
+@each $state in success, warning, danger {
+  .badge.text-bg-#{$state} {
+    background-color: rgba(var(--pan-#{$state}-rgb), 0.12) !important;
+    color: var(--pan-#{$state}-text) !important;
+    border: 1px solid rgba(var(--pan-#{$state}-rgb), 0.25) !important;
+  }
 }
 
-// Warning
-.badge.text-bg-warning {
-  background-color: rgba(234, 179, 8, 0.12) !important;
-  color: #a16207 !important;
-  border: 1px solid rgba(234, 179, 8, 0.25) !important;
-}
-
-// Danger
-.badge.text-bg-danger {
-  background-color: rgba(239, 68, 68, 0.12) !important;
-  color: #dc2626 !important;
-  border: 1px solid rgba(239, 68, 68, 0.25) !important;
-}
-
-// Dark mode badge overrides → _tags.dark.scss in pan_style_pro_enterprise
+// Dark mode: the status tokens carry it (_tokens.dark.scss)

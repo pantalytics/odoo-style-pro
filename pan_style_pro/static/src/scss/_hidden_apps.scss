@@ -37,7 +37,7 @@
   font-weight: 500;
   color: var(--pan-text);
   cursor: pointer;
-  transition: background-color 0.1s ease;
+  transition: background-color 0.15s ease;
 
   &:hover {
     background-color: var(--pan-bg-secondary, rgba(0, 0, 0, 0.04));
@@ -70,7 +70,7 @@
   font-weight: 500;
   color: var(--pan-text-secondary);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: border-color 0.15s ease, color 0.15s ease;
 
   &:hover {
     border-color: var(--pan-border-strong);
@@ -124,14 +124,16 @@
   transition: opacity 0.15s ease, transform 0.15s ease;
   box-shadow: var(--pan-shadow-sm);
 
-  .pan-home-app-dimmed:hover & {
+  .pan-home-app-dimmed:hover &,
+  .pan-home-app-dimmed:focus-within &,
+  &:focus-visible {
     opacity: 1;
   }
 
   &:hover {
     background: var(--pan-accent);
     border-color: var(--pan-accent);
-    color: #ffffff;
+    color: var(--pan-accent-foreground);
     transform: scale(1.1);
   }
 }

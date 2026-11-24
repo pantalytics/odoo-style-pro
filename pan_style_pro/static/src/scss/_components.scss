@@ -11,7 +11,7 @@
 .btn-primary {
   background-color: var(--pan-accent) !important;
   border-color: var(--pan-accent) !important;
-  color: #ffffff !important;
+  color: var(--pan-accent-foreground) !important;
 
   &:hover,
   &:focus,
@@ -19,7 +19,7 @@
   &.active {
     background-color: var(--pan-accent-hover) !important;
     border-color: var(--pan-accent-hover) !important;
-    color: #ffffff !important;
+    color: var(--pan-accent-foreground) !important;
     box-shadow: 0 0 0 3px rgba(var(--pan-accent-rgb), 0.25) !important;
   }
 }
@@ -93,13 +93,6 @@ select.form-select {
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
 
-// Discuss sidebar
-.o_discuss_sidebar .o_active {
-  background-color: rgba(var(--pan-accent-rgb), 0.1) !important;
-  color: var(--pan-accent) !important;
-  border-radius: var(--pan-radius-md) !important;
-}
-
 // Notebook tabs — Vercel stijl: alleen een clean 2px bottom underline
 .o_notebook .nav-tabs {
   border-bottom: 1px solid var(--pan-border) !important;
@@ -119,6 +112,11 @@ select.form-select {
   background: transparent !important;
   box-shadow: none !important;
   outline: none !important;
+
+  &:focus-visible {
+    outline: 2px solid var(--pan-accent) !important;
+    outline-offset: -2px;
+  }
 
   &:hover {
     color: var(--pan-text) !important;
