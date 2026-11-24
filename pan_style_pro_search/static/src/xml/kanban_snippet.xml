@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="pan_style_pro_search.KanbanRecord" t-inherit="web.KanbanRecord" t-inherit-mode="extension">
+        <xpath expr="article" position="inside">
+            <div t-if="this.panSnippet" class="pan-smart-snippet w-100" t-out="this.panSnippet"/>
+        </xpath>
+    </t>
+</templates>

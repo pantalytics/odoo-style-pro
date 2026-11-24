@@ -1,0 +1,37 @@
+// The public sidebar: a caret beside the emoji on a page with children, none
+// on a leaf. Odoo draws the caret over the emoji on hover, on every row, so a
+// folded page reads the same as one with nothing under it. Rows the patch has
+// not answered for yet carry neither class and keep Odoo's behaviour.
+
+.o_knowledge_sidebar .o_article:is(.pan-has-children, .pan-leaf) > .o_article_handle {
+  .o_article_icon {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    gap: var(--pan-space-1);
+  }
+
+  .o_article_caret {
+    position: static;
+    width: 1rem;
+    color: var(--pan-text-secondary);
+  }
+
+  .o_article_emoji {
+    opacity: 1;
+  }
+}
+
+.o_knowledge_sidebar .o_article.pan-has-children > .o_article_handle .o_article_caret {
+  opacity: 1;
+}
+
+.o_knowledge_sidebar .o_article.pan-leaf > .o_article_handle {
+  .o_article_caret {
+    opacity: 0;
+  }
+
+  .o_article_icon {
+    cursor: default;
+  }
+}
