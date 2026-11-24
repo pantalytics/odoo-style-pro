@@ -1,28 +1,33 @@
 // Pantalytics statusbar
 //
-// Odoo's chevron steps, Odoo's geometry, only our colours. Odoo draws every
-// step from the --o-statusbar-* variables below, and folds steps into "..."
-// menus by measuring whether the row wraps (StatusBarField.areItemsWrapping).
-// So: set the variables, never the padding, height, margins or clip-path.
-// A step with another height than the row makes Odoo fold every step into one
-// dropdown, on every screen size.
-// Phone (< 768 px): Odoo 19+ shows one dropdown with the current step. Kept.
+// Odoo 20's look on 19 and 20: one framed block, steps as plain text, only the
+// current step filled (with Odoo's arrow point). Odoo draws the step shapes
+// from its own variables and folds steps into "..." menus by measuring the
+// row height (StatusBarField.areItemsWrapping). So never change a step's
+// height, padding or clip-path: a mismatch folds every step into one dropdown.
+//
+// 19 and 20 differ in two ways this file relies on:
+// - 20 wraps each step in .o_arrow_button_wrap and gives the block a border
+//   and padding, which its wrap check subtracts. 19's check does not, so on 19
+//   the frame is an outline: it does not count towards the height.
+// - Phone (< 768 px): both show one dropdown button with the current step.
+
+$-pan-statusbar-md: 768px;
 
 .o_field_statusbar > .o_statusbar_status {
   --o-statusbar-radius: var(--pan-radius-md);
-  // The 1px frame of each step, chevron included: our elevation is a border.
-  --o-statusbar-border: var(--pan-border-strong);
-  // Current step: neutral, never the accent (brand: a state, not an action).
-  --o-statusbar-background-active: var(--pan-bg-secondary);
-  --o-statusbar-border-active: var(--pan-text-secondary);
-  --o-statusbar-background-hover: var(--pan-bg-secondary);
+  --o-statusbar-border-color: var(--pan-border-strong); // 20: the block's frame
+  --o-statusbar-border: transparent;                     // 19: no frame per step
+  --o-statusbar-border-active: transparent;
 
-  > .o_arrow_button {
-    // Undo the global .btn look (_buttons.scss): Odoo draws the frame itself.
-    // Rounded only on the two outer ends, as Odoo does (.btn forces a radius).
+  .o_arrow_button {
     border: 0 !important;
-    border-radius: 0 !important;
     box-shadow: none !important;
+    font-weight: 500;
+
+    // Rounded only on the outer ends (.btn forces a radius on every button).
+    // o_last is the left end, o_first the right one: Odoo lays them out reversed.
+    border-radius: 0 !important;
 
     &.o_last {
       border-top-left-radius: var(--o-statusbar-radius) !important;
@@ -33,19 +38,54 @@
       border-top-right-radius: var(--o-statusbar-radius) !important;
       border-bottom-right-radius: var(--o-statusbar-radius) !important;
     }
-    background-color: var(--pan-bg);
-    color: var(--pan-text-secondary);
-    font-weight: 500;
+  }
 
-    &:hover:not(:disabled),
-    &:focus-visible {
-      background-color: var(--o-statusbar-background-hover);
-      color: var(--pan-text);
+  @media (min-width: $-pan-statusbar-md) {
+    background: var(--pan-bg);
+
+    // 19 only: frame the block without changing its height. The shadow paints
+    // the 2px gap between frame and steps, as 20's padding does.
+    &:not(:has(.o_arrow_button_wrap)) {
+      border-radius: var(--o-statusbar-radius);
+      box-shadow: 0 0 0 2px var(--pan-bg);
+      outline: 1px solid var(--pan-border-strong);
+      outline-offset: 2px;
     }
 
-    &.o_arrow_button_current {
-      background-color: var(--o-statusbar-background-active);
-      color: var(--pan-text);
+    .o_arrow_button {
+      background-color: transparent !important;
+      color: var(--pan-text-secondary) !important;
+
+      &::before {
+        display: none; // 19's per-step frame
+      }
+
+      &:hover:not(:disabled),
+      &:focus-visible {
+        background-color: var(--pan-bg-secondary) !important;
+        color: var(--pan-text) !important;
+      }
+
+      // Neutral, never the accent: a state, not an action (brand 10-status).
+      &.o_arrow_button_current {
+        background-color: var(--pan-border) !important;
+        color: var(--pan-text) !important;
+      }
+    }
+  }
+
+  // Phone: the single dropdown is an ordinary outlined button, no arrow.
+  @media (max-width: $-pan-statusbar-md - 0.02px) {
+    .o_arrow_button {
+      clip-path: none !important;
+      border: 1px solid var(--pan-border-strong) !important;
+      border-radius: var(--o-statusbar-radius) !important;
+      background-color: var(--pan-bg) !important;
+      color: var(--pan-text) !important;
+
+      &::before {
+        display: none;
+      }
     }
   }
 }
