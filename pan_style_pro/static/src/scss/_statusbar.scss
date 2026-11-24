@@ -1,73 +1,51 @@
-// Pantalytics statusbar overrides
+// Pantalytics statusbar
+//
+// Odoo's chevron steps, Odoo's geometry, only our colours. Odoo draws every
+// step from the --o-statusbar-* variables below, and folds steps into "..."
+// menus by measuring whether the row wraps (StatusBarField.areItemsWrapping).
+// So: set the variables, never the padding, height, margins or clip-path.
+// A step with another height than the row makes Odoo fold every step into one
+// dropdown, on every screen size.
+// Phone (< 768 px): Odoo 19+ shows one dropdown with the current step. Kept.
 
-// ─── Workflow status bar ───────────────────────────────────────────────────────
+.o_field_statusbar > .o_statusbar_status {
+  --o-statusbar-radius: var(--pan-radius-md);
+  // The 1px frame of each step, chevron included: our elevation is a border.
+  --o-statusbar-border: var(--pan-border-strong);
+  // Current step: neutral, never the accent (brand: a state, not an action).
+  --o-statusbar-background-active: var(--pan-bg-secondary);
+  --o-statusbar-border-active: var(--pan-text-secondary);
+  --o-statusbar-background-hover: var(--pan-bg-secondary);
 
-// No vertical padding: Odoo folds the stages into a dropdown as soon as this
-// row is taller than one stage button (StatusBarField.areItemsWrapping).
-.o_statusbar_status {
-  gap: var(--pan-space-1) !important;
-  flex-wrap: wrap !important;
-  align-items: center !important;
-}
+  > .o_arrow_button {
+    // Undo the global .btn look (_buttons.scss): Odoo draws the frame itself.
+    // Rounded only on the two outer ends, as Odoo does (.btn forces a radius).
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
 
-// Reset all arrow/chevron geometry on every stage button
-.o_statusbar_status button,
-.o_statusbar_status button.o_arrow_button {
-  clip-path: none !important;
-  // Odoo pulls each stage under the next one's arrow (a negative margin); a
-  // pill has no arrow, so it stands on its own and the gap above spaces them.
-  margin: 0 !important;
-  border-radius: var(--pan-radius-lg) !important;
-  font-size: 0.75rem !important;
-  font-weight: 500 !important;
-  line-height: 1 !important;
-  padding: var(--pan-space-1) var(--pan-space-2) !important;
-  border: 1px solid var(--pan-border) !important;
-  background-color: transparent !important;
-  color: var(--pan-text-secondary) !important;
-  box-shadow: none !important;
-  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
+    &.o_last {
+      border-top-left-radius: var(--o-statusbar-radius) !important;
+      border-bottom-left-radius: var(--o-statusbar-radius) !important;
+    }
 
-  // Remove the pseudo-element arrow wedge Odoo draws
-  &::before,
-  &::after {
-    display: none !important;
-  }
-}
+    &.o_first {
+      border-top-right-radius: var(--o-statusbar-radius) !important;
+      border-bottom-right-radius: var(--o-statusbar-radius) !important;
+    }
+    background-color: var(--pan-bg);
+    color: var(--pan-text-secondary);
+    font-weight: 500;
 
-// ─── Hover state (non-disabled buttons) ───────────────────────────────────────
+    &:hover:not(:disabled),
+    &:focus-visible {
+      background-color: var(--o-statusbar-background-hover);
+      color: var(--pan-text);
+    }
 
-.o_statusbar_status button.o_arrow_button:not(:disabled):not(.disabled):hover {
-  background-color: rgba(var(--pan-accent-rgb), 0.08) !important;
-  border-color: var(--pan-border-strong) !important;
-  color: var(--pan-text) !important;
-}
-
-// ─── Past / disabled stages ───────────────────────────────────────────────────
-
-.o_statusbar_status button.o_arrow_button.disabled:not(.o_arrow_button_current),
-.o_statusbar_status button.o_arrow_button:disabled:not(.o_arrow_button_current) {
-  background-color: transparent !important;
-  border-color: transparent !important;
-  color: var(--pan-text-secondary) !important;
-  opacity: 1 !important;
-  cursor: default !important;
-  pointer-events: none !important;
-}
-
-// ─── Current stage ────────────────────────────────────────────────────────────
-// Odoo 17+ marks it o_arrow_button_current, and disabled. A state, not an
-// action, so neutral (brand: accent is for the primary action and links).
-
-.o_statusbar_status button.o_arrow_button.o_arrow_button_current {
-  background-color: var(--pan-bg-secondary) !important;
-  border-color: var(--pan-border-strong) !important;
-  color: var(--pan-text) !important;
-  font-weight: 500 !important;
-  opacity: 1 !important;
-
-  &::before,
-  &::after {
-    display: none !important;
+    &.o_arrow_button_current {
+      background-color: var(--o-statusbar-background-active);
+      color: var(--pan-text);
+    }
   }
 }
