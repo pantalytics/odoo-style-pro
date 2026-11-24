@@ -4,7 +4,7 @@
 # to the installed one. A theme change that ships without a bump is simply
 # never applied on the customer's database — the old CSS keeps being served.
 #
-#   tools/ci_version_bump.sh <base-ref>     # e.g. origin/19.0
+#   tools/ci_version_bump.sh <base-ref>     # e.g. origin/main
 #
 # Checked per module: only the module you touched needs the bump.
 set -euo pipefail

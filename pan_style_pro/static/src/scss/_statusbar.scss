@@ -1,73 +1,91 @@
-// Pantalytics statusbar overrides
+// Pantalytics statusbar
+//
+// Odoo 20's look on 19 and 20: one framed block, steps as plain text, only the
+// current step filled (with Odoo's arrow point). Odoo draws the step shapes
+// from its own variables and folds steps into "..." menus by measuring the
+// row height (StatusBarField.areItemsWrapping). So never change a step's
+// height, padding or clip-path: a mismatch folds every step into one dropdown.
+//
+// 19 and 20 differ in two ways this file relies on:
+// - 20 wraps each step in .o_arrow_button_wrap and gives the block a border
+//   and padding, which its wrap check subtracts. 19's check does not, so on 19
+//   the frame is an outline: it does not count towards the height.
+// - Phone (< 768 px): both show one dropdown button with the current step.
 
-// ─── Workflow status bar ───────────────────────────────────────────────────────
+$-pan-statusbar-md: 768px;
 
-.o_statusbar_status {
-  gap: var(--pan-space-1) !important;
-  padding: var(--pan-space-1) 0 !important;
-  flex-wrap: wrap !important;
-  align-items: center !important;
-}
+.o_field_statusbar > .o_statusbar_status {
+  --o-statusbar-radius: var(--pan-radius-md);
+  --o-statusbar-border-color: var(--pan-border-strong); // 20: the block's frame
+  --o-statusbar-border: transparent;                     // 19: no frame per step
+  --o-statusbar-border-active: transparent;
 
-// Reset all arrow/chevron geometry on every stage button
-.o_statusbar_status button,
-.o_statusbar_status button.o_arrow_button {
-  clip-path: none !important;
-  border-radius: var(--pan-radius-lg) !important;
-  font-size: 0.75rem !important;
-  font-weight: 500 !important;
-  line-height: 1 !important;
-  padding: var(--pan-space-1) var(--pan-space-2) !important;
-  border: 1px solid var(--pan-border) !important;
-  background-color: transparent !important;
-  color: var(--pan-text-secondary) !important;
-  box-shadow: none !important;
-  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
+  .o_arrow_button {
+    border: 0 !important;
+    box-shadow: none !important;
+    font-weight: 500;
 
-  // Remove the pseudo-element arrow wedge Odoo draws
-  &::before,
-  &::after {
-    display: none !important;
+    // Rounded only on the outer ends (.btn forces a radius on every button).
+    // o_last is the left end, o_first the right one: Odoo lays them out reversed.
+    border-radius: 0 !important;
+
+    &.o_last {
+      border-top-left-radius: var(--o-statusbar-radius) !important;
+      border-bottom-left-radius: var(--o-statusbar-radius) !important;
+    }
+
+    &.o_first {
+      border-top-right-radius: var(--o-statusbar-radius) !important;
+      border-bottom-right-radius: var(--o-statusbar-radius) !important;
+    }
   }
-}
 
-// ─── Current / active stage ────────────────────────────────────────────────────
+  @media (min-width: $-pan-statusbar-md) {
+    background: var(--pan-bg);
 
-.o_statusbar_status button.o_arrow_button.btn-primary {
-  background-color: var(--pan-accent) !important;
-  border-color: var(--pan-accent) !important;
-  color: #ffffff !important;
-  font-weight: 600 !important;
+    // 19 only: frame the block without changing its height. The shadow paints
+    // the 2px gap between frame and steps, as 20's padding does.
+    &:not(:has(.o_arrow_button_wrap)) {
+      border-radius: var(--o-statusbar-radius);
+      box-shadow: 0 0 0 2px var(--pan-bg);
+      outline: 1px solid var(--pan-border-strong);
+      outline-offset: 2px;
+    }
 
-  &::before,
-  &::after {
-    display: none !important;
+    .o_arrow_button {
+      background-color: transparent !important;
+      color: var(--pan-text-secondary) !important;
+
+      &::before {
+        display: none; // 19's per-step frame
+      }
+
+      &:hover:not(:disabled),
+      &:focus-visible {
+        background-color: var(--pan-bg-secondary) !important;
+        color: var(--pan-text) !important;
+      }
+
+      // Neutral, never the accent: a state, not an action (brand 10-status).
+      &.o_arrow_button_current {
+        background-color: var(--pan-border) !important;
+        color: var(--pan-text) !important;
+      }
+    }
   }
-}
 
-// ─── Hover state (non-disabled buttons) ───────────────────────────────────────
+  // Phone: the single dropdown is an ordinary outlined button, no arrow.
+  @media (max-width: $-pan-statusbar-md - 0.02px) {
+    .o_arrow_button {
+      clip-path: none !important;
+      border: 1px solid var(--pan-border-strong) !important;
+      border-radius: var(--o-statusbar-radius) !important;
+      background-color: var(--pan-bg) !important;
+      color: var(--pan-text) !important;
 
-.o_statusbar_status button.o_arrow_button:not(:disabled):not(.disabled):hover {
-  background-color: rgba(var(--pan-accent-rgb), 0.08) !important;
-  border-color: var(--pan-border-strong) !important;
-  color: var(--pan-text) !important;
-}
-
-// Keep active stage hover consistent with accent
-.o_statusbar_status button.o_arrow_button.btn-primary:hover {
-  background-color: var(--pan-accent-hover) !important;
-  border-color: var(--pan-accent-hover) !important;
-  color: #ffffff !important;
-}
-
-// ─── Past / disabled stages ───────────────────────────────────────────────────
-
-.o_statusbar_status button.o_arrow_button.disabled,
-.o_statusbar_status button.o_arrow_button:disabled {
-  background-color: transparent !important;
-  border-color: transparent !important;
-  color: var(--pan-text-secondary) !important;
-  opacity: 0.6 !important;
-  cursor: default !important;
-  pointer-events: none !important;
+      &::before {
+        display: none;
+      }
+    }
+  }
 }

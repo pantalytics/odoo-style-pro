@@ -1,0 +1,456 @@
+// Pantalytics Knowledge — a docs site, not a 2010 wiki
+// One partial for both faces of the app: the backend article form
+// (.o_knowledge_form_view) and the public article page
+// (.o_knowledge_public_view, website_knowledge). Selectors that are not on a
+// page do nothing, so the same rules serve both bundles.
+//
+// Look: GitBook-like. A quiet grey sidebar, the active page as an accent tint,
+// one readable column of prose, code and quotes as bordered blocks. Brand rule:
+// no shadows, elevation is a 1px border.
+//
+// Knowledge's own rules go up to five classes deep and our partial can load
+// before them in the bundle, so every rule starts from a root class plus the
+// view class.
+
+.o_knowledge_form_view,
+.o_knowledge_public_view {
+  font-family: var(--pan-font-body);
+}
+
+// ─── Prose: the article body ──────────────────────────────────────────────
+
+@mixin pan-knowledge-prose {
+  color: var(--pan-text);
+  font-size: 1rem;
+  line-height: 1.7;
+
+  p,
+  li {
+    line-height: 1.7;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--pan-text);
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+  }
+
+  h1 { font-size: 2rem;     margin: 2.5rem 0 1rem; }
+  h2 { font-size: 1.5rem;   margin: 2.25rem 0 0.75rem; }
+  h3 { font-size: 1.25rem;  margin: 1.75rem 0 0.5rem; }
+  h4 { font-size: 1.0625rem; margin: 1.5rem 0 0.5rem; }
+
+  > :first-child {
+    margin-top: 0;
+  }
+
+  h1 {
+    font-size: 2.25rem;
+    letter-spacing: -0.02em;
+  }
+
+  // Brand: headings are never bold and never a theme colour, even when the
+  // editor wrapped them in one
+  :is(h1, h2, h3, h4, h5, h6) :is(b, strong, span, font) {
+    font-weight: inherit !important;
+    color: inherit !important;
+  }
+
+  // The article index embed: cards, not a bulleted list
+  .o_embedded_articles_index_label {
+    font-family: var(--pan-font-body) !important;
+    font-size: 0.75rem;
+    font-weight: 500 !important;
+    color: var(--pan-text-secondary);
+    padding: 0 !important;
+    margin: var(--pan-space-5) 0 var(--pan-space-3);
+  }
+
+  .o_embedded_articles_index_content > ul {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+    gap: var(--pan-space-3);
+    list-style: none;
+    padding: 0 !important;
+
+    > li {
+      margin: 0;
+
+      // Cards show one level; the sidebar carries the rest of the tree
+      > ul {
+        display: none;
+      }
+
+      > a {
+        height: 100%;
+        align-items: center;
+        padding: var(--pan-space-4) !important;
+        border: 1px solid var(--pan-border-strong);
+        border-radius: var(--pan-radius-lg);
+        font-weight: 500;
+        color: var(--pan-text) !important;
+        text-decoration: none;
+        transition: border-color 0.15s, color 0.15s;
+
+        .text-truncate {
+          white-space: normal;
+        }
+
+        &::after {
+          content: "\2192";
+          margin-left: var(--pan-space-2);
+          color: var(--pan-text-secondary);
+          transition: transform 0.15s, color 0.15s;
+        }
+
+        &:hover,
+        &:focus-visible {
+          border-color: var(--pan-accent);
+          color: var(--pan-accent) !important;
+
+          &::after {
+            color: var(--pan-accent);
+            transform: translateX(2px);
+          }
+        }
+      }
+    }
+  }
+
+  ul,
+  ol {
+    padding-left: 1.5rem;
+  }
+
+  // Inline links only: the article index renders its rows as d-flex links
+  a:not(.btn):not(.d-flex) {
+    color: var(--pan-accent);
+    text-decoration: underline;
+    text-decoration-color: rgba(var(--pan-accent-rgb), 0.35);
+    text-underline-offset: 0.2em;
+    transition: text-decoration-color 0.15s;
+
+    &:hover {
+      text-decoration-color: var(--pan-accent);
+    }
+  }
+
+  // Inline code
+  code {
+    font-size: 0.875em;
+    color: var(--pan-text);
+    background-color: var(--pan-bg-secondary);
+    border: 1px solid var(--pan-border);
+    border-radius: var(--pan-radius-sm);
+    padding: 0.1em 0.35em;
+  }
+
+  // Code blocks
+  pre {
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--pan-text);
+    background-color: var(--pan-bg-secondary) !important;
+    border: 1px solid var(--pan-border) !important;
+    border-radius: var(--pan-radius-lg);
+    padding: var(--pan-space-4) var(--pan-space-5);
+
+    code {
+      background: none;
+      border: 0;
+      padding: 0;
+    }
+  }
+
+  blockquote {
+    color: var(--pan-text-secondary);
+    border-left: 3px solid var(--pan-accent);
+    background: none;
+    padding: var(--pan-space-1) 0 var(--pan-space-1) var(--pan-space-4);
+    margin: var(--pan-space-5) 0;
+  }
+
+  hr {
+    border: 0;
+    border-top: 1px solid var(--pan-border);
+    opacity: 1;
+    margin: var(--pan-space-6) 0;
+  }
+
+  img {
+    border-radius: var(--pan-radius-lg);
+  }
+
+  table.table,
+  table {
+    // A table pasted from markdown has no class: give it the full column, a
+    // line under each row and room before the next paragraph
+    width: 100%;
+    border-collapse: collapse;
+    margin: var(--pan-space-4) 0 var(--pan-space-5);
+    border-color: var(--pan-border);
+    // Bootstrap paints cells from its own table vars; tie them to ours so a
+    // table never ends up light-on-light or dark-on-dark
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--pan-text);
+
+    th {
+      font-weight: 500;
+      color: var(--pan-text);
+      background-color: var(--pan-bg-secondary);
+    }
+
+    td,
+    th {
+      border-bottom: 1px solid var(--pan-border);
+      border-color: var(--pan-border) !important;
+      padding: var(--pan-space-2) var(--pan-space-3);
+      vertical-align: top;
+    }
+  }
+
+  // Odoo's alert / banner blocks read as callouts
+  .alert,
+  .o_editor_banner {
+    border-radius: var(--pan-radius-lg);
+    box-shadow: none;
+  }
+}
+
+// ─── Sidebar: the page tree ───────────────────────────────────────────────
+
+@mixin pan-knowledge-sidebar {
+  background-color: var(--pan-bg) !important;
+  border-right: 1px solid var(--pan-border) !important;
+  font-size: 0.875rem;
+
+  // Odoo paints the inner panels bg-100
+  .bg-100 {
+    background-color: transparent !important;
+  }
+
+  // Emoji and caret stay as Odoo draws them: the caret is what tells a page
+  // with children from one without.
+  .o_article_icon {
+    color: var(--pan-text-secondary);
+  }
+
+  // Section titles (Favorites, Workspace, Private): eyebrow, not a heading
+  .o_section_header_label,
+  .o_section_title {
+    font-family: var(--pan-font-body) !important;
+    font-size: 0.75rem;
+    font-weight: 500 !important;
+    color: var(--pan-text-secondary);
+  }
+
+  .o_section .o_section_header {
+    margin-top: var(--pan-space-3);
+  }
+
+  .o_article .o_article_handle:has(:focus-visible) {
+    outline: 2px solid var(--pan-accent);
+    outline-offset: -2px;
+  }
+
+  .o_article .o_article_handle {
+    border-radius: var(--pan-radius-md);
+    color: var(--pan-text-secondary);
+    margin: 1px var(--pan-space-2);
+    padding: 0.2rem 0;
+    transition: background-color 0.15s, color 0.15s;
+
+    &:hover {
+      background-color: var(--pan-bg-secondary);
+      color: var(--pan-text);
+    }
+
+    .o_article_icon:hover {
+      background-color: var(--pan-border);
+    }
+
+    &.o_article_active {
+      background-color: rgba(var(--pan-accent-rgb), 0.1);
+      color: var(--pan-accent);
+      font-weight: 500;
+
+      &:hover {
+        background-color: rgba(var(--pan-accent-rgb), 0.14);
+      }
+
+      .o_article_name,
+      a {
+        color: var(--pan-accent);
+      }
+
+      .o_article_icon:hover {
+        background-color: rgba(var(--pan-accent-rgb), 0.18);
+      }
+    }
+  }
+
+  // Odoo marks the names text-black fw-bold, which is !important
+  .o_article_name {
+    color: inherit !important;
+    font-weight: inherit !important;
+    // Wrap long titles instead of cutting them off
+    white-space: normal;
+    line-height: 1.4;
+  }
+
+  // Child pages hang off a thin guide line, like a docs nav
+  li > ul {
+    margin-left: var(--pan-space-4);
+    border-left: 1px solid var(--pan-border);
+  }
+
+  li > ul > li {
+    padding-left: var(--pan-space-1) !important;
+  }
+
+  // Search and New buttons at the top of the tree
+  .o_public_search {
+    background-color: var(--pan-bg) !important;
+    border: 1px solid var(--pan-border-strong) !important;
+    height: 2.25rem;
+  }
+
+  .o_knowledge_search,
+  .o_public_search,
+  .o_knowledge_create_article {
+    border-radius: var(--pan-radius-md);
+    color: var(--pan-text-secondary);
+
+    &:hover {
+      background-color: var(--pan-border) !important;
+      color: var(--pan-text);
+    }
+  }
+
+  .o_resizable_panel_handle:hover,
+  .o_resizable_panel_handle.o_knowledge_sidebar_active_handle {
+    background-color: var(--pan-accent);
+  }
+}
+
+// ─── Header line: breadcrumb and actions above the article ───────────────
+
+@mixin pan-knowledge-header {
+  border-bottom: 1px solid var(--pan-border);
+  background-color: var(--pan-bg);
+
+  .o_knowledge_article_display_name,
+  .o_hierarchy_article_name {
+    font-size: 0.875rem;
+    color: var(--pan-text-secondary);
+  }
+}
+
+// ─── Backend: the article form ───────────────────────────────────────────
+
+.o_web_client .o_knowledge_form_view {
+  --knowledge-view-bg: var(--pan-bg);
+
+  .o_knowledge_sidebar {
+    @include pan-knowledge-sidebar;
+  }
+
+  .o_knowledge_header {
+    @include pan-knowledge-header;
+  }
+
+  .o_knowledge_header .o_hierarchy_article_name input:hover,
+  .o_knowledge_header .o_hierarchy_article_name input:focus {
+    border-bottom-color: var(--pan-accent) !important;
+  }
+
+  .o_knowledge_cover img {
+    height: 22vh;
+  }
+
+  .o_knowledge_editor .o_field_html .note-editable,
+  .o_knowledge_editor .o_readonly {
+    @include pan-knowledge-prose;
+  }
+
+  .o_widget_knowledge_chatter_panel,
+  .o_widget_knowledge_comments_panel,
+  .o_widget_knowledge_properties_panel {
+    border-left-color: var(--pan-border);
+  }
+
+  .o_knowledge_article_form_resizer span:hover,
+  .o_knowledge_article_form_resizer span.o_resizer_bg {
+    background-color: var(--pan-accent);
+  }
+}
+
+// ─── Public: website_knowledge's article page ────────────────────────────
+
+html body .o_knowledge_public_view {
+  background-color: var(--pan-bg);
+  color: var(--pan-text);
+
+  .o_knowledge_sidebar_container {
+    @include pan-knowledge-sidebar;
+  }
+
+  .o_knowledge_sidebar {
+    background-color: transparent;
+  }
+
+  .o_knowledge_header_line {
+    @include pan-knowledge-header;
+    min-height: 56px;
+  }
+
+  .o_toggle_public_sidebar {
+    border-radius: var(--pan-radius-md);
+    color: var(--pan-text-secondary);
+
+    &:hover {
+      background-color: var(--pan-bg-secondary);
+      color: var(--pan-text);
+    }
+  }
+
+  // "Log in" reads as an outline button, not a bold nav link
+  .o_knowledge_article_log_in {
+    font-weight: 500 !important;
+    font-size: 0.875rem;
+    color: var(--pan-text);
+    border: 1px solid var(--pan-border-strong);
+    border-radius: var(--pan-radius-md);
+    padding: var(--pan-space-1) var(--pan-space-3);
+
+    &:hover {
+      border-color: var(--pan-accent);
+      color: var(--pan-accent);
+    }
+  }
+
+  .o_knowledge_article {
+    padding-top: var(--pan-space-6);
+  }
+
+  .o_knowledge_cover img {
+    height: 22vh;
+  }
+
+  .o_knowledge_icon:not(.o_full_width),
+  .o_knowledge_article:not(.o_full_width) {
+    max-width: 46rem;
+  }
+
+  .o_knowledge_article {
+    padding-bottom: 6rem;
+
+    .o_readonly {
+      @include pan-knowledge-prose;
+    }
+  }
+
+  .o_embedded_toc_header_highlight {
+    background-color: rgba(var(--pan-accent-rgb), 0.12);
+  }
+}

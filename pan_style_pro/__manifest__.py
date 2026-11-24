@@ -1,6 +1,7 @@
 {
     "name": "Style Pro",
-    "version": "20.0.1.0.2",
+    "version": "20.0.1.13.1",
+    "images": ["static/description/banner.png"],
     "summary": "Modern Pantalytics brand theme for Odoo backend",
     "description": """
         Gives Odoo a modern, consumer-grade look and feel using the Pantalytics brand.
@@ -12,14 +13,17 @@
     "license": "LGPL-3",
     "depends": ["web"],
     "data": [
+        "security/ir.access.csv",
         "views/res_config_settings_views.xml",
     ],
     "assets": {
         "web.assets_frontend": [
+            "pan_style_pro/static/src/scss/_fonts.scss",
             "pan_style_pro/static/src/scss/_login.scss",
         ],
         "web.assets_backend": [
             "pan_style_pro/static/src/scss/_tokens.scss",
+            "pan_style_pro/static/src/scss/_fonts.scss",
             "pan_style_pro/static/src/scss/_typography.scss",
             "pan_style_pro/static/src/scss/_components.scss",
             "pan_style_pro/static/src/scss/_tags.scss",

@@ -18,30 +18,26 @@
 
 // ─── Dropdown items ───────────────────────────────────────────────────────────
 
-.dropdown-item,
-.o_dropdown_menu .o_dropdown_item {
+.dropdown-item {
   border-radius: var(--pan-radius-md) !important;
   color: var(--pan-text) !important;
   font-size: 0.875rem !important;
   line-height: 1.5 !important;
   background-color: transparent !important;
-  transition: background-color 0.1s ease, color 0.1s ease !important;
+  transition: background-color 0.15s ease, color 0.15s ease !important;
 }
 
 // Hover / focus state
 .dropdown-item:hover,
 .dropdown-item:focus,
-.o_dropdown_menu .o_dropdown_item:hover,
-.o_dropdown_menu .o_dropdown_item:focus {
+.dropdown-item.focus {
   background-color: var(--pan-border) !important;
   color: var(--pan-text) !important;
 }
 
 // Active / selected state
 .dropdown-item.active,
-.dropdown-item:active,
-.o_dropdown_menu .o_dropdown_item.active,
-.o_dropdown_menu .o_dropdown_item:active {
+.dropdown-item:active {
   background-color: rgba(var(--pan-accent-rgb), 0.1) !important;
   color: var(--pan-accent) !important;
   font-weight: 500 !important;
@@ -56,24 +52,13 @@
   opacity: 1 !important;
 }
 
-// ─── App icons in apps dropdown ──────────────────────────────────────────────
-
-.pan-app-icon {
-  width: 24px;
-  height: 24px;
-  border-radius: var(--pan-radius-sm);
-  flex-shrink: 0;
-}
-
 // ─── Section header ───────────────────────────────────────────────────────────
 
 .dropdown-header,
 .o_dropdown_menu .dropdown-header {
   padding: var(--pan-space-1) var(--pan-space-2) !important;
-  font-size: 0.6875rem !important;
-  font-weight: 600 !important;
-  letter-spacing: 0.06em !important;
-  text-transform: uppercase !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
   color: var(--pan-text-secondary) !important;
   line-height: 1.5 !important;
 }

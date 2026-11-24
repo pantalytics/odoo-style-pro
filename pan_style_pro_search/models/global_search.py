@@ -1,7 +1,6 @@
 import logging
 
-from odoo import api, models
-from odoo.api import ormcache
+from odoo import api, models, tools
 from odoo.fields import Domain
 from odoo.tools import SQL
 
@@ -69,7 +68,7 @@ class PanSmartSearchGlobal(models.AbstractModel):
         ]
 
     @api.model
-    @ormcache("self.env.uid")
+    @tools.ormcache("self.env.uid")
     def _pan_smart_search_models(self):
         """Business-document models behind the menus this user can see,
         largest first. "Business document" = has a chatter (message_ids):

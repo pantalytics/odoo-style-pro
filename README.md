@@ -1,6 +1,6 @@
-# Style Pro for Odoo 20
+# Style Pro for Odoo 19 and 20
 
-A modern, consumer-grade UI theme for Odoo 20 — inspired by the design language of Linear and Vercel. Built and maintained by [Pantalytics](https://pantalytics.com).
+A modern, consumer-grade UI theme for Odoo 19 — inspired by the design language of Linear and Vercel. Built and maintained by [Pantalytics](https://pantalytics.com).
 
 ![Pantalytics Style Pro — Light Mode](docs/screenshots/kanban-light.png)
 
@@ -18,7 +18,7 @@ No third-party CSS framework. No overrides that break on update. Just tokens and
 
 | Area | What changed |
 |---|---|
-| **Typography** | Lexend (headings) + Instrument Sans (body), self-hosted |
+| **Typography** | Murecho, the brand's one typeface, self-hosted |
 | **Colors** | Full `--pan-*` token system for light and dark mode |
 | **Dark mode** | Proper dark tokens via `web.assets_web_dark` — uses Odoo's built-in toggle (Enterprise) |
 | **Navbar** | Clean white navbar with accent highlights, command palette search bar |
@@ -27,10 +27,12 @@ No third-party CSS framework. No overrides that break on update. Just tokens and
 | **Home menu** | Styled app launcher with search bar (Enterprise only) |
 | **Kanban** | Styled columns, hover lift on cards, full-height drop zones |
 | **List view** | Uppercase column headers, subtle row hover, cleaner borders |
-| **Form view** | Card layout with shadow, clean section separators |
+| **Detail level** | Three buttons left of the view switcher set how much a kanban card shows: its title, its title and text, or everything. One click to any level; each icon is a card that grows with the level. Remembered per user and model (`pan.view`), on every device |
+| **Personal views** | Move columns by dragging them in the table or in the column list (grip, drop line, show/hide switches, after Airtable), resize, sort, filter and group: all remembered per user and model (`pan.view`), on every device |
+| **Form view** | Card layout with a 1px border, clean section separators |
 | **Control panel** | Aligned search bar, styled filter pills, view switcher |
-| **Dropdowns** | Rounded, shadowed panels with proper dark mode support |
-| **Modals** | Rounded corners, consistent shadow |
+| **Dropdowns** | Rounded, bordered panels with proper dark mode support |
+| **Modals** | Rounded corners, a 1px border, no shadow |
 | **Notifications** | Left-border style (no heavy colored backgrounds) |
 | **Status bar** | Pill-shaped stage buttons |
 | **Tags** | Full pill border-radius, semi-transparent overlays |
@@ -92,7 +94,7 @@ On Enterprise, `pan_style_pro_enterprise` auto-installs for home menu and dark m
 |---|---|---|---|
 | `pan_style_pro` | `web` | No | All base styling, navbar search, app icons |
 | `pan_style_pro_enterprise` | `pan_style_pro`, `web_enterprise` | Yes | Home menu, dark mode tokens |
-| `pan_style_pro_search` | `pan_style_pro` | Yes | Smart search in every search bar and dropdown: separate words in any order, typo tolerance, best match first. Off by default; switch on in Settings > Style Pro > Search. See [docs/SMART_SEARCH.md](docs/SMART_SEARCH.md). |
+| `pan_style_pro_search` | `pan_style_pro`, `mail` | Yes | Smart search in every search bar and dropdown: separate words in any order, typo tolerance, best match first, also in descriptions and the chatter. Off by default; switch on in Settings > Style Pro > Search. See [docs/SMART_SEARCH.md](docs/SMART_SEARCH.md). |
 
 ---
 
@@ -102,14 +104,15 @@ All values are CSS custom properties on `:root`. Override them in your own parti
 
 | Token | Light | Dark |
 |---|---|---|
-| `--pan-accent` | `#9b99ff` | `#9b99ff` |
-| `--pan-accent-hover` | `#7370ff` | `#b3b1ff` |
-| `--pan-bg` | `#ffffff` | _(Odoo-controlled)_ |
-| `--pan-text` | `#001d21` | `rgba(255,255,255,0.9)` |
-| `--pan-text-secondary` | `rgba(0,29,33,0.55)` | `rgba(255,255,255,0.42)` |
-| `--pan-border` | `rgba(0,0,0,0.08)` | `rgba(255,255,255,0.09)` |
-| Heading font | Lexend 500 | Lexend 500 |
-| Body font | Instrument Sans 400–700 | Instrument Sans 400–700 |
+| `--pan-accent` | `#5b58d8` | `#9b99ff` |
+| `--pan-accent-hover` | `#4a47c4` | `#7370ff` |
+| `--pan-accent-foreground` | `#ffffff` | `#001d21` |
+| `--pan-bg` | `#ffffff` | `#001d21` |
+| `--pan-bg-secondary` | `#f4f5f7` | `#002328` |
+| `--pan-text` | `#001d21` | `#ffffff` |
+| `--pan-text-secondary` | `rgba(0,29,33,0.6)` | `rgba(255,255,255,0.6)` |
+| `--pan-border` | `rgba(0,0,0,0.08)` | `rgba(255,255,255,0.1)` |
+| Font | Murecho 400–700 | Murecho 400–700 |
 
 ---
 
@@ -137,13 +140,14 @@ these scripts, so nothing can drift apart:
 ```bash
 pip install ruff==0.14.0 libsass==0.23.0
 tools/ci.sh lint        # ruff, SCSS compiles, asset paths, brand rules (seconds)
-tools/ci.sh install     # install pan_style_pro into a real Odoo 20 (needs Docker)
+tools/ci.sh install     # install pan_style_pro into a real Odoo 19 (needs Docker)
 tools/ci.sh upgrade     # install the last release, then upgrade to HEAD
 tools/ci.sh             # all of it
 ```
 
-A merge to `20.0` with a bumped `pan_style_pro` version is tagged and released
-automatically.
+Every PR goes to `main`. A release is a merge from `main` into `19.0` (and
+`20.0`), which Cloudpepper and Odoo.sh deploy from; a merge to `19.0` with a
+bumped `pan_style_pro` version is tagged and released automatically.
 
 ---
 
@@ -151,9 +155,8 @@ automatically.
 
 | | Status |
 |---|---|
-| Odoo 20 Community | Tested (this branch) |
-| Odoo 20 Enterprise | Needs testing (this branch) |
-| Odoo 19 Community / Enterprise | Branch `19.0` |
+| Odoo 19 Community | Tested |
+| Odoo 19 Enterprise | Tested |
 | Odoo 17/18 | Not supported |
 | Light mode | Tested |
 | Dark mode | Tested (Enterprise) |

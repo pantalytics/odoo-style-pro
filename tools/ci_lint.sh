@@ -5,7 +5,7 @@
 # the version bump.
 #
 #   tools/ci_lint.sh                  # everything that needs no base ref
-#   BASE_REF=origin/20.0 tools/ci_lint.sh   # + the version-bump check
+#   BASE_REF=origin/main tools/ci_lint.sh   # + the version-bump check
 #
 # .github/workflows/ci.yml calls this file rather than repeating the checks, so
 # a runner, a laptop and a Claude cloud session cannot disagree about what
@@ -93,11 +93,13 @@ modules = sys.argv[1:]
 declared, missing, problems = set(), [], 0
 
 def walk(entry):
-    # Bundle entries are paths, or ("remove", path) / ("prepend", path) tuples.
+    # Bundle entries are paths, or directive tuples: ("prepend", path),
+    # ("remove", path), ("after"|"before"|"replace", target, path). Only the
+    # last element is ours; a target can be another module's file.
     if isinstance(entry, str):
         return [entry]
-    if isinstance(entry, (list, tuple)):
-        return [e for e in entry if isinstance(e, str) and "/" in e]
+    if isinstance(entry, (list, tuple)) and entry and isinstance(entry[-1], str):
+        return [entry[-1]]
     return []
 
 for module in modules:
@@ -149,6 +151,27 @@ else
 fi
 
 # ---------------------------------------------------------------------------
+# Odoo bundles every backend JS file into one asset; one syntax error (a
+# missing comma between patch() methods) blanks the whole web client, and
+# nothing else here would notice. Parse each file as a module.
+step "JS parses"
+if command -v node >/dev/null 2>&1; then
+    js_failed=0
+    while IFS= read -r file; do
+        # node --check parses without resolving the @web/... imports; the .mjs
+        # copy makes it parse as an ES module.
+        cp "$file" /tmp/pan_js_check.mjs
+        if ! node --check /tmp/pan_js_check.mjs 2>/tmp/pan_js_check.err; then
+            echo "::error file=$file::$(grep -m1 -E 'SyntaxError' /tmp/pan_js_check.err)"
+            js_failed=1
+        fi
+    done < <(find $MODULES -name '*.js' -path '*static/src*' | sort)
+    [ "$js_failed" = 0 ] && echo "OK: every JS file parses." || fail "JS syntax error."
+else
+    fail "node is not installed (needed to parse the JS)."
+fi
+
+# ---------------------------------------------------------------------------
 # Odoo 20 runs OWL 3 and dropped Font Awesome and ir.config_parameter's
 # get_param/set_param. Each of these installs cleanly and only breaks in the
 # browser or on the first request, so install cannot catch them.
@@ -173,11 +196,11 @@ fi
 
 # ---------------------------------------------------------------------------
 # CLAUDE.md: OWL patches, no jQuery. A replaced component silently drops every
-# other module's patch on it; jQuery is not loaded in the Odoo 19+ backend at
+# other module's patch on it; jQuery is not loaded in the Odoo 19 backend at
 # all, so a `$(...)` call is a runtime error nothing here would otherwise see.
 step "JS — no jQuery"
 if grep -rn '\bjQuery\b\|[^A-Za-z_$.]\$(' --include='*.js' $MODULES; then
-    fail "No jQuery in the Odoo 19+ backend — use vanilla JS or OWL."
+    fail "No jQuery in the Odoo 19 backend — use vanilla JS or OWL."
 else
     echo "OK: no jQuery."
 fi

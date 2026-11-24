@@ -2,10 +2,11 @@
 
 ## Overview
 
-`odoo-style-pro` consists of two Odoo modules that override Odoo's default UI without modifying core files:
+`odoo-style-pro` consists of four Odoo modules that override Odoo's default UI without modifying core files:
 
 - **`pan_style_pro`** — Community-compatible base (depends only on `web`)
 - **`pan_style_pro_enterprise`** — Enterprise bridge (auto-installs when `web_enterprise` is present)
+- **`pan_style_pro_knowledge`** — Public Knowledge sidebar bridge (auto-installs with `website_knowledge`). Odoo draws the same hover caret on every row and its sidebar data carries no "has children", so `/pan_style_pro/knowledge/parents` answers it for the rows on screen, a patch on `KnowledgePublicSidebar` marks each row `pan-has-children` or `pan-leaf`, and the caret shows only on the first. Not installable in CI (Enterprise); checked against odoo.pantalytics.com with the bundle swapped in
 - **`pan_style_pro_search`** — Smart search in every search bar and dropdown, off by default (auto-installs with `pan_style_pro`). Works differently from the theme modules (Python on `base`, no styling); see [SMART_SEARCH.md](SMART_SEARCH.md)
 
 Three mechanisms are used:
@@ -18,56 +19,95 @@ Three mechanisms are used:
 
 ## Module Structure
 
+Assets are registered per bundle in each `__manifest__.py`; that list is the source for load order. `pan_style_pro_search` is described in [SMART_SEARCH.md](SMART_SEARCH.md).
+
 ```
-pan_style_pro/                          # Community + Enterprise base
+pan_style_pro/
 ├── __init__.py
-├── __manifest__.py                     # Assets registered here (no assets.xml)
+├── __manifest__.py
+├── models/
+│   ├── __init__.py
+│   ├── base.py
+│   ├── ir_http.py
+│   ├── pan_view.py
+│   ├── res_config_settings.py
+│   └── res_users_settings.py
+├── security/
+│   ├── ir.model.access.csv
+│   └── pan_view_rules.xml
 ├── static/
 │   ├── description/
+│   │   ├── banner.png
 │   │   └── icon.png
 │   └── src/
 │       ├── fonts/
-│       │   ├── instrument-sans-400-latin.woff2
-│       │   ├── instrument-sans-700-latin.woff2
-│       │   └── lexend-500-latin.woff2
-│       ├── scss/
-│       │   ├── _tokens.scss            # Design tokens (:root)
-│       │   ├── _typography.scss        # Font faces, body/heading rules, icon font fixes
-│       │   ├── _layout.scss            # Navbar, list/form views
-│       │   ├── _components.scss        # Buttons, inputs, cards
-│       │   ├── _control_panel.scss     # Search bar, filter pills, view switcher
-│       │   ├── _dropdowns.scss         # Dropdown panels and items
-│       │   ├── _kanban.scss            # Kanban columns and cards
-│       │   ├── _tags.scss              # Tags and badges
-│       │   ├── _modals.scss            # Modal dialogs
-│       │   ├── _notifications.scss     # Toast notifications
-│       │   ├── _statusbar.scss         # Status bar stages
-│       │   ├── _pager.scss             # Pager controls
-│       │   ├── _chatter.scss           # Mail chatter
-│       │   ├── _settings.scss          # Settings page
-│       │   ├── _stat_buttons.scss      # Stat buttons on forms
-│       │   ├── _navbar_search.scss     # Command palette search bar
-│       │   └── _login.scss             # Login page (assets_frontend)
+│       │   ├── OFL-Murecho.txt
+│       │   └── murecho-latin.woff2
 │       ├── js/
+│       │   ├── chatter_resizer.js
+│       │   ├── home_menu_community.js
+│       │   ├── home_menu_service.js
+│       │   ├── pan_field_list.js
+│       │   ├── pan_style_service.js
+│       │   ├── pan_detail.js
+│       │   ├── pan_view_store.js
 │       │   └── patches/
-│       │       └── navbar_search_patch.js  # Patches NavBar to add search
+│       │       ├── home_menu_community_patch.js
+│       │       ├── kanban_mobile_sortable_patch.js
+│       │       ├── list_columns_patch.js
+│       │       └── search_view_patch.js
+│       ├── scss/
+│       │   ├── _chatter.scss
+│       │   ├── _components.scss
+│       │   ├── _control_panel.scss
+│       │   ├── _dropdowns.scss
+│       │   ├── _fonts.scss
+│       │   ├── _hidden_apps.scss
+│       │   ├── _home_menu_community.scss
+│       │   ├── _kanban.scss
+│       │   ├── _layout.scss
+│       │   ├── _detail.scss
+│       │   ├── _list_columns.scss
+│       │   ├── _login.scss
+│       │   ├── _modals.scss
+│       │   ├── _notifications.scss
+│       │   ├── _pager.scss
+│       │   ├── _settings.scss
+│       │   ├── _stat_buttons.scss
+│       │   ├── _statusbar.scss
+│       │   ├── _tags.scss
+│       │   ├── _tokens.scss
+│       │   └── _typography.scss
 │       └── xml/
-│           ├── navbar_search.xml       # Search bar template (extends web.NavBar)
-│           └── apps_menu.xml           # App icons in dropdown (extends web.NavBar.AppsMenu)
+│           ├── home_menu_community.xml
+│           ├── detail.xml
+│           └── list_columns.xml
+├── tests/
+│   ├── __init__.py
+│   ├── test_detail.py
+│   └── test_pan_view.py
+└── views/
+    └── res_config_settings_views.xml
 
-pan_style_pro_enterprise/               # Enterprise-only features
+pan_style_pro_enterprise/
 ├── __init__.py
-├── __manifest__.py                     # auto_install: True
+├── __manifest__.py
 └── static/
+    ├── description/
+    │   └── icon.png
     └── src/
-        ├── scss/
-        │   ├── _home_menu.scss         # Home menu styling
-        │   └── _tokens.dark.scss       # Dark mode token overrides
         ├── js/
         │   └── patches/
-        │       └── home_menu_patch.js  # Patches HomeMenu with search bar
+        │       └── home_menu_patch.js
+        ├── scss/
+        │   ├── _components.dark.scss
+        │   ├── _home_menu.scss
+        │   ├── _knowledge.scss
+        │   ├── _studio.scss
+        │   ├── _tags.dark.scss
+        │   └── _tokens.dark.scss
         └── xml/
-            └── home_menu.xml           # Home menu search template
+            └── home_menu.xml
 ```
 
 ---
@@ -78,16 +118,17 @@ All visual values are CSS custom properties on `:root`. Dark mode overrides are 
 
 ```scss
 :root {
-  --pan-accent:        #9b99ff;
-  --pan-accent-hover:  #7370ff;
-  --pan-bg:            #ffffff;
-  --pan-bg-secondary:  #fafafa;
-  --pan-text:          #001d21;
-  --pan-text-secondary: rgba(0, 29, 33, 0.55);
-  --pan-border:        rgba(0, 0, 0, 0.08);
-  --pan-font-heading:  "Lexend", sans-serif;
-  --pan-font-body:     "Instrument Sans", sans-serif;
-  --pan-navbar-bg:     #ffffff;
+  --pan-accent:            #5b58d8;   // dark: #9b99ff
+  --pan-accent-hover:      #4a47c4;   // dark: #7370ff
+  --pan-accent-foreground: #ffffff;   // dark: #001d21
+  --pan-bg:                #ffffff;   // dark: #001d21
+  --pan-bg-secondary:      #f4f5f7;   // dark: #002328
+  --pan-text:              #001d21;   // dark: #ffffff
+  --pan-text-secondary:    rgba(0, 29, 33, 0.6);
+  --pan-border:            rgba(0, 0, 0, 0.08);
+  --pan-font-heading:      "Murecho", sans-serif;
+  --pan-font-body:         "Murecho", sans-serif;
+  --pan-shadow-*:          none;      // brand: elevation is a 1px border
 }
 ```
 
@@ -99,9 +140,13 @@ Assets are registered in `__manifest__.py` using the `assets` dict — no separa
 
 ```python
 "assets": {
-    "web.assets_frontend": ["pan_style_pro/static/src/scss/_login.scss"],
+    "web.assets_frontend": [
+        "pan_style_pro/static/src/scss/_fonts.scss",
+        "pan_style_pro/static/src/scss/_login.scss",
+    ],
     "web.assets_backend": [
         "pan_style_pro/static/src/scss/_tokens.scss",
+        "pan_style_pro/static/src/scss/_fonts.scss",
         "pan_style_pro/static/src/scss/_typography.scss",
         # ... all other partials, JS patches, and XML templates
     ],
@@ -171,4 +216,47 @@ This is defined in `_typography.scss`.
 | Self-hosted fonts | No Google CDN dependency |
 | Bridge module over conditional loading | JS `import` and XML `t-inherit` can't be made conditional |
 | No `main.scss` entry point | Odoo's asset pipeline handles ordering; individual registration is more explicit |
-| Navbar search bar opens command palette | Vercel/Linear pattern — makes ⌘K discoverable |
+| No shadows, a 1px border | Brand rule (brand.pantalytics.com/en/product-ui) |
+
+## Personal views (`pan.view`)
+
+One Postgres table, `pan_view`: one row per user, model and view type (unique), plus at most one shared row per model and type (`user_id` empty, written by administrators, read by everyone). A row is a view on a model in the Airtable sense: `columns` (ordered `{name, visible, width}`), `sort`, `filter` (the search bar as facets: a predefined filter by XML name, a typed value for a search field, or a custom domain) and `group_by` as JSON. Record rules keep users on their own rows and let them read the shared ones; administrators manage all. The web client gets the user's own and the shared rows once at login (`session_info.pan_views`, `{model: {type: {mine, shared}}}`), shows mine when present, else shared, and calls `pan.view.save(res_model, values, view_type, shared)` on each change, `pan.view.reset` to drop one. Keyed on the model, not on an `ir.ui.view`, so a view follows the user into every list of that model. Only `list` is wired in the web client today; the table is ready for a name, several views per model and shared views.
+
+Web client (`js/pan_view_store.js` holds the session copy and writes through):
+- `list_columns_patch.js` on `ListRenderer`: order by dragging a column (in the table or in the column list), visible via the column list, width via the resize handle. Saved as one `columns` list; "Reset my view" in the dropdown clears it. x2many lists in forms are left alone.
+
+### Moving columns: interaction design
+
+Two places, one result: the table and the column list stay in sync.
+
+**In the table**
+- Hover a header: a grip (⋮⋮) shows on the left and the label moves aside for it. The grip is the sign that the column moves.
+- Press the header (or the grip) and move more than 4 px: that is a drag. A press without moving stays a click and sorts, as in Odoo; the right edge still resizes.
+- While dragging: the column (header and every cell) fades to 35 %, a label with its name follows the pointer, and a 2 px accent line over the table's full height marks where it lands. No line when the spot equals where it already is. The list scrolls along near its left and right edge.
+- Release drops it and saves; Esc cancels and leaves no trace. The drop's click does not sort.
+
+**In the column list** (the ⚙ at the end of the header row, after Airtable's "Hide fields")
+- Every column in table order: a grip, the name, and a switch to show or hide it. Columns the view always shows carry a lock ("This list always shows this column"); hidden ones are greyed.
+- Drag a row by its grip: an accent-outlined slot shows where it goes; the table follows on release, the list stays open.
+- From 12 columns a search field filters the list; dragging is off while it filters (an order among a few visible rows says nothing about the hidden ones) and the list says so.
+- Above the columns: whose view you edit (mine, or everyone's for administrators) and a reset.
+- Property columns keep Odoo's own grouped list below.
+
+**Implementation notes**
+- The table drag is our own pointer handling, not Odoo's `useSortable`: that moves only the `<th>`, so the cells did not follow and the target was unclear.
+- `list_columns.xml` is inserted right after `web/static/src/views/list/list_renderer.xml` in the bundle (`("after", ...)` in the manifest). Modules that copy `web.ListRenderer` as a primary template (account's file-upload list: sales orders, invoices) only take the extensions loaded before their copy; at the end of the bundle the columns feature was missing from those lists.
+- The column list is reached through a prototype getter (`t-component="panFieldList"`), not `ListRenderer.components`: subclasses copy those at load time.
+- An open dropdown is not re-rendered with fresh data when the list behind it is, so the column list applies a move or a switch from its own state and drops that state when new props differ.
+- `search_view_patch.js` on `SearchModel` and `DynamicList`: when an action opens, the stored `filter` facets and `group_by` are *added* to the action's own defaults (never replacing them, so two actions on one model keep their meaning); every search bar change is saved back. A column-header sort is saved as `sort` and applies below a favorite's order, above the action's default. Dialog lists are left alone.
+
+## Detail level
+
+How much a card shows: 1 its title, 2 its title and text, 3 everything (the model's own card, the default). Three buttons directly left of the view switcher (`js/pan_detail.js`, `xml/detail.xml`), one per level and the one in use pressed; each icon is a card that grows with the level. Any level is one click (19.0.1.11 had one button with a menu: two clicks, which the owner found one too many). On a phone the bar has no room for three: one button there, which steps to the next level. After Airtable's row height and Gmail's density: named levels, no slider.
+
+- **Stored** as the `detail` part of the user's view on the model (`pan.view`, on the kanban view), so it follows the user to every device. Cards of one model share one level, whatever view shows them.
+- **Applied in CSS** (`scss/_detail.scss`). The button writes the level on the view's root as `data-pan-detail`. A card says what its title and its text are with the classes `pan-card-title` and `pan-card-text`; at levels 1 and 2 everything that is not one of those, not inside one and not around one is hidden (`:has()`).
+- **The title of Odoo's own cards** is marked on the server (`models/base.py`, `_get_view`): the first bold element (`fw-bold`, `fw-bolder`) of the kanban's `card` template, which is how Odoo writes a card's title (143 of the 164 cards of Odoo 19 Community). A card without one gets no button. A card that marks its own title is left alone.
+- **Text**: Odoo's cards have no text line, so "Titles and text" is off for them, with the reason in the menu. A module gives its card one with `pan-card-text` in the arch.
+- **Other view types**: the button shows in the view types of the registry `pan_detail_views` (kanban is in it). A module adds its own, `registry.category("pan_detail_views").add("my_view", { isAvailable(env), hasText(env) })`, both optional, and reads `data-pan-detail` on its view root. Nothing here knows such a module, and it works without Style Pro.
+- **Tables** have no detail level: columns are the personal view above.
+- `detail.xml` is inserted right after `web/static/src/search/control_panel/control_panel.xml`, for the same reason as `list_columns.xml`. The button is a `t-component` from a getter on `ControlPanel.prototype`, not an entry in `ControlPanel.components`: a subclass that copied the components before this module loaded would otherwise not know it.

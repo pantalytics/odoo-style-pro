@@ -1,5 +1,6 @@
 // Pantalytics chatter overrides
 // Styles the mail chatter: topbar, messages, composer, followers, resize handle
+// (the handle also sits before the attachment preview on vendor bills)
 
 // ─── Chatter resize handle ─────────────────────────────────────────────────
 
@@ -39,7 +40,7 @@
     border-radius: 6px;
     background-color: var(--pan-bg, #ffffff);
     border: 1px solid var(--pan-border);
-    transition: border-color 0.2s, height 0.2s;
+    transition: border-color 0.15s;
   }
 
   &:hover,
@@ -53,19 +54,62 @@
     }
   }
 
-  // ── Collapsed state ─────────────────────────────────────────────────────
+  // ── Collapsed state: a button right next to the form ──
+  // Odoo caps the form at 1400px and pushes everything after it to the far
+  // right; there the button got lost in empty space, so it hugs the form.
 
   &.pan-chatter-collapsed {
+    width: 48px;
     cursor: pointer;
 
-    // Hide the pill indicator when collapsed
+    &::before,
     &::after {
       display: none;
     }
   }
 }
 
-// ─── Toggle button (on the resize handle, top) ──────────────────────────
+// Chatter hidden: the button hugs the form
+.pan-chatter-collapsed:not(.pan-handle-left) {
+  margin-right: auto;
+}
+
+.o_form_sheet_bg:has(+ .pan-chatter-resize-handle.pan-chatter-collapsed:not(.pan-handle-left)) {
+  margin-right: 0 !important;
+  padding-right: 0 !important;
+}
+
+// Next to a PDF the handle hides the form, on its left: mirror the icon
+.pan-handle-left .pan-chatter-toggle .oi {
+  transform: scaleX(-1);
+}
+
+// Collapsed panel: zero width, not display:none. The PDF viewer needs a
+// layout box or it logs errors; !important beats Odoo's min-width.
+
+.o_form_view .pan-panel-collapsed {
+  flex: 0 0 0 !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  overflow: hidden !important;
+  visibility: hidden;
+}
+
+// While dragging: keep the cursor, no text selection, and stop the PDF
+// preview iframe from swallowing mouse events
+
+body.pan-resizing {
+  cursor: col-resize;
+  user-select: none;
+
+  iframe {
+    pointer-events: none;
+  }
+}
+
+// ─── Toggle: icon only, top of the handle ───────────────────────────────
 
 .pan-chatter-toggle {
   position: absolute;
@@ -76,40 +120,42 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   padding: 0;
-  border: 1px solid var(--pan-border);
-  border-radius: var(--pan-radius-sm);
-  background: var(--pan-bg, #ffffff);
+  border: 0;
+  border-radius: var(--pan-radius-md);
+  background: transparent;
   color: var(--pan-text-secondary);
-  font-size: 0.75rem;
+  font-size: 1rem;
   cursor: pointer;
   opacity: 0;
-  transition: opacity 0.15s ease, color 0.15s ease,
-              background-color 0.15s ease, border-color 0.15s ease;
+  transition: opacity 0.15s ease, color 0.15s ease;
 
-  .pan-chatter-resize-handle:hover & {
-    opacity: 1;
-  }
-
-  // Always visible when collapsed
-  .pan-chatter-collapsed & {
+  .pan-chatter-resize-handle:hover &,
+  &:focus-visible {
     opacity: 1;
   }
 
   &:hover {
     color: var(--pan-accent);
-    border-color: var(--pan-accent);
-    background-color: var(--pan-bg-secondary);
   }
-}
 
-// ─── Smooth collapse/expand transition ────────────────────────────────────
+  // Collapsed: an outline button, the only way back to the panel
+  .pan-chatter-collapsed & {
+    top: var(--pan-space-3);
+    width: 32px;
+    height: 32px;
+    opacity: 1;
+    border: 1px solid var(--pan-border-strong);
+    background-color: var(--pan-bg);
+    color: var(--pan-text);
 
-.o_xxl_form_view .o_form_sheet_bg,
-.o_xxl_form_view .o-mail-Form-chatter.o-aside {
-  transition: flex 0.25s ease;
+    &:hover {
+      color: var(--pan-text);
+      background-color: var(--pan-bg-secondary);
+    }
+  }
 }
 
 // ─── Chatter topbar ─────────────────────────────────────────────────────────

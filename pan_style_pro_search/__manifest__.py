@@ -1,6 +1,6 @@
 {
     "name": "Style Pro Search",
-    "version": "20.0.2.4.5",
+    "version": "20.0.2.6.1",
     "summary": "Google-style search in every Odoo model: words in any order, typos, best match first",
     "description": """
         Adds "Smart search" as the first option of every search bar, search
@@ -11,7 +11,8 @@
         Nothing is configured per model: the searched fields come from each
         model's own search view, so custom fields added there are searched too.
         Standard search fields, filters, group-bys and custom filters are
-        untouched.
+        untouched. Descriptions and the chatter (emails, notes) are searched
+        through a full-text index, for whatever the user may read.
 
         Installs automatically with Style Pro and is off until switched on in
         Settings > Style Pro > Search. See docs/SMART_SEARCH.md.
@@ -20,7 +21,7 @@
     "website": "https://pantalytics.com",
     "category": "Productivity",
     "license": "LGPL-3",
-    "depends": ["pan_style_pro"],
+    "depends": ["pan_style_pro", "mail"],
     "data": [
         "security/pan_style_pro_search_groups.xml",
         "security/ir.access.csv",

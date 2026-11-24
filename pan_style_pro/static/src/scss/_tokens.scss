@@ -17,20 +17,34 @@
   --pan-border:           rgba(0, 0, 0, 0.08);
   --pan-border-strong:    rgba(0, 0, 0, 0.15);
 
+  // Status (brand: green works, amber needs the user, red broken). The
+  // -rgb triplet is for tints; -text is the AA colour for words on a tint.
+  --pan-success-rgb:      34, 197, 94;
+  --pan-success-text:     #15803d;
+  --pan-warning-rgb:      245, 158, 11;
+  --pan-warning-text:     #a16207;
+  --pan-danger-rgb:       239, 68, 68;
+  --pan-danger-text:      #dc2626;
+
   // Typography
-  --pan-font-heading:     "Lexend", sans-serif;
-  --pan-font-body:        "Instrument Sans", sans-serif;
+  --pan-font-heading:     "Murecho", sans-serif;
+  --pan-font-body:        "Murecho", sans-serif;
 
   // Radius
   --pan-radius-sm:        0.25rem;  // 4px  — inputs, tags
   --pan-radius-md:        0.375rem; // 6px  — buttons, cards
   --pan-radius-lg:        0.5rem;   // 8px  — modals, panels
 
-  // Shadows
-  --pan-shadow-xs:  0 1px 2px rgba(0, 0, 0, 0.05);
-  --pan-shadow-sm:  0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --pan-shadow-md:  0 4px 6px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.04);
-  --pan-shadow-lg:  0 10px 24px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0, 0, 0, 0.04);
+  // Shadows: the brand has none, elevation is a 1px border. The tokens stay
+  // so every surface that used one still reads a value.
+  --pan-shadow-xs:  none;
+  --pan-shadow-sm:  none;
+  --pan-shadow-md:  none;
+  --pan-shadow-lg:  none;
+
+  // Text on an accent fill: white on the light accent, dark teal on the
+  // dark one (white on the dark accent is 2.5:1).
+  --pan-accent-foreground: #ffffff;
 
   // Spacing (4px base scale)
   --pan-space-1:  0.25rem;  //  4px
@@ -47,3 +61,13 @@
 }
 
 // Dark mode tokens are in _tokens.dark.scss → web.assets_web_dark
+
+// With reduced motion asked for, nothing animates (brand: motion rule).
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

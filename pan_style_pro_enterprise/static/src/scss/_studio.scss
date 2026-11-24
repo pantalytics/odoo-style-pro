@@ -1,0 +1,29 @@
+// Pantalytics Studio overrides
+//
+// Studio paints the app's menu sections (top left of the navbar) as dark
+// blocks. Style Pro forces navbar text to --pan-text, so they ended up dark on
+// dark. Drop Studio's fill: the entries look like the normal navbar again, in
+// light and dark mode alike.
+
+.o_in_studio .o_main_navbar .o_menu_sections,
+.o_studio_navbar .o_menu_sections {
+  > *,
+  .o_nav_entry,
+  .dropdown-toggle,
+  .btn,
+  button {
+    background-color: transparent !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+    color: var(--pan-text) !important;
+  }
+
+  .o_nav_entry,
+  .dropdown-toggle,
+  .btn,
+  button {
+    &:hover {
+      background-color: rgba(var(--pan-accent-rgb), 0.08) !important;
+    }
+  }
+}
